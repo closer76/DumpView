@@ -12,6 +12,13 @@ enum {
     MONITOR_STATE_RUNNING
 };
 
+enum {
+    MONITOR_EVENT_TYPE_NONE = 0,
+    MONITOR_EVENT_TYPE_DATAREADY,
+    MONITOR_EVENT_TYPE_STARTED,
+    MONITOR_EVENT_TYPE_STOPPED
+};
+
 class MonitorThread :
     public wxThread
 {

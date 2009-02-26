@@ -9,12 +9,12 @@
 
 unsigned char DumpViewFrame::m_textBuffer[BUF_SIZE] = {0};
 
-const long DumpViewFrame::ID_BUTTON_START = wxNewId();
-const long DumpViewFrame::ID_BUTTON_STOP = wxNewId();
-const long DumpViewFrame::ID_BUTTON_REC = wxNewId();
-const long DumpViewFrame::ID_BUTTON_PAUSE = wxNewId();
+const long DumpViewFrame::ID_RADIOBOX_SWITCH = wxNewId();
+const long DumpViewFrame::ID_CHECKBOX_PAUSE = wxNewId();
+const long DumpViewFrame::ID_CHECKBOX_REC = wxNewId();
 const long DumpViewFrame::ID_BUTTON_CLEAR = wxNewId();
 const long DumpViewFrame::ID_TEXT_DEFAULT_FOLDER = wxNewId();
+const long DumpViewFrame::ID_BUTTON_SELECT_FILE = wxNewId();
 const long DumpViewFrame::ID_OUTPUT_BOX = wxNewId();
 const long DumpViewFrame::ID_MENU_SAVEAS = wxNewId();
 const long DumpViewFrame::ID_MENU_QUIT = wxNewId();
@@ -42,11 +42,14 @@ BEGIN_EVENT_TABLE(DumpViewFrame, wxFrame)
     EVT_MENU( ID_MENU_SETFONT , DumpViewFrame::OnFontSetting)
     EVT_MENU( ID_MENU_SETFOLDER , DumpViewFrame::OnFolderSetting)
     EVT_MENU( ID_MENU_ABOUT , DumpViewFrame::OnAbout)
-    EVT_BUTTON( ID_BUTTON_START , DumpViewFrame::OnStart )
-    EVT_BUTTON( ID_BUTTON_STOP , DumpViewFrame::OnStop )
-    EVT_BUTTON( ID_BUTTON_REC , DumpViewFrame::OnRec )
-    EVT_BUTTON( ID_BUTTON_PAUSE , DumpViewFrame::OnPause )
+
     EVT_BUTTON( ID_BUTTON_CLEAR , DumpViewFrame::OnClear )
+    EVT_BUTTON( ID_BUTTON_SELECT_FILE, DumpViewFrame::OnSelectFile )
+
+    EVT_RADIOBOX( ID_RADIOBOX_SWITCH, DumpViewFrame::OnSwitchSelected)
+
+    EVT_CHECKBOX( ID_CHECKBOX_REC, DumpViewFrame::OnRec)
+    EVT_CHECKBOX( ID_CHECKBOX_PAUSE, DumpViewFrame::OnPause)
     ////Manual Code End
 END_EVENT_TABLE()
 
@@ -125,72 +128,44 @@ void DumpViewFrame::m_InitMenuBar(void)
 
 void DumpViewFrame::m_InitSizedComponents(wxWindow* parent)
 {
-    wxBoxSizer* BoxSizer1;
-    wxBoxSizer* BoxSizer2;
+    wxBoxSizer* BoxSizer2, *BoxSizer3, *BoxSizer4, *BoxSizer5;
 
-    BoxSizer1 = new wxBoxSizer(wxVERTICAL);
+    BoxSizer3 = new wxBoxSizer(wxVERTICAL);
     BoxSizer2 = new wxBoxSizer(wxHORIZONTAL);
-
-#ifdef USE_BITMAP_BUTTON
-    wxBitmap image_red( wxT("red"), wxBITMAP_TYPE_BMP_RESOURCE);
-    wxBitmap image_black( wxT("black"), wxBITMAP_TYPE_BMP_RESOURCE);
-    wxMask* mask_rec_default =      new wxMask( wxBitmap( wxT("rec_default"), wxBITMAP_TYPE_BMP_RESOURCE));
-    wxMask* mask_rec_disabled =     new wxMask( wxBitmap( wxT("rec_disabled"), wxBITMAP_TYPE_BMP_RESOURCE));
-    wxMask* mask_start_default =    new wxMask( wxBitmap( wxT("start_default"), wxBITMAP_TYPE_BMP_RESOURCE));
-    wxMask* mask_start_disabled =   new wxMask( wxBitmap( wxT("start_disabled"), wxBITMAP_TYPE_BMP_RESOURCE));
-    wxMask* mask_stop_default =     new wxMask( wxBitmap( wxT("stop_default"), wxBITMAP_TYPE_BMP_RESOURCE));
-    wxMask* mask_stop_disabled =    new wxMask( wxBitmap( wxT("stop_disabled"), wxBITMAP_TYPE_BMP_RESOURCE));
-    wxMask* mask_pause_default =    new wxMask( wxBitmap( wxT("pause_default"), wxBITMAP_TYPE_BMP_RESOURCE));
-    wxMask* mask_pause_disabled =   new wxMask( wxBitmap( wxT("pause_disabled"), wxBITMAP_TYPE_BMP_RESOURCE));
-
-    image_red.SetMask( mask_rec_default);
-    m_buttonRec = new wxBitmapButton( parent, ID_BUTTON_REC, image_red, wxDefaultPosition, wxSize(40, 40), wxBU_AUTODRAW, wxDefaultValidator, _T("ID_BUTTON_REC"));
- //   m_buttonRec->SetBitmapSelected( image_red);
-    image_red.SetMask( mask_rec_disabled);
-    m_buttonRec->SetBitmapDisabled( image_red);
-
-    image_black.SetMask( mask_start_default);
-    m_buttonStart = new wxBitmapButton( parent, ID_BUTTON_START, image_black, wxDefaultPosition, wxSize(40, 40), wxBU_AUTODRAW, wxDefaultValidator, _T("ID_BUTTON_START"));
-//    m_buttonStart->SetBitmapSelected( image_black);
-    image_black.SetMask( mask_start_disabled);
-    m_buttonStart->SetBitmapDisabled( image_black);
-
-    image_black.SetMask( mask_stop_default);
-    m_buttonStop = new wxBitmapButton( parent, ID_BUTTON_STOP, image_black, wxDefaultPosition, wxSize(40, 40), wxBU_AUTODRAW, wxDefaultValidator, _T("ID_BUTTON_STOP"));
-//    m_buttonStop->SetBitmapSelected( image_black);
-    image_black.SetMask( mask_stop_disabled);
-    m_buttonStop->SetBitmapDisabled( image_black);
-
-    image_black.SetMask( mask_pause_default);
-    m_buttonPause = new wxBitmapButton( parent, ID_BUTTON_PAUSE, image_black, wxDefaultPosition, wxSize(40, 40), wxBU_AUTODRAW, wxDefaultValidator, _T("ID_BUTTON_PAUSE"));
-//    m_buttonPause->SetBitmapSelected( image_black);
-    image_black.SetMask( mask_pause_disabled);
-    m_buttonPause->SetBitmapDisabled( image_black);
-#else
-    m_buttonStart = new wxButton(this, ID_BUTTON_START, _("Start"), wxDefaultPosition, wxSize(40,40), 0, wxDefaultValidator, _T("ID_BUTTON_START"));
-    m_buttonStop = new wxButton(this, ID_BUTTON_STOP, _("Stop"), wxDefaultPosition, wxSize(40,40), 0, wxDefaultValidator, _T("ID_BUTTON_STOP"));
-    m_buttonRec = new wxButton(this, ID_BUTTON_REC, _("Rec"), wxDefaultPosition, wxSize(40,40), 0, wxDefaultValidator, _T("ID_BUTTON_REC"));
-    m_buttonPause = new wxButton(this, ID_BUTTON_PAUSE, _("Pause"), wxDefaultPosition, wxSize(40,40), 0, wxDefaultValidator, _T("ID_BUTTON_PAUSE"));
-#endif
-    m_buttonClear = new wxButton(parent, ID_BUTTON_CLEAR, _("Clear logs"), wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, _T("ID_BUTTON5"));
-    BoxSizer2->Add(m_buttonStart, 0, wxTOP|wxBOTTOM|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
-    BoxSizer2->Add(m_buttonStop, 0, wxTOP|wxBOTTOM|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
-    BoxSizer2->Add(m_buttonRec, 0, wxTOP|wxBOTTOM|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
-    BoxSizer2->Add(m_buttonPause, 0, wxTOP|wxBOTTOM|wxRIGHT|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
-    BoxSizer2->Add(m_buttonClear, 1, wxALL|wxALIGN_BOTTOM|wxALIGN_CENTER_HORIZONTAL, 5);
-    BoxSizer1->Add(BoxSizer2, 0, wxALL|wxEXPAND|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
-
-    m_textDefaultFolder = new wxTextCtrl(parent, ID_TEXT_DEFAULT_FOLDER, _(""), wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, _T("ID_TEXT_DEFAULT_FOLDER"));
-    BoxSizer1->Add(m_textDefaultFolder, 0, wxALL|wxEXPAND|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
+    wxString __wxRadioBoxChoices_1[2] =
+    {
+    	_("On"),
+    	_("Off")
+    };
+    m_radioSwitch = new wxRadioBox(parent, ID_RADIOBOX_SWITCH, _("Port Switch"), wxDefaultPosition, wxSize(82,71), 2, __wxRadioBoxChoices_1, 1, 0, wxDefaultValidator, _T("ID_RADIOBOX_SWITCH"));
+    BoxSizer2->Add(m_radioSwitch, 0, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
+    BoxSizer4 = new wxBoxSizer(wxVERTICAL);
+    m_checkboxPause = new wxCheckBox(parent, ID_CHECKBOX_PAUSE, _("Pause"), wxDefaultPosition, wxSize(52,22), 0, wxDefaultValidator, _T("ID_CHECKBOX_PAUSE"));
+    m_checkboxPause->SetValue(false);
+    BoxSizer4->Add(m_checkboxPause, 0, wxLEFT|wxRIGHT|wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL, 5);
+    m_checkboxRec = new wxCheckBox(parent, ID_CHECKBOX_REC, _("Record"), wxDefaultPosition, wxSize(58,16), 0, wxDefaultValidator, _T("ID_CHECKBOX_REC"));
+    m_checkboxRec->SetValue(false);
+    BoxSizer4->Add(m_checkboxRec, 0, wxLEFT|wxRIGHT|wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL, 5);
+    m_buttonClear = new wxButton(parent, ID_BUTTON_CLEAR, _("Clear logs"), wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, _T("ID_BUTTON_CLEAR"));
+    BoxSizer4->Add(m_buttonClear, 0, wxALL|wxEXPAND|wxALIGN_BOTTOM|wxALIGN_CENTER_HORIZONTAL, 5);
+    BoxSizer2->Add(BoxSizer4, 1, wxALL|wxEXPAND|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
+    BoxSizer3->Add(BoxSizer2, 0, wxALL|wxEXPAND|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 0);
+    BoxSizer5 = new wxBoxSizer(wxHORIZONTAL);
+    m_textLogFilename = new wxTextCtrl(parent, ID_TEXT_DEFAULT_FOLDER, _(""), wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, _T("ID_TEXT_DEFAULT_FOLDER"));
+    BoxSizer5->Add(m_textLogFilename, 1, wxTOP|wxBOTTOM|wxLEFT|wxEXPAND|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
+    m_buttonSelectFile = new wxButton(parent, ID_BUTTON_SELECT_FILE, _("..."), wxDefaultPosition, wxSize(29,24), 0, wxDefaultValidator, _T("ID_BUTTON_SELECT_FILE"));
+    BoxSizer5->Add(m_buttonSelectFile, 0, wxTOP|wxBOTTOM|wxRIGHT|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
+    BoxSizer3->Add(BoxSizer5, 0, wxALL|wxEXPAND|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 0);
 #ifdef USE_RICH_EDIT
     m_OutputBox = new wxRichTextCtrl( this, ID_OUTPUT_BOX, wxEmptyString, wxDefaultPosition, wxSize(160,120), wxRE_READONLY | wxRE_MULTILINE);
 #else
     m_OutputBox = new wxTextCtrl( parent, ID_OUTPUT_BOX, wxEmptyString, wxDefaultPosition, wxSize(160, 120), wxTE_MULTILINE | wxTE_READONLY);
 #endif
-    BoxSizer1->Add(m_OutputBox, 1, wxALL|wxEXPAND|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
-    parent->SetSizer(BoxSizer1);
-    BoxSizer1->Fit(parent);
-    BoxSizer1->SetSizeHints(parent);
+    BoxSizer3->Add(m_OutputBox, 1, wxALL|wxEXPAND|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
+
+    parent->SetSizer(BoxSizer3);
+    BoxSizer3->Fit(parent);
+    BoxSizer3->SetSizeHints(parent);
 
 }
 
@@ -216,23 +191,35 @@ void DumpViewFrame::OnClose(wxCloseEvent& event)
 
 void DumpViewFrame::OnThreadCallback(wxCommandEvent& evt)
 {
-    int data_read = m_PortMonitor->CopyBuffer(m_textBuffer);
-    if ( data_read >= BUF_SIZE)
-        data_read = BUF_SIZE - 1;
+    int data_read = 0;
 
-    m_textBuffer[data_read] = 0;
-    if ( data_read > 0)
+    switch ( evt.GetInt())
     {
-        m_OutputBox->AppendText(wxString((char*)m_textBuffer, *wxConvCurrent));
-#ifdef USE_RICH_EDIT
-        m_statusBar1->SetStatusText( wxString::Format( wxT("(%d,%d,%d)"),
-            m_OutputBox->GetScrollPos( wxVERTICAL),
-            m_OutputBox->GetScrollRange( wxVERTICAL),
-            m_OutputBox->GetCaretPosition()));
-        m_OutputBox->ScrollIntoView( m_OutputBox->GetCaretPosition(), WXK_DOWN);
-#else
-        m_OutputBox->ScrollPages(5);
-#endif
+    case MONITOR_EVENT_TYPE_DATAREADY:
+        data_read = m_PortMonitor->CopyBuffer(m_textBuffer);
+        if ( data_read >= BUF_SIZE)
+            data_read = BUF_SIZE - 1;
+
+        m_textBuffer[data_read] = 0;
+        if ( data_read > 0)
+        {
+            m_OutputBox->AppendText(wxString((char*)m_textBuffer, *wxConvCurrent));
+    #ifdef USE_RICH_EDIT
+            m_statusBar1->SetStatusText( wxString::Format( wxT("(%d,%d,%d)"),
+                m_OutputBox->GetScrollPos( wxVERTICAL),
+                m_OutputBox->GetScrollRange( wxVERTICAL),
+                m_OutputBox->GetCaretPosition()));
+            m_OutputBox->ScrollIntoView( m_OutputBox->GetCaretPosition(), WXK_DOWN);
+    #else
+            m_OutputBox->ScrollPages(5);
+    #endif
+        }
+        break;
+
+    case MONITOR_EVENT_TYPE_STARTED:
+    case MONITOR_EVENT_TYPE_STOPPED:
+        m_radioSwitch->Enable();
+        break;
     }
 }
 
@@ -308,22 +295,26 @@ void DumpViewFrame::OnAbout(wxCommandEvent& evt)
 {
 }
 
-void DumpViewFrame::OnStart(wxCommandEvent& evt)
+void DumpViewFrame::OnSwitchSelected(wxCommandEvent& evt)
 {
-    m_PortMonitor->StartMonitoring();
-    m_buttonStart->Disable();
-    m_buttonStop->Enable();
-    m_buttonRec->Enable();
-    m_buttonPause->Enable();
-}
+    const int SWITCH_ON = 0;
+    const int SWITCH_OFF = 1;
 
-void DumpViewFrame::OnStop(wxCommandEvent& evt)
-{
-    m_PortMonitor->StopMonitoring();
-    m_buttonStart->Enable();
-    m_buttonStop->Disable();
-    m_buttonRec->Disable();
-    m_buttonPause->Disable();
+    switch( evt.GetInt())
+    {
+    case SWITCH_ON:
+        m_checkboxPause->Enable();
+        m_radioSwitch->Disable();
+        m_PortMonitor->StartMonitoring();
+        break;
+
+    case SWITCH_OFF:
+        m_checkboxPause->Disable();
+        m_checkboxPause->SetValue(false);
+        m_radioSwitch->Disable();
+        m_PortMonitor->StopMonitoring();
+        break;
+    }
 }
 
 void DumpViewFrame::OnRec(wxCommandEvent& evt)
@@ -333,6 +324,28 @@ void DumpViewFrame::OnRec(wxCommandEvent& evt)
     }
     else
     {
+    }
+}
+
+void DumpViewFrame::OnSelectFile(wxCommandEvent& evt)
+{
+    m_SelectFile_body(false);
+}
+
+void DumpViewFrame::m_SelectFile_body( bool prompt_overwrite)
+{
+    wxFileDialog* dlg = new wxFileDialog(
+        this,
+        wxT("Select file to store logs..."),
+        m_strDefaultPath,
+        m_strDumpFilename,
+        wxT("*.*"),
+        wxFD_SAVE | (prompt_overwrite?wxFD_OVERWRITE_PROMPT:0));
+
+    if ( wxID_OK == dlg->ShowModal())
+    {
+        m_strDefaultPath = dlg->GetDirectory();
+        m_textLogFilename->ChangeValue( dlg->GetFilename());
     }
 }
 

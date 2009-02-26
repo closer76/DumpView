@@ -50,19 +50,13 @@ private:
     wxMenuItem* m_menuSetFolder;
     wxMenu* m_menuEdit;
     wxMenu* m_menuSettings;
-#ifdef USE_BITMAP_BUTTON
-    wxBitmapButton* m_buttonRec;
-    wxBitmapButton* m_buttonStart;
-    wxBitmapButton* m_buttonStop;
-    wxBitmapButton* m_buttonPause;
-#else
-    wxButton* m_buttonRec;
-    wxButton* m_buttonStart;
-    wxButton* m_buttonStop;
-    wxButton* m_buttonPause;
-#endif
+
+    wxRadioBox* m_radioSwitch;
+    wxCheckBox* m_checkboxPause;
+    wxCheckBox* m_checkboxRec;
+    wxButton* m_buttonSelectFile;
     wxButton* m_buttonClear;
-    wxTextCtrl* m_textDefaultFolder;
+    wxTextCtrl* m_textLogFilename;
     wxStatusBar* m_statusBar1;
 #ifdef USE_RICH_EDIT
     wxRichTextCtrl* m_OutputBox;
@@ -72,12 +66,12 @@ private:
 
 
     // ID for GUI controls
-    static const long ID_BUTTON_START;
-    static const long ID_BUTTON_STOP;
-    static const long ID_BUTTON_REC;
-    static const long ID_BUTTON_PAUSE;
+    static const long ID_RADIOBOX_SWITCH;
+    static const long ID_CHECKBOX_PAUSE;
+    static const long ID_CHECKBOX_REC;
     static const long ID_BUTTON_CLEAR;
     static const long ID_TEXT_DEFAULT_FOLDER;
+    static const long ID_BUTTON_SELECT_FILE;
     static const long ID_OUTPUT_BOX;
     static const long ID_MENU_SAVEAS;
     static const long ID_MENU_QUIT;
@@ -94,6 +88,7 @@ private:
     void m_InitSizedComponents(wxWindow* parent);
     void m_InitStatusBar(void);
 
+    void m_SelectFile_body(bool prompt_overwrite);
 
     DECLARE_EVENT_TABLE();
 
@@ -113,11 +108,13 @@ public:
     void OnFolderSetting(wxCommandEvent& evt);  // Menu->Settings->Default Folder
     void OnAbout(wxCommandEvent& evt);          // Menu->Help->About...
 
-    void OnStart(wxCommandEvent& evt);          // Button Start
-    void OnStop(wxCommandEvent& evt);           // Button Stop
-    void OnRec(wxCommandEvent& evt);            // Button Rec
-    void OnPause(wxCommandEvent& evt);          // Button Pause
     void OnClear(wxCommandEvent& evt);          // Button Clear
+    void OnSelectFile(wxCommandEvent& evt);     // Button Select File
+
+    void OnSwitchSelected(wxCommandEvent& evt); // Radiobox Switch
+
+    void OnRec(wxCommandEvent& evt);            // Checkbox Record
+    void OnPause(wxCommandEvent& evt);          // Checkbox Pause
 };
 
 #endif

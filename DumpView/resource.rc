@@ -1,10 +1,1 @@
-black           BITMAP  "black.bmp"
-red             BITMAP  "red.bmp"
-pause_default   BITMAP  "pause_mask_default.bmp"
-pause_disabled  BITMAP  "pause_mask_disabled.bmp"
-rec_default     BITMAP  "rec_mask_default.bmp"
-rec_disabled    BITMAP  "rec_mask_disabled.bmp"
-start_default   BITMAP  "start_mask_default.bmp"
-start_disabled  BITMAP  "start_mask_disabled.bmp"
-stop_default    BITMAP  "stop_mask_default.bmp"
-stop_disabled   BITMAP  "stop_mask_disabled.bmp"
+

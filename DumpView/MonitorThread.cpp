@@ -10,6 +10,7 @@ wxThread::ExitCode MonitorThread::Entry()
     DWORD sizeRead;
     wxCommandEvent evt(wxEVT_THREAD_CALLBACK, wxID_ANY);
 
+    evt.SetInt(MONITOR_EVENT_TYPE_NONE);
     m_NextState = m_NextState = MONITOR_STATE_RUNNING;
 
     while( !TestDestroy())
@@ -24,6 +25,7 @@ wxThread::ExitCode MonitorThread::Entry()
                     return (wxThread::ExitCode)0;
                 }
                 m_CurrentState = MONITOR_STATE_RUNNING;
+                evt.SetInt(MONITOR_EVENT_TYPE_STARTED);
             }
             break;
 
@@ -32,6 +34,7 @@ wxThread::ExitCode MonitorThread::Entry()
             {
                 m_ReleaseSerialPort();
                 m_CurrentState = MONITOR_STATE_STOPPED;
+                evt.SetInt(MONITOR_EVENT_TYPE_STOPPED);
             }
             else
             {
@@ -43,13 +46,20 @@ wxThread::ExitCode MonitorThread::Entry()
                 }
                 s_nBufStartPos += sizeRead;
                 if ( s_nBufStartPos >= 0)
-                    m_pParent->AddPendingEvent( evt);
+                {
+                    evt.SetInt( MONITOR_EVENT_TYPE_DATAREADY);
+                }
                 s_mutexDataBuffer.Unlock();
             }
             break;
 
         default:
             break;
+        }
+
+        if (evt.GetInt() != MONITOR_EVENT_TYPE_NONE)
+        {
+            m_pParent->AddPendingEvent(evt);
         }
 
         wxThread::This()->Sleep(1);

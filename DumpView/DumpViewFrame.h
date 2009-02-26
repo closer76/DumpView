@@ -32,6 +32,7 @@ private:
     };
 
     MainState m_state;
+    bool m_IsRecording;
     MonitorThread* m_PortMonitor;
 
     static unsigned char m_textBuffer[BUF_SIZE];
@@ -90,7 +91,7 @@ private:
     static const long ID_STATUSBAR1;
 
     void m_InitMenuBar(void);
-    void m_InitSizedComponents(void);
+    void m_InitSizedComponents(wxWindow* parent);
     void m_InitStatusBar(void);
 
 

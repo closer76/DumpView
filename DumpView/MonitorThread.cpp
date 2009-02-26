@@ -10,28 +10,53 @@ wxThread::ExitCode MonitorThread::Entry()
     DWORD sizeRead;
     wxCommandEvent evt(wxEVT_THREAD_CALLBACK, wxID_ANY);
 
-    if ( !m_InitSerialPort())
-    {
-        return (wxThread::ExitCode)0;
-    }
+    m_NextState = m_NextState = MONITOR_STATE_RUNNING;
 
     while( !TestDestroy())
     {
-        sizeRead = 0;
-        s_mutexDataBuffer.Lock();
-        if (!::ReadFile(m_hSerialPort, s_buf+s_nBufStartPos, BUF_SIZE-s_nBufStartPos, &sizeRead, NULL))
+        switch (m_CurrentState)
         {
-            ::MessageBox( NULL, wxT("Read file error"), wxT("Error"), MB_OK);
+        case MONITOR_STATE_STOPPED:
+            if ( m_NextState == MONITOR_STATE_RUNNING)
+            {
+                if ( !m_InitSerialPort())
+                {
+                    return (wxThread::ExitCode)0;
+                }
+                m_CurrentState = MONITOR_STATE_RUNNING;
+            }
+            break;
+
+        case MONITOR_STATE_RUNNING:
+            if ( m_NextState == MONITOR_STATE_STOPPED)
+            {
+                m_ReleaseSerialPort();
+                m_CurrentState = MONITOR_STATE_STOPPED;
+            }
+            else
+            {
+                sizeRead = 0;
+                s_mutexDataBuffer.Lock();
+                if (!::ReadFile(m_hSerialPort, s_buf+s_nBufStartPos, BUF_SIZE-s_nBufStartPos, &sizeRead, NULL))
+                {
+                    ::MessageBox( NULL, wxT("Read file error"), wxT("Error"), MB_OK);
+                }
+                s_nBufStartPos += sizeRead;
+                if ( s_nBufStartPos >= 0)
+                    m_pParent->AddPendingEvent( evt);
+                s_mutexDataBuffer.Unlock();
+            }
+            break;
+
+        default:
+            break;
         }
-        s_nBufStartPos += sizeRead;
-        if ( s_nBufStartPos >= 0)
-            m_pParent->AddPendingEvent( evt);
-        s_mutexDataBuffer.Unlock();
 
         wxThread::This()->Sleep(1);
     }
 
     // Clean-up
+    m_CurrentState = m_NextState = MONITOR_STATE_STOPPED;
     m_ReleaseSerialPort();
 
     return (wxThread::ExitCode)0;

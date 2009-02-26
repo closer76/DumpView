@@ -52,6 +52,9 @@ public:
     wxThread::ExitCode Entry();
 
     int CopyBuffer(unsigned char* out_buf);
+
+    void StartMonitoring(void)  { m_NextState = MONITOR_STATE_RUNNING;}
+    void StopMonitoring(void)   { m_NextState = MONITOR_STATE_STOPPED;}
 };
 
 #endif

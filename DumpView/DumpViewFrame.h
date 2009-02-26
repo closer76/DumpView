@@ -18,12 +18,20 @@
 #include "MonitorThread.h"
 
 //#define USE_RICH_EDIT
+#define USE_BITMAP_BUTTON
 
 DECLARE_EVENT_TYPE( wxEVT_THREAD_CALLBACK, -1)
 
 class DumpViewFrame : public wxFrame
 {
 private:
+    enum MainState {
+        STATE_START,
+        STATE_STOP,
+        STATE_PAUSE
+    };
+
+    MainState m_state;
     MonitorThread* m_PortMonitor;
 
     static unsigned char m_textBuffer[BUF_SIZE];
@@ -41,11 +49,18 @@ private:
     wxMenuItem* m_menuSetFolder;
     wxMenu* m_menuEdit;
     wxMenu* m_menuSettings;
+#ifdef USE_BITMAP_BUTTON
+    wxBitmapButton* m_buttonRec;
+    wxBitmapButton* m_buttonStart;
+    wxBitmapButton* m_buttonStop;
+    wxBitmapButton* m_buttonPause;
+#else
     wxButton* m_buttonRec;
-    wxButton* m_buttonClear;
     wxButton* m_buttonStart;
     wxButton* m_buttonStop;
     wxButton* m_buttonPause;
+#endif
+    wxButton* m_buttonClear;
     wxTextCtrl* m_textDefaultFolder;
     wxStatusBar* m_statusBar1;
 #ifdef USE_RICH_EDIT
@@ -75,6 +90,9 @@ private:
     static const long ID_STATUSBAR1;
 
     void m_InitMenuBar(void);
+    void m_InitSizedComponents(void);
+    void m_InitStatusBar(void);
+
 
     DECLARE_EVENT_TABLE();
 

@@ -58,42 +58,11 @@ DumpViewFrame::DumpViewFrame(const wxString& title) :
     m_strDumpFilename = wxT("dump.txt");
 
     //------- Set up UI
-    wxBoxSizer* BoxSizer1;
-    wxBoxSizer* BoxSizer2;
-
     m_InitMenuBar();
 
-    BoxSizer1 = new wxBoxSizer(wxVERTICAL);
-    BoxSizer2 = new wxBoxSizer(wxHORIZONTAL);
-    m_buttonStart = new wxButton(this, ID_BUTTON_START, _("Start"), wxDefaultPosition, wxSize(40,40), 0, wxDefaultValidator, _T("ID_BUTTON_START"));
-    BoxSizer2->Add(m_buttonStart, 0, wxTOP|wxBOTTOM|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
-    m_buttonStop = new wxButton(this, ID_BUTTON_STOP, _("Stop"), wxDefaultPosition, wxSize(40,40), 0, wxDefaultValidator, _T("ID_BUTTON_STOP"));
-    BoxSizer2->Add(m_buttonStop, 0, wxTOP|wxBOTTOM|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
-    m_buttonRec = new wxButton(this, ID_BUTTON_REC, _("Rec"), wxDefaultPosition, wxSize(40,40), 0, wxDefaultValidator, _T("ID_BUTTON_REC"));
-    BoxSizer2->Add(m_buttonRec, 0, wxTOP|wxBOTTOM|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
-    m_buttonPause = new wxButton(this, ID_BUTTON_PAUSE, _("Pause"), wxDefaultPosition, wxSize(40,40), 0, wxDefaultValidator, _T("ID_BUTTON_PAUSE"));
-    BoxSizer2->Add(m_buttonPause, 0, wxTOP|wxBOTTOM|wxRIGHT|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
-    m_buttonClear = new wxButton(this, ID_BUTTON_CLEAR, _("Clear logs"), wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, _T("ID_BUTTON5"));
-    BoxSizer2->Add(m_buttonClear, 1, wxALL|wxALIGN_BOTTOM|wxALIGN_CENTER_HORIZONTAL, 5);
-    BoxSizer1->Add(BoxSizer2, 0, wxALL|wxEXPAND|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
-    m_textDefaultFolder = new wxTextCtrl(this, ID_TEXT_DEFAULT_FOLDER, _(""), wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, _T("ID_TEXT_DEFAULT_FOLDER"));
-    BoxSizer1->Add(m_textDefaultFolder, 0, wxALL|wxEXPAND|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
-#ifdef USE_RICH_EDIT
-    m_OutputBox = new wxRichTextCtrl( this, ID_OUTPUT_BOX, wxEmptyString, wxDefaultPosition, wxSize(160,120), wxRE_READONLY | wxRE_MULTILINE);
-#else
-    m_OutputBox = new wxTextCtrl( this, ID_OUTPUT_BOX, wxEmptyString, wxDefaultPosition, wxSize(160, 120), wxTE_MULTILINE | wxTE_READONLY);
-#endif
-    BoxSizer1->Add(m_OutputBox, 1, wxALL|wxEXPAND|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
-    SetSizer(BoxSizer1);
-    BoxSizer1->Fit(this);
-    BoxSizer1->SetSizeHints(this);
+    m_InitSizedComponents();
 
-    m_statusBar1 = new wxStatusBar(this, ID_STATUSBAR1, 0, _T("ID_STATUSBAR1"));
-    int __wxStatusBarWidths_1[1] = { -1 };
-    int __wxStatusBarStyles_1[1] = { wxSB_NORMAL };
-    m_statusBar1->SetFieldsCount(1,__wxStatusBarWidths_1);
-    m_statusBar1->SetStatusStyles(1,__wxStatusBarStyles_1);
-    SetStatusBar(m_statusBar1);
+    m_InitStatusBar();
 
     this->SetSize( 800, 540);
 
@@ -147,6 +116,83 @@ void DumpViewFrame::m_InitMenuBar(void)
     SetMenuBar(MenuBar1);
 }
 
+void DumpViewFrame::m_InitSizedComponents(void)
+{
+    wxBoxSizer* BoxSizer1;
+    wxBoxSizer* BoxSizer2;
+
+    BoxSizer1 = new wxBoxSizer(wxVERTICAL);
+    BoxSizer2 = new wxBoxSizer(wxHORIZONTAL);
+
+#ifdef USE_BITMAP_BUTTON
+    wxBitmap image_red( wxT("red"), wxBITMAP_TYPE_BMP_RESOURCE);
+    wxBitmap image_black( wxT("black"), wxBITMAP_TYPE_BMP_RESOURCE);
+    wxMask* mask_rec_default = new wxMask( wxBitmap( wxT("rec_default"), wxBITMAP_TYPE_BMP_RESOURCE));
+    wxMask* mask_rec_disabled = new wxMask( wxBitmap( wxT("rec_disabled"), wxBITMAP_TYPE_BMP_RESOURCE));
+    wxMask* mask_start_default = new wxMask( wxBitmap( wxT("start_default"), wxBITMAP_TYPE_BMP_RESOURCE));
+    wxMask* mask_start_disabled = new wxMask( wxBitmap( wxT("start_disabled"), wxBITMAP_TYPE_BMP_RESOURCE));
+    wxMask* mask_stop_default = new wxMask( wxBitmap( wxT("stop_default"), wxBITMAP_TYPE_BMP_RESOURCE));
+    wxMask* mask_stop_disabled = new wxMask( wxBitmap( wxT("stop_disabled"), wxBITMAP_TYPE_BMP_RESOURCE));
+    wxMask* mask_pause_default = new wxMask( wxBitmap( wxT("pause_default"), wxBITMAP_TYPE_BMP_RESOURCE));
+    wxMask* mask_pause_disabled = new wxMask( wxBitmap( wxT("pause_disabled"), wxBITMAP_TYPE_BMP_RESOURCE));
+
+    image_red.SetMask( mask_rec_default);
+    m_buttonRec = new wxBitmapButton( this, ID_BUTTON_REC, image_red, wxDefaultPosition, wxSize(40, 40), wxBU_AUTODRAW, wxDefaultValidator, _T("ID_BUTTON_REC"));
+    image_red.SetMask( mask_rec_disabled);
+    m_buttonRec->SetBitmapDisabled( image_red);
+
+    image_black.SetMask( mask_start_default);
+    m_buttonStart = new wxBitmapButton( this, ID_BUTTON_START, image_black, wxDefaultPosition, wxSize(40, 40), wxBU_AUTODRAW, wxDefaultValidator, _T("ID_BUTTON_START"));
+    image_black.SetMask( mask_start_disabled);
+    m_buttonStart->SetBitmapDisabled( image_black);
+
+    image_black.SetMask( mask_stop_default);
+    m_buttonStop = new wxBitmapButton( this, ID_BUTTON_STOP, image_black, wxDefaultPosition, wxSize(40, 40), wxBU_AUTODRAW, wxDefaultValidator, _T("ID_BUTTON_STOP"));
+    image_black.SetMask( mask_stop_disabled);
+    m_buttonStop->SetBitmapDisabled( image_black);
+
+    image_black.SetMask( mask_pause_default);
+    m_buttonPause = new wxBitmapButton( this, ID_BUTTON_PAUSE, image_black, wxDefaultPosition, wxSize(40, 40), wxBU_AUTODRAW, wxDefaultValidator, _T("ID_BUTTON_PAUSE"));
+    image_black.SetMask( mask_pause_disabled);
+    m_buttonPause->SetBitmapDisabled( image_black);
+#else
+    m_buttonStart = new wxButton(this, ID_BUTTON_START, _("Start"), wxDefaultPosition, wxSize(40,40), 0, wxDefaultValidator, _T("ID_BUTTON_START"));
+    m_buttonStop = new wxButton(this, ID_BUTTON_STOP, _("Stop"), wxDefaultPosition, wxSize(40,40), 0, wxDefaultValidator, _T("ID_BUTTON_STOP"));
+    m_buttonRec = new wxButton(this, ID_BUTTON_REC, _("Rec"), wxDefaultPosition, wxSize(40,40), 0, wxDefaultValidator, _T("ID_BUTTON_REC"));
+    m_buttonPause = new wxButton(this, ID_BUTTON_PAUSE, _("Pause"), wxDefaultPosition, wxSize(40,40), 0, wxDefaultValidator, _T("ID_BUTTON_PAUSE"));
+#endif
+    m_buttonClear = new wxButton(this, ID_BUTTON_CLEAR, _("Clear logs"), wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, _T("ID_BUTTON5"));
+    BoxSizer2->Add(m_buttonStart, 0, wxTOP|wxBOTTOM|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
+    BoxSizer2->Add(m_buttonStop, 0, wxTOP|wxBOTTOM|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
+    BoxSizer2->Add(m_buttonRec, 0, wxTOP|wxBOTTOM|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
+    BoxSizer2->Add(m_buttonPause, 0, wxTOP|wxBOTTOM|wxRIGHT|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
+    BoxSizer2->Add(m_buttonClear, 1, wxALL|wxALIGN_BOTTOM|wxALIGN_CENTER_HORIZONTAL, 5);
+    BoxSizer1->Add(BoxSizer2, 0, wxALL|wxEXPAND|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
+
+    m_textDefaultFolder = new wxTextCtrl(this, ID_TEXT_DEFAULT_FOLDER, _(""), wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, _T("ID_TEXT_DEFAULT_FOLDER"));
+    BoxSizer1->Add(m_textDefaultFolder, 0, wxALL|wxEXPAND|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
+#ifdef USE_RICH_EDIT
+    m_OutputBox = new wxRichTextCtrl( this, ID_OUTPUT_BOX, wxEmptyString, wxDefaultPosition, wxSize(160,120), wxRE_READONLY | wxRE_MULTILINE);
+#else
+    m_OutputBox = new wxTextCtrl( this, ID_OUTPUT_BOX, wxEmptyString, wxDefaultPosition, wxSize(160, 120), wxTE_MULTILINE | wxTE_READONLY);
+#endif
+    BoxSizer1->Add(m_OutputBox, 1, wxALL|wxEXPAND|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
+    SetSizer(BoxSizer1);
+    BoxSizer1->Fit(this);
+    BoxSizer1->SetSizeHints(this);
+
+}
+
+void DumpViewFrame::m_InitStatusBar(void)
+{
+    m_statusBar1 = new wxStatusBar(this, ID_STATUSBAR1, 0, _T("ID_STATUSBAR1"));
+    int __wxStatusBarWidths_1[1] = { -1 };
+    int __wxStatusBarStyles_1[1] = { wxSB_NORMAL };
+    m_statusBar1->SetFieldsCount(1,__wxStatusBarWidths_1);
+    m_statusBar1->SetStatusStyles(1,__wxStatusBarStyles_1);
+    SetStatusBar(m_statusBar1);
+}
+
 void DumpViewFrame::OnClose(wxCloseEvent& event)
 {
     if ( m_PortMonitor && m_PortMonitor->IsAlive())
@@ -188,7 +234,6 @@ void DumpViewFrame::OnSaveAs(wxCommandEvent& evt)
         m_OutputBox->SaveFile( dlg->GetPath());
 
         m_strDefaultPath = dlg->GetDirectory();
-        m_strDumpFilename
     }
     dlg->Destroy();
 }
@@ -254,10 +299,16 @@ void DumpViewFrame::OnAbout(wxCommandEvent& evt)
 
 void DumpViewFrame::OnStart(wxCommandEvent& evt)
 {
+    m_PortMonitor->StartMonitoring();
+    m_buttonStart->Disable();
+    m_buttonStop->Enable();
 }
 
 void DumpViewFrame::OnStop(wxCommandEvent& evt)
 {
+    m_PortMonitor->StopMonitoring();
+    m_buttonStart->Enable();
+    m_buttonStop->Disable();
 }
 
 void DumpViewFrame::OnRec(wxCommandEvent& evt)

@@ -16,7 +16,7 @@ BEGIN_EVENT_TABLE( LogDirDialog, wxDialog)
 	EVT_CHECKBOX( ID_CHKBOX_USE_LAST_DIR, LogDirDialog::OnChkboxUseLastDir_Clicked)
 END_EVENT_TABLE()
 
-LogDirDialog::LogDirDialog(LogDirSetting* settings, wxWindow* parent, const wxPoint& pos,const wxSize& size) :
+LogDirDialog::LogDirDialog(LogDirSettings* settings, wxWindow* parent, const wxPoint& pos,const wxSize& size) :
     wxDialog( parent, ID_LOG_DIR_DIALOG, wxT("Set Default Log Directory"), pos, size),
     m_settings(settings)
 {

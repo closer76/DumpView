@@ -28,6 +28,8 @@
 #include "OutputBoxMouseHandler.h"
 
 #include "LogDirDialog.h"
+#include "LoadGuidDefDialog.h"
+#include "GuidTranslator.h"
 
 const int PAUSE_BUF_SIZE = 1024*1024;
 
@@ -59,7 +61,10 @@ private:
     wxString m_strDefaultPath;
     wxString m_strDumpFilename;
 
-	LogDirSetting* m_LogDirSetting;
+	LogDirSettings* m_LogDirSettings;
+
+	GuidDefSettings* m_GuidDefSettings;
+	GuidTranslator m_GuidTranslator;
 
     wxConfig* m_pAppConfig;
     wxSize m_sizeTopWindow;
@@ -76,6 +81,7 @@ private:
     wxMenuItem* m_menuSaveAs;
     wxMenuItem* m_menuCopy;
     wxMenuItem* m_menuSetFolder;
+	wxMenuItem* m_menuLoadGuidDef;
     wxMenu* m_menuEdit;
     wxMenu* m_menuSettings;
 
@@ -94,6 +100,7 @@ private:
     wxButton* m_buttonFind;
     wxTextCtrl* m_textFindTarget;
     wxCheckBox* m_checkboxCaseSensitive;
+	wxButton* m_buttonTranslateGuid;
 
 
     // ID for GUI controls
@@ -107,6 +114,7 @@ private:
     static const long ID_BUTTON_FIND;
     static const long ID_TEXT_DEFAULT_FOLDER;
     static const long ID_BUTTON_SELECT_FILE;
+	static const long ID_BUTTON_TRANSLATE_GUID;
     static const long ID_OUTPUT_BOX;
     static const long ID_PANEL1;
     static const long ID_MENU_OPEN;
@@ -118,6 +126,7 @@ private:
     static const long ID_MENU_SETCOM;
     static const long ID_MENU_SETFONT;
     static const long ID_MENU_SETFOLDER;
+	static const long ID_MENU_LOADGUIDDEF;
     static const long ID_MENU_ABOUT;
     static const long ID_STATUSBAR1;
 
@@ -127,6 +136,7 @@ private:
 
     bool m_SelectFile_body(bool prompt_overwrite);
     void m_SwitchSelect_body(int selection);
+	void m_LoadGuidDefFile_body(void);
 
     static wxString m_FormatErrorMessage(DWORD error_no);
 
@@ -151,10 +161,12 @@ public:
     void OnComPortSetting(wxCommandEvent& evt); // Menu->Settings->Com Port
     void OnFontSetting(wxCommandEvent& evt);    // Menu->Settings->Display font
     void OnFolderSetting(wxCommandEvent& evt);  // Menu->Settings->Default Folder
+	void OnLoadGuidDef(wxCommandEvent& evt);	// Menu->Settings->Load GUID definitions
     void OnAbout(wxCommandEvent& evt);          // Menu->Help->About...
 
     void OnClear(wxCommandEvent& evt);          // Button Clear
     void OnSelectFile(wxCommandEvent& evt);     // Button Select File
+	void OnTranslateGuid(wxCommandEvent& evt);	// Button Translate GUID
 
     void OnSwitchSelected(wxCommandEvent& evt); // Radiobox Switch
 

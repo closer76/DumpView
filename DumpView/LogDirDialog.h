@@ -7,7 +7,7 @@
 #include <wx/button.h>
 #include <wx/checkbox.h>
 
-struct LogDirSetting
+struct LogDirSettings
 {
     wxString defaultDir;
     wxString lastDir;
@@ -23,10 +23,10 @@ class LogDirDialog : public wxDialog
     wxButton*   m_btnOk;
     wxButton*   m_btnCancel;
 
-    LogDirSetting*  m_settings;
+    LogDirSettings*  m_settings;
 
 public:
-    LogDirDialog(LogDirSetting* settings, wxWindow* parent, const wxPoint& pos=wxDefaultPosition, const wxSize& size=wxDefaultSize);
+    LogDirDialog(LogDirSettings* settings, wxWindow* parent, const wxPoint& pos=wxDefaultPosition, const wxSize& size=wxDefaultSize);
     virtual ~LogDirDialog();
 
 protected:

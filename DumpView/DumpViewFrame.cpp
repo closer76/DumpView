@@ -24,6 +24,7 @@ const long DumpViewFrame::ID_CHECKBOX_CASE_SENSITIVE = wxNewId();
 const long DumpViewFrame::ID_BUTTON_FIND = wxNewId();
 const long DumpViewFrame::ID_TEXT_DEFAULT_FOLDER = wxNewId();
 const long DumpViewFrame::ID_BUTTON_SELECT_FILE = wxNewId();
+const long DumpViewFrame::ID_BUTTON_TRANSLATE_GUID = wxNewId();
 const long DumpViewFrame::ID_OUTPUT_BOX = wxNewId();
 const long DumpViewFrame::ID_PANEL1 = wxNewId();
 const long DumpViewFrame::ID_MENU_OPEN = wxNewId();
@@ -35,6 +36,7 @@ const long DumpViewFrame::ID_MENU_COPY = wxNewId();
 const long DumpViewFrame::ID_MENU_SETCOM = wxNewId();
 const long DumpViewFrame::ID_MENU_SETFONT = wxNewId();
 const long DumpViewFrame::ID_MENU_SETFOLDER = wxNewId();
+const long DumpViewFrame::ID_MENU_LOADGUIDDEF = wxNewId();
 const long DumpViewFrame::ID_MENU_ABOUT = wxNewId();
 const long DumpViewFrame::ID_STATUSBAR1 = wxNewId();
 
@@ -54,11 +56,13 @@ BEGIN_EVENT_TABLE(DumpViewFrame, wxFrame)
     EVT_MENU( ID_MENU_SETCOM, DumpViewFrame::OnComPortSetting)
     EVT_MENU( ID_MENU_SETFONT , DumpViewFrame::OnFontSetting)
     EVT_MENU( ID_MENU_SETFOLDER , DumpViewFrame::OnFolderSetting)
+	EVT_MENU( ID_MENU_LOADGUIDDEF, DumpViewFrame::OnLoadGuidDef)
     EVT_MENU( ID_MENU_ABOUT , DumpViewFrame::OnAbout)
 
     EVT_BUTTON( ID_BUTTON_CLEAR , DumpViewFrame::OnClear )
     EVT_BUTTON( ID_BUTTON_SELECT_FILE, DumpViewFrame::OnSelectFile )
     EVT_BUTTON( ID_BUTTON_FIND, DumpViewFrame::OnFind )
+	EVT_BUTTON( ID_BUTTON_TRANSLATE_GUID, DumpViewFrame::OnTranslateGuid )
 
     EVT_RADIOBOX( ID_RADIOBOX_SWITCH, DumpViewFrame::OnSwitchSelected)
 
@@ -88,6 +92,8 @@ const wxString REG_FONT_COLOR       = wxT("FontColor");
 const wxString REG_DEFAULT_LOG_DIR  = wxT("DefaultLogDir");
 const wxString REG_LAST_LOG_DIR     = wxT("LastVisitedLogDir");
 const wxString REG_USE_LAST_DIR     = wxT("UseLastLogDir");
+const wxString REG_GUID_DEF_FILE	= wxT("GuidDefFile");
+const wxString REG_GUID_AUTO_LOAD	= wxT("GuidAutoLoad");
 
 const int STATUS_COLS = 3;
 
@@ -97,7 +103,8 @@ DumpViewFrame::DumpViewFrame(const wxString& title) :
     m_fpLog(0),
     m_ResetPort(false),
     m_bufPause(0),
-	m_LogDirSetting(0),
+	m_GuidDefSettings(0),
+	m_LogDirSettings(0),
     m_pAppConfig(0),
     m_sizeTopWindow(0, 0),
     m_pMouseEvtHandler(0)
@@ -172,23 +179,32 @@ DumpViewFrame::DumpViewFrame(const wxString& title) :
         }
     }
 
-	//------- Get log directory settings from registry
-	m_LogDirSetting = new LogDirSetting();
-	m_LogDirSetting->defaultDir = m_pAppConfig->Read( REG_DEFAULT_LOG_DIR, wxEmptyString);
-	m_LogDirSetting->lastDir = m_pAppConfig->Read( REG_LAST_LOG_DIR, wxEmptyString);
-	m_LogDirSetting->useLastDir = (m_pAppConfig->Read( REG_USE_LAST_DIR, static_cast<long>(1)) == 1) ? true : false;
-	if ( m_LogDirSetting->useLastDir)
+	//------- Get GUID definition settings from registry
+	m_GuidDefSettings = new GuidDefSettings();
+	m_GuidDefSettings->pathToDefFile = m_pAppConfig->Read( REG_GUID_DEF_FILE, wxEmptyString);
+	m_GuidDefSettings->autoLoad = (m_pAppConfig->Read( REG_GUID_AUTO_LOAD, static_cast<long>(0)) == 1) ? true : false;
+	if ( m_GuidDefSettings->autoLoad)
 	{
-		if ( m_LogDirSetting->lastDir != wxEmptyString)
+		m_LoadGuidDefFile_body();
+	}
+
+	//------- Get log directory settings from registry
+	m_LogDirSettings = new LogDirSettings();
+	m_LogDirSettings->defaultDir = m_pAppConfig->Read( REG_DEFAULT_LOG_DIR, wxEmptyString);
+	m_LogDirSettings->lastDir = m_pAppConfig->Read( REG_LAST_LOG_DIR, wxEmptyString);
+	m_LogDirSettings->useLastDir = (m_pAppConfig->Read( REG_USE_LAST_DIR, static_cast<long>(1)) == 1) ? true : false;
+	if ( m_LogDirSettings->useLastDir)
+	{
+		if ( m_LogDirSettings->lastDir != wxEmptyString)
 		{
-			m_strDefaultPath = m_LogDirSetting->lastDir;
+			m_strDefaultPath = m_LogDirSettings->lastDir;
 		}
 	}
 	else
 	{
-		if ( m_LogDirSetting->defaultDir != wxEmptyString)
+		if ( m_LogDirSettings->defaultDir != wxEmptyString)
 		{
-			m_strDefaultPath = m_LogDirSetting->defaultDir;
+			m_strDefaultPath = m_LogDirSettings->defaultDir;
 		}
 	}
 
@@ -238,6 +254,8 @@ void DumpViewFrame::m_InitMenuBar(void)
     m_menuSettings->Append(m_menuSetFont);
     m_menuSetFolder = new wxMenuItem(m_menuSettings, ID_MENU_SETFOLDER, _("Default log folder..."), wxEmptyString, wxITEM_NORMAL);
     m_menuSettings->Append(m_menuSetFolder);
+	m_menuLoadGuidDef = new wxMenuItem(m_menuSettings, ID_MENU_LOADGUIDDEF, wxT("Load GUID definitions..."), wxEmptyString, wxITEM_NORMAL);
+	m_menuSettings->Append(m_menuLoadGuidDef);
     MenuBar1->Append(m_menuSettings, _("&Settings"));
     m_menuHelp = new wxMenu();
     m_menuAbout = new wxMenuItem(m_menuHelp, ID_MENU_ABOUT, _("About...\tF1"), _("Show info about this application"), wxITEM_NORMAL);
@@ -271,6 +289,8 @@ void DumpViewFrame::m_InitSizedComponents(wxWindow* parent)
     m_checkboxRec->SetValue(false);
     BoxSizer4->Add(m_checkboxRec, 0, wxLEFT|wxRIGHT|wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL, 5);
     BoxSizer7->Add(BoxSizer4, 0, wxALL|wxEXPAND|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
+	m_buttonTranslateGuid = new wxButton( parent, ID_BUTTON_TRANSLATE_GUID, wxT("Translate GUID"));
+	BoxSizer7->Add( m_buttonTranslateGuid, 0, wxALL | wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL, 5);
     m_buttonClear = new wxButton(parent, ID_BUTTON_CLEAR, _("Clear logs"), wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, _T("ID_BUTTON_CLEAR"));
     BoxSizer7->Add(m_buttonClear, 1, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
     BoxSizer8->Add(BoxSizer7, 1, wxALL|wxEXPAND|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 0);
@@ -406,14 +426,22 @@ void DumpViewFrame::OnClose(wxCloseEvent& event)
             m_pAppConfig->Write( REG_FONT_COLOR, m_OutputBox->GetForegroundColour().GetAsString(wxC2S_CSS_SYNTAX));
         }
 
-		if ( m_LogDirSetting)
+		if ( m_LogDirSettings)
 		{
-			m_pAppConfig->Write( REG_DEFAULT_LOG_DIR, m_LogDirSetting->defaultDir);
-			m_pAppConfig->Write( REG_LAST_LOG_DIR, m_LogDirSetting->lastDir);
-			m_pAppConfig->Write( REG_USE_LAST_DIR, (long)(m_LogDirSetting->useLastDir ? 1 : 0));
+			m_pAppConfig->Write( REG_DEFAULT_LOG_DIR, m_LogDirSettings->defaultDir);
+			m_pAppConfig->Write( REG_LAST_LOG_DIR, m_LogDirSettings->lastDir);
+			m_pAppConfig->Write( REG_USE_LAST_DIR, (long)(m_LogDirSettings->useLastDir ? 1 : 0));
 
-			delete m_LogDirSetting;
-			m_LogDirSetting = 0;
+			delete m_LogDirSettings;
+			m_LogDirSettings = 0;
+		}
+
+		if ( m_GuidDefSettings)
+		{
+			m_pAppConfig->Write( REG_GUID_DEF_FILE, m_GuidDefSettings->pathToDefFile);
+			m_pAppConfig->Write( REG_GUID_AUTO_LOAD, static_cast<long>(m_GuidDefSettings->autoLoad ? 1 : 0));
+			delete m_GuidDefSettings;
+			m_GuidDefSettings = 0;
 		}
 
         delete m_pAppConfig;
@@ -550,10 +578,10 @@ void DumpViewFrame::OnSaveAs(wxCommandEvent& evt)
     {
         m_OutputBox->SaveFile( dlg->GetPath());
 
-		m_LogDirSetting->lastDir = dlg->GetDirectory();
-		if ( m_LogDirSetting->useLastDir)
+		m_LogDirSettings->lastDir = dlg->GetDirectory();
+		if ( m_LogDirSettings->useLastDir)
 		{
-			m_strDefaultPath = m_LogDirSetting->lastDir;
+			m_strDefaultPath = m_LogDirSettings->lastDir;
 		}
     }
     dlg->Destroy();
@@ -646,6 +674,22 @@ void DumpViewFrame::OnFind(wxCommandEvent& evt)
     }
 }
 
+void DumpViewFrame::OnTranslateGuid( wxCommandEvent &evt)
+{
+	int line_count = m_OutputBox->GetNumberOfLines();
+	wxString new_content = wxT("");
+	wxString line_text;
+
+	for ( int i = 0; i < line_count; i++)
+	{
+		line_text = m_OutputBox->GetLineText(i);
+		new_content += m_GuidTranslator.TranslateString( line_text);
+		new_content += wxT("\n");
+	}
+
+	m_OutputBox->ChangeValue( new_content);
+}
+
 void DumpViewFrame::OnCopyAll(wxCommandEvent& evt)
 {
     m_OutputBox->SetSelection( -1, -1);
@@ -710,21 +754,56 @@ void DumpViewFrame::OnFontSetting(wxCommandEvent& evt)
 
 void DumpViewFrame::OnFolderSetting(wxCommandEvent& evt)
 {
-	LogDirDialog* dlg = new LogDirDialog(m_LogDirSetting, this);
+	LogDirDialog* dlg = new LogDirDialog(m_LogDirSettings, this);
 
 	if ( dlg->ShowModal() == wxID_OK)
 	{
-		if ( m_LogDirSetting->useLastDir)
+		if ( m_LogDirSettings->useLastDir)
 		{
-			m_strDefaultPath = m_LogDirSetting->lastDir;
+			m_strDefaultPath = m_LogDirSettings->lastDir;
 		}
 		else
 		{
-			m_strDefaultPath = m_LogDirSetting->defaultDir;
+			m_strDefaultPath = m_LogDirSettings->defaultDir;
 		}
 	}
 
 	dlg->Destroy();
+}
+
+void DumpViewFrame::OnLoadGuidDef(wxCommandEvent& evt)
+{
+	LoadGuidDefDialog* dlg = new LoadGuidDefDialog( m_GuidDefSettings, this);
+    if (wxID_OK == dlg->ShowModal())
+    {
+		m_LoadGuidDefFile_body();
+    }
+    dlg->Destroy();
+}
+
+void DumpViewFrame::m_LoadGuidDefFile_body(void)
+{
+	int result;
+
+	result = m_GuidTranslator.ReadTranslationTable( m_GuidDefSettings->pathToDefFile);
+	if ( result >= 0)
+	{
+		m_buttonTranslateGuid->Enable(true);
+	}
+	else
+	{
+		wxString reason = wxT("(Reason unknown)");
+		if ( result == -1)
+		{
+			reason = wxT("Definition file not found.");
+		}
+		else if ( result == -2)
+		{
+			reason = wxT("Definition file format error.");
+		}
+		wxMessageBox( wxT("Error: ") + reason, wxT("Failed to open GUID definition file!"));
+		m_buttonTranslateGuid->Enable(false);
+	}
 }
 
 void DumpViewFrame::OnAbout(wxCommandEvent& evt)
@@ -844,10 +923,10 @@ bool DumpViewFrame::m_SelectFile_body( bool prompt_overwrite)
         m_textLogFilename->ChangeValue( dlg->GetPath());
 
 		// Save the last-visited directory information
-		m_LogDirSetting->lastDir = dlg->GetDirectory();
-		if ( m_LogDirSetting->useLastDir)
+		m_LogDirSettings->lastDir = dlg->GetDirectory();
+		if ( m_LogDirSettings->useLastDir)
 		{
-			m_strDefaultPath = m_LogDirSetting->lastDir;
+			m_strDefaultPath = m_LogDirSettings->lastDir;
 		}
 
 		result = true;

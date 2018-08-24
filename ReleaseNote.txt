@@ -1,0 +1,30 @@
+===============================================================================
+=                                    DumpView                                 =
+=                                  Release Note                               =
+===============================================================================
+
+-------------------------------------------------------------------------------
+Version 0.95 - Apr. 19, 2010
+
+1. Supported GUID translation for EFI.
+2. Allowed user to select default folder to store logs.
+3. Enlarged buffer Serial Port read buffer from 4KB to 8KB.
+4. Linked to wxWidgets 2.9.0 instead of 2.8.9.
+
+-------------------------------------------------------------------------------
+Version 0.94 - Mar. 19, 2009
+
+1. Added "Open File" function to help debugging.
+2. Enlarged Serial Port read buffer from 128 to 4096 bytes.
+3. Added error handling mechanism for serial port related operations to im-
+   prove robustness.
+4. Saved serial port settings when app exits.
+5. Saved font settings when app exits.
+6. Showed current COM port settings in status bar.
+
+-------------------------------------------------------------------------------
+Version 0.93 - Mar. 10, 2009
+
+1. First public release of DumpView.
+
+--------------------------------< END OF FILE >--------------------------------

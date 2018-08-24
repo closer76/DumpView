@@ -27,6 +27,8 @@
 #include "MonitorThread.h"
 #include "OutputBoxMouseHandler.h"
 
+#include "LogDirDialog.h"
+
 const int PAUSE_BUF_SIZE = 1024*1024;
 
 DECLARE_EVENT_TYPE( wxEVT_THREAD_CALLBACK, -1)
@@ -56,6 +58,8 @@ private:
 
     wxString m_strDefaultPath;
     wxString m_strDumpFilename;
+
+	LogDirSetting* m_LogDirSetting;
 
     wxConfig* m_pAppConfig;
     wxSize m_sizeTopWindow;

@@ -193,6 +193,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\LogDirDialog.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\MonitorThread.cpp"
 				>
 			</File>
@@ -231,6 +235,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\LogDirDialog.h"
+				>
+			</File>
+			<File
 				RelativePath=".\MonitorThread.h"
 				>
 			</File>
@@ -259,5 +267,9 @@
 		</File>
 	</Files>
 	<Globals>
+		<Global
+			Name="RESOURCE_FILE"
+			Value="resource.rc"
+		/>
 	</Globals>
 </VisualStudioProject>

@@ -85,6 +85,9 @@ const wxString REG_BYTE_SIZE        = wxT("ByteSize");
 const wxString REG_STOP_BIT         = wxT("StopBit");
 const wxString REG_FONT             = wxT("Font");
 const wxString REG_FONT_COLOR       = wxT("FontColor");
+const wxString REG_DEFAULT_LOG_DIR  = wxT("DefaultLogDir");
+const wxString REG_LAST_LOG_DIR     = wxT("LastVisitedLogDir");
+const wxString REG_USE_LAST_DIR     = wxT("UseLastLogDir");
 
 const int STATUS_COLS = 3;
 
@@ -94,6 +97,7 @@ DumpViewFrame::DumpViewFrame(const wxString& title) :
     m_fpLog(0),
     m_ResetPort(false),
     m_bufPause(0),
+	m_LogDirSetting(0),
     m_pAppConfig(0),
     m_sizeTopWindow(0, 0),
     m_pMouseEvtHandler(0)
@@ -101,7 +105,7 @@ DumpViewFrame::DumpViewFrame(const wxString& title) :
     int pos_x = -1, pos_y = -1;
 
     //------- Initiate internal variables
-    m_strDefaultPath = wxT(".");
+	m_strDefaultPath = wxT(".");
     m_strDumpFilename = wxT("dump.txt");
 
     //------- Init buffer
@@ -168,7 +172,27 @@ DumpViewFrame::DumpViewFrame(const wxString& title) :
         }
     }
 
-    //------- Create the thread that monitors serial port
+	//------- Get log directory settings from registry
+	m_LogDirSetting = new LogDirSetting();
+	m_LogDirSetting->defaultDir = m_pAppConfig->Read( REG_DEFAULT_LOG_DIR, wxEmptyString);
+	m_LogDirSetting->lastDir = m_pAppConfig->Read( REG_LAST_LOG_DIR, wxEmptyString);
+	m_LogDirSetting->useLastDir = (m_pAppConfig->Read( REG_USE_LAST_DIR, static_cast<long>(1)) == 1) ? true : false;
+	if ( m_LogDirSetting->useLastDir)
+	{
+		if ( m_LogDirSetting->lastDir != wxEmptyString)
+		{
+			m_strDefaultPath = m_LogDirSetting->lastDir;
+		}
+	}
+	else
+	{
+		if ( m_LogDirSetting->defaultDir != wxEmptyString)
+		{
+			m_strDefaultPath = m_LogDirSetting->defaultDir;
+		}
+	}
+
+	//------- Create the thread that monitors serial port
     m_PortMonitor = new MonitorThread(this, settings);
     
     if (m_PortMonitor->Create() != wxTHREAD_NO_ERROR || m_PortMonitor->Run() != wxTHREAD_NO_ERROR)
@@ -382,6 +406,16 @@ void DumpViewFrame::OnClose(wxCloseEvent& event)
             m_pAppConfig->Write( REG_FONT_COLOR, m_OutputBox->GetForegroundColour().GetAsString(wxC2S_CSS_SYNTAX));
         }
 
+		if ( m_LogDirSetting)
+		{
+			m_pAppConfig->Write( REG_DEFAULT_LOG_DIR, m_LogDirSetting->defaultDir);
+			m_pAppConfig->Write( REG_LAST_LOG_DIR, m_LogDirSetting->lastDir);
+			m_pAppConfig->Write( REG_USE_LAST_DIR, (long)(m_LogDirSetting->useLastDir ? 1 : 0));
+
+			delete m_LogDirSetting;
+			m_LogDirSetting = 0;
+		}
+
         delete m_pAppConfig;
         m_pAppConfig = 0;
     }
@@ -513,7 +547,11 @@ void DumpViewFrame::OnSaveAs(wxCommandEvent& evt)
     {
         m_OutputBox->SaveFile( dlg->GetPath());
 
-        m_strDefaultPath = dlg->GetDirectory();
+		m_LogDirSetting->lastDir = dlg->GetDirectory();
+		if ( m_LogDirSetting->useLastDir)
+		{
+			m_strDefaultPath = m_LogDirSetting->lastDir;
+		}
     }
     dlg->Destroy();
 }
@@ -669,6 +707,21 @@ void DumpViewFrame::OnFontSetting(wxCommandEvent& evt)
 
 void DumpViewFrame::OnFolderSetting(wxCommandEvent& evt)
 {
+	LogDirDialog* dlg = new LogDirDialog(m_LogDirSetting, this);
+
+	if ( dlg->ShowModal() == wxID_OK)
+	{
+		if ( m_LogDirSetting->useLastDir)
+		{
+			m_strDefaultPath = m_LogDirSetting->lastDir;
+		}
+		else
+		{
+			m_strDefaultPath = m_LogDirSetting->defaultDir;
+		}
+	}
+
+	dlg->Destroy();
 }
 
 void DumpViewFrame::OnAbout(wxCommandEvent& evt)
@@ -785,9 +838,16 @@ bool DumpViewFrame::m_SelectFile_body( bool prompt_overwrite)
 
     if ( wxID_OK == dlg->ShowModal())
     {
-        m_strDefaultPath = dlg->GetDirectory();
         m_textLogFilename->ChangeValue( dlg->GetPath());
-        result = true;
+
+		// Save the last-visited directory information
+		m_LogDirSetting->lastDir = dlg->GetDirectory();
+		if ( m_LogDirSetting->useLastDir)
+		{
+			m_strDefaultPath = m_LogDirSetting->lastDir;
+		}
+
+		result = true;
     }
 
     dlg->Destroy();

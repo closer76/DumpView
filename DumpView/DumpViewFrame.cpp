@@ -2,6 +2,8 @@
 //
 #include "DumpViewFrame.h"
 #include "ComSettingDialog.h"
+#include "FileExistDialog.h"
+#include "AboutDialog.h"
 #include <wx/sizer.h>
 #include <wx/fontdlg.h>
 //#include <process.h>
@@ -59,6 +61,7 @@ const int SWITCH_OFF = 1;
 DumpViewFrame::DumpViewFrame(const wxString& title) : 
     wxFrame(NULL, wxID_ANY, title),
     m_IsRecording(false),
+    m_fpLog(0),
     m_ResetPort(false),
     m_bufPause(0)
 {
@@ -201,6 +204,12 @@ void DumpViewFrame::OnClose(wxCloseEvent& event)
         m_bufPause = 0;
     }
 
+    if ( m_fpLog)
+    {
+        delete m_fpLog;
+        m_fpLog = 0;
+    }
+
     event.Skip();
 }
 
@@ -238,7 +247,9 @@ void DumpViewFrame::OnThreadCallback(wxCommandEvent& evt)
 
             if ( m_IsRecording)
             {
-                // TODO: log messages into log file
+                // write messages into log file
+                wxASSERT( m_fpLog);
+                m_fpLog->Write( m_textBuffer, data_read);
             }
         }
         break;
@@ -358,6 +369,11 @@ void DumpViewFrame::OnFolderSetting(wxCommandEvent& evt)
 
 void DumpViewFrame::OnAbout(wxCommandEvent& evt)
 {
+    AboutDialog* dlg = new AboutDialog(this);
+
+    dlg->ShowModal();
+
+    dlg->Destroy();
 }
 
 void DumpViewFrame::OnSwitchSelected(wxCommandEvent& evt)
@@ -390,9 +406,53 @@ void DumpViewFrame::OnRec(wxCommandEvent& evt)
 {
     if ( m_IsRecording)
     {
+        delete m_fpLog;
+        m_fpLog = 0;
+        m_IsRecording = false;
     }
     else
     {
+        wxFileName filename( m_textLogFilename->GetValue());
+        if ( filename.GetFullName() == wxT(""))
+        {
+            m_SelectFile_body(false);
+            filename.Assign( m_textLogFilename->GetValue());
+        }
+
+        wxASSERT(m_fpLog == 0);
+        wxFile::OpenMode open_mode = wxFile::write;
+        if ( filename.FileExists())
+        {
+            FileExistDialog* dlg = new FileExistDialog(this);
+            dlg->SetFilename( filename.GetFullPath());
+            int result = dlg->ShowModal();
+            dlg->Destroy();
+
+            if ( result == FILEEXIST_APPEND)
+            {
+                open_mode = wxFile::write_append;
+            }
+            else if ( result == FILEEXIST_CANCEL)
+            {
+                m_IsRecording = false;
+                m_checkboxRec->SetValue(false);
+                return;
+            }
+        }
+
+        m_fpLog = new wxFile( filename.GetFullPath().c_str(), open_mode);
+        if ( !m_fpLog->IsOpened())
+        {
+            wxMessageBox( _("Cannot open file to write."));
+            delete m_fpLog;
+            m_fpLog = 0;
+            m_IsRecording = false;
+            m_checkboxRec->SetValue(false);
+        }
+        else
+        {
+            m_IsRecording = true;
+        }
     }
 }
 
@@ -416,6 +476,8 @@ void DumpViewFrame::m_SelectFile_body( bool prompt_overwrite)
         m_strDefaultPath = dlg->GetDirectory();
         m_textLogFilename->ChangeValue( dlg->GetPath());
     }
+
+    dlg->Destroy();
 }
 
 void DumpViewFrame::OnPause(wxCommandEvent& evt)

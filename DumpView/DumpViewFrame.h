@@ -3,6 +3,10 @@
 #ifndef __DumpViewFrame_H__
 #define __DumpViewFrame_H__
 
+//#define USE_RICH_EDIT
+#define USE_BITMAP_BUTTON
+
+
 #ifdef __BORLANDC__
     #pragma hdrstop
 #endif
@@ -10,17 +14,18 @@
 #ifndef WX_PRECOMP
     #include <wx/wx.h>
     #include <wx/frame.h>
+    #include <wx/file.h>
+    #include <wx/filename.h>
 #else
     #include <wx/wxprec.h>
 #endif
 
+#ifdef USE_RICH_EDIT
 #include <wx/richtext/richtextctrl.h>
+#endif
 #include "MonitorThread.h"
 
 const int PAUSE_BUF_SIZE = 1024*1024;
-
-//#define USE_RICH_EDIT
-#define USE_BITMAP_BUTTON
 
 DECLARE_EVENT_TYPE( wxEVT_THREAD_CALLBACK, -1)
 
@@ -34,12 +39,13 @@ private:
     };
 
     MainState m_state;
-    bool m_IsRecording;
     MonitorThread* m_PortMonitor;
-
     bool m_ResetPort;
 
     static unsigned char m_textBuffer[XFER_BUF_SIZE];
+
+    bool m_IsRecording;
+    wxFile* m_fpLog;
 
     int m_iCurPauseBufSize;
     unsigned char* m_bufPause;

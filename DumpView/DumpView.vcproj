@@ -173,6 +173,10 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
+				RelativePath=".\AboutDialog.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\ComSettingDialog.cpp"
 				>
 			</File>
@@ -185,6 +189,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\FileExistDialog.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\MonitorThread.cpp"
 				>
 			</File>
@@ -194,6 +202,10 @@
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
+			<File
+				RelativePath=".\AboutDialog.h"
+				>
+			</File>
 			<File
 				RelativePath=".\ComPortSetting.h"
 				>
@@ -211,7 +223,15 @@
 				>
 			</File>
 			<File
+				RelativePath=".\FileExistDialog.h"
+				>
+			</File>
+			<File
 				RelativePath=".\MonitorThread.h"
+				>
+			</File>
+			<File
+				RelativePath=".\version.h"
 				>
 			</File>
 		</Filter>

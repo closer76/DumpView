@@ -107,7 +107,7 @@ wxThread::ExitCode MonitorThread::Entry()
 
 bool MonitorThread::m_InitSerialPort()
 {
-    if ( m_PortNum <= 0 || m_PortNum > 16)
+    if ( m_PortNum <= 0 || m_PortNum > m_MaxPortNum)
     {
         return false;
     }
@@ -194,7 +194,7 @@ int MonitorThread::CopyBuffer(char* out_buf)
     return count;
 }
 
-std::list<int>* MonitorThread::GetAvailableComPorts(int max)
+std::list<int>* MonitorThread::GetAvailableComPorts()
 {
 	// Rescan available com ports
 	COMMCONFIG cc;
@@ -202,7 +202,7 @@ std::list<int>* MonitorThread::GetAvailableComPorts(int max)
 
 	m_AvailComPorts.clear();
 
-	for ( int i = 0; i <= max; i++)
+	for ( int i = 0; i <= m_MaxPortNum; i++)
 	{
 		if ( ::GetDefaultCommConfig( wxString::Format( wxT("COM%d"), i).c_str(), &cc, &size))
 		{

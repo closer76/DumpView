@@ -41,6 +41,7 @@ private:
     int m_Parity;
     int m_ByteSize;
     int m_StopBit;
+	int m_MaxPortNum;
 
 	std::list<int> m_AvailComPorts;
 
@@ -53,19 +54,20 @@ private:
 
 public:
 
-    MonitorThread(wxEvtHandler* pParent, ComPortSetting &settings):
-        wxThread(),
-        m_pParent(pParent),
-        m_hSerialPort(INVALID_HANDLE_VALUE),
-        m_CurrentState( MONITOR_STATE_STOPPED),
-        m_NextState( MONITOR_STATE_STOPPED),
-        m_ErrorCode(ERROR_SUCCESS),
-        m_PortNum(settings.PortNum),
-        m_BaudRate(settings.BaudRate),
+	MonitorThread(wxEvtHandler* pParent, ComPortSetting &settings) :
+		wxThread(),
+		m_pParent(pParent),
+		m_hSerialPort(INVALID_HANDLE_VALUE),
+		m_CurrentState(MONITOR_STATE_STOPPED),
+		m_NextState(MONITOR_STATE_STOPPED),
+		m_ErrorCode(ERROR_SUCCESS),
+		m_PortNum(settings.PortNum),
+		m_BaudRate(settings.BaudRate),
 		m_ManualBaudRate(settings.ManualBaudRate),
-        m_Parity(settings.Parity),
-        m_ByteSize(settings.ByteSize),
-        m_StopBit(settings.StopBit),
+		m_Parity(settings.Parity),
+		m_ByteSize(settings.ByteSize),
+		m_StopBit(settings.StopBit),
+		m_MaxPortNum(32),
 		m_AvailComPorts()
     {}
 
@@ -77,7 +79,7 @@ public:
     void StopMonitoring(void)   { m_NextState = MONITOR_STATE_STOPPED;}
     bool IsMonitoring(void)     { return (m_CurrentState == MONITOR_STATE_RUNNING);}
 
-	std::list<int>* GetAvailableComPorts(int max = 16);
+	std::list<int>* GetAvailableComPorts();
 
     void GetPortSettings( ComPortSetting& settings);
     void SetPortSettings( const ComPortSetting& settings);
@@ -88,6 +90,9 @@ public:
         m_ErrorCode = ERROR_SUCCESS;
         return result;
     }
+
+	void SetMaxPortNum(int max_port_num) { m_MaxPortNum = max_port_num; }
+	int GetMaxPortNum() { return m_MaxPortNum; }
 };
 
 #endif

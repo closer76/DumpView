@@ -83,6 +83,8 @@ const wxString REG_BAUD_RATE        = wxT("BAUD Rate");
 const wxString REG_PARITY           = wxT("Parity");
 const wxString REG_BYTE_SIZE        = wxT("ByteSize");
 const wxString REG_STOP_BIT         = wxT("StopBit");
+const wxString REG_FONT             = wxT("Font");
+const wxString REG_FONT_COLOR       = wxT("FontColor");
 
 DumpViewFrame::DumpViewFrame(const wxString& title) : 
     wxFrame(NULL, wxID_ANY, title, wxDefaultPosition, wxDefaultSize, wxDEFAULT_FRAME_STYLE),
@@ -131,6 +133,12 @@ DumpViewFrame::DumpViewFrame(const wxString& title) :
     pos_x = m_pAppConfig->Read( REG_POS_X, static_cast<int>(-1));
     pos_y = m_pAppConfig->Read( REG_POS_Y, static_cast<int>(-1));
 
+    SetSize( m_sizeTopWindow);
+    if ( pos_x >= 0 && pos_y >= 0)
+    {
+        this->SetPosition( wxPoint(pos_x, pos_y));
+    }
+
     //------- Get port settings from registry
     ComPortSetting settings;
     settings.PortNum = m_pAppConfig->Read( REG_COM_NUM, static_cast<int>(1));
@@ -139,10 +147,22 @@ DumpViewFrame::DumpViewFrame(const wxString& title) :
     settings.ByteSize = m_pAppConfig->Read( REG_BYTE_SIZE, static_cast<int>(8));
     settings.StopBit = m_pAppConfig->Read( REG_STOP_BIT, static_cast<long>(ONESTOPBIT));
 
-    SetSize( m_sizeTopWindow);
-    if ( pos_x >= 0 && pos_y >= 0)
+    //------- Get font info from registry
+    if ( m_OutputBox)
     {
-        this->SetPosition( wxPoint(pos_x, pos_y));
+        wxString tmp_str = m_pAppConfig->Read( REG_FONT, wxEmptyString);
+        if ( tmp_str != wxEmptyString)
+        {
+            wxFont display_font;
+            display_font.SetNativeFontInfo(tmp_str);
+            m_OutputBox->SetFont( display_font);
+        }
+
+        tmp_str = m_pAppConfig->Read( REG_FONT_COLOR, wxEmptyString);
+        if ( tmp_str != wxEmptyString)
+        {
+            m_OutputBox->SetForegroundColour( wxColour(tmp_str));
+        }
     }
 
     //------- Create the thread that monitors serial port
@@ -304,6 +324,12 @@ void DumpViewFrame::OnClose(wxCloseEvent& event)
             m_pAppConfig->Write(REG_PARITY , static_cast<int>(settings.Parity ));
             m_pAppConfig->Write(REG_BYTE_SIZE , static_cast<int>(settings.ByteSize ));
             m_pAppConfig->Write(REG_STOP_BIT , static_cast<int>(settings.StopBit ));
+        }
+
+        if ( m_OutputBox)
+        {
+            m_pAppConfig->Write( REG_FONT, m_OutputBox->GetFont().GetNativeFontInfoDesc());
+            m_pAppConfig->Write( REG_FONT_COLOR, m_OutputBox->GetForegroundColour().GetAsString(wxC2S_CSS_SYNTAX));
         }
 
         delete m_pAppConfig;

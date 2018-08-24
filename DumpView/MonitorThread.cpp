@@ -107,12 +107,12 @@ wxThread::ExitCode MonitorThread::Entry()
 
 bool MonitorThread::m_InitSerialPort()
 {
-    if ( m_PortNum <= 0 || m_PortNum > 8)
+    if ( m_PortNum <= 0 || m_PortNum > 16)
     {
         return false;
     }
 
-    wxString port_name = wxString::Format( wxT("COM%d"), m_PortNum);
+    wxString port_name = wxString::Format( wxT("\\\\.\\COM%d"), m_PortNum);
 
     wxChar err_str[128];
 

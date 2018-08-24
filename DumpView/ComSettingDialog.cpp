@@ -32,10 +32,10 @@ ComSettingDialog::ComSettingDialog(wxWindow* parent,wxWindowID id,const wxPoint&
 	Create(parent, id, _("COM Port Settings..."), wxDefaultPosition, wxDefaultSize, wxDEFAULT_DIALOG_STYLE, _T("id"));
 	SetClientSize(wxSize(306,244));
 	Move(wxDefaultPosition);
-	m_lablePortNumber = new wxStaticText(this, ID_LABEL_PORT_NUM, _("Port number:"), wxPoint(32,24), wxSize(104,14), wxALIGN_RIGHT, _T("ID_LABEL_PORT_NUM"));
-	m_lableBaudRate = new wxStaticText(this, ID_LABEL_BAUD_RATE, _("Baud rate:"), wxPoint(32,56), wxSize(104,14), wxALIGN_RIGHT, _T("ID_LABEL_BAUD_RATE"));
+	m_labelPortNumber = new wxStaticText(this, ID_LABEL_PORT_NUM, _("Port number:"), wxPoint(32,24), wxSize(104,14), wxALIGN_RIGHT, _T("ID_LABEL_PORT_NUM"));
+	m_labelBaudRate = new wxStaticText(this, ID_LABEL_BAUD_RATE, _("Baud rate:"), wxPoint(32,56), wxSize(104,14), wxALIGN_RIGHT, _T("ID_LABEL_BAUD_RATE"));
 	m_labelByteSize = new wxStaticText(this, ID_LABEL_BYTE_SIZE, _("Byte size:"), wxPoint(32,88), wxSize(104,14), wxALIGN_RIGHT, _T("ID_LABEL_BYTE_SIZE"));
-	m_lableParity = new wxStaticText(this, ID_LABEL_PARITY, _("Parity:"), wxPoint(32,120), wxSize(104,14), wxALIGN_RIGHT, _T("ID_LABEL_PARITY"));
+	m_labelParity = new wxStaticText(this, ID_LABEL_PARITY, _("Parity:"), wxPoint(32,120), wxSize(104,14), wxALIGN_RIGHT, _T("ID_LABEL_PARITY"));
 	m_labelStopBit = new wxStaticText(this, ID_LABEL_STOP_BIT, _("Stop bit:"), wxPoint(32,152), wxSize(104,14), wxALIGN_RIGHT, _T("ID_LABEL_STOP_BIT"));
 	m_choicePortNumber = new wxChoice(this, ID_CHOICE_PORT_NUM, wxPoint(144,24), wxDefaultSize, 0, 0, 0, wxDefaultValidator, _T("ID_CHOICE_PORT_NUM"));
 	m_choicePortNumber->Append(_("COM1"));

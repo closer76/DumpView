@@ -19,10 +19,10 @@ class ComSettingDialog: public wxDialog
 		virtual ~ComSettingDialog();
 
 		//(*Declarations(ComSettingDialog)
-		wxStaticText* m_lablePortNumber;
-		wxStaticText* m_lableBaudRate;
+		wxStaticText* m_labelPortNumber;
+		wxStaticText* m_labelBaudRate;
 		wxStaticText* m_labelByteSize;
-		wxStaticText* m_lableParity;
+		wxStaticText* m_labelParity;
 		wxStaticText* m_labelStopBit;
 		wxChoice* m_choicePortNumber;
 		wxChoice* m_choiceBaudRate;

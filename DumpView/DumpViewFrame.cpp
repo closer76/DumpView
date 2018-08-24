@@ -535,7 +535,10 @@ void DumpViewFrame::OnOpen( wxCommandEvent& evt)
     if (wxID_OK == dlg->ShowModal())
     {
         m_OutputBox->Clear();
-        m_OutputBox->LoadFile( dlg->GetPath());
+		if ( !m_OutputBox->LoadFile( dlg->GetPath()))
+		{
+			wxMessageBox( wxT("Load file failed."));
+		}
     }
     dlg->Destroy();
 }

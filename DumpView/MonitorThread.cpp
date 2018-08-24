@@ -8,6 +8,7 @@ int MonitorThread::s_nBufStartPos = 0;
 wxThread::ExitCode MonitorThread::Entry()
 {
     DWORD sizeRead;
+    int retry_count;
     wxCommandEvent evt(wxEVT_THREAD_CALLBACK, wxID_ANY);
 
     evt.SetInt(MONITOR_EVENT_TYPE_NONE);
@@ -20,12 +21,22 @@ wxThread::ExitCode MonitorThread::Entry()
         case MONITOR_STATE_STOPPED:
             if ( m_NextState == MONITOR_STATE_RUNNING)
             {
-                if ( m_InitSerialPort())
+                for ( retry_count = 0; retry_count < 5; retry_count++)
                 {
-                    m_CurrentState = MONITOR_STATE_RUNNING;
-                    evt.SetInt(MONITOR_EVENT_TYPE_STARTED);
+                    if ( m_InitSerialPort())
+                    {
+                        m_CurrentState = MONITOR_STATE_RUNNING;
+                        evt.SetInt(MONITOR_EVENT_TYPE_STARTED);
+                        break;
+                    }
+                    else
+                    {
+                        m_ReleaseSerialPort();
+                        wxThread::This()->Sleep(100);
+                    }
                 }
-                else
+                
+                if ( retry_count == 5)
                 {
                     m_NextState = MONITOR_STATE_STOPPED;
                     evt.SetInt(MONITOR_EVENT_TYPE_INIT_FAILED);
@@ -54,8 +65,21 @@ wxThread::ExitCode MonitorThread::Entry()
                 }
                 else
                 {
-                    // TODO: shall we do error handling?
-                    ::MessageBox( NULL, wxT("Read file error"), wxT("Error"), MB_OK);
+                    // ReadFile() returns errors. Report error code to primary thread.
+                    m_ErrorCode = ::GetLastError();
+                    m_ReleaseSerialPort();
+                    m_CurrentState = MONITOR_STATE_STOPPED;
+                    if ( m_ErrorCode == ERROR_OPERATION_ABORTED)
+                    {
+                        // Ignore these errors and restart
+                        m_ErrorCode = ERROR_SUCCESS;
+                        m_NextState = MONITOR_STATE_RUNNING;
+                    }
+                    else
+                    {
+                        m_NextState = MONITOR_STATE_STOPPED;
+                        evt.SetInt( MONITOR_EVENT_TYPE_TERMINATED);
+                    }
                 }
                 s_mutexDataBuffer.Unlock();
             }
@@ -89,7 +113,6 @@ bool MonitorThread::m_InitSerialPort()
     }
 
     wxString port_name = wxString::Format( wxT("COM%d"), m_PortNum);
-    //error_message = wxT("");
 
     wxChar err_str[128];
 
@@ -106,7 +129,7 @@ bool MonitorThread::m_InitSerialPort()
 
     if ( m_hSerialPort == INVALID_HANDLE_VALUE)
     {
-        //error_message = m_GetErrorString(::GetLastError());
+        m_ErrorCode = ::GetLastError();
         return false;
     }
 
@@ -115,7 +138,7 @@ bool MonitorThread::m_InitSerialPort()
 
     if ( !::GetCommState( m_hSerialPort, &dcb))
     {
-        //error_message = m_GetErrorString(::GetLastError());
+        m_ErrorCode = ::GetLastError();
         return false;
     }
 
@@ -126,7 +149,7 @@ bool MonitorThread::m_InitSerialPort()
 
     if ( !::SetCommState( m_hSerialPort, &dcb))
     {
-        //error_message = m_GetErrorString(::GetLastError());
+        m_ErrorCode = ::GetLastError();
         return false;
     }
 
@@ -140,6 +163,7 @@ bool MonitorThread::m_InitSerialPort()
 
     if (!::SetCommTimeouts( m_hSerialPort, &timeout))
     {
+        m_ErrorCode = ::GetLastError();
         return false;
     }
 

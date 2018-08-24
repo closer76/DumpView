@@ -105,6 +105,7 @@ private:
     static const long ID_BUTTON_SELECT_FILE;
     static const long ID_OUTPUT_BOX;
     static const long ID_PANEL1;
+    static const long ID_MENU_OPEN;
     static const long ID_MENU_SAVEAS;
     static const long ID_MENU_QUIT;
     static const long ID_MENU_FIND;
@@ -123,6 +124,8 @@ private:
     bool m_SelectFile_body(bool prompt_overwrite);
     void m_SwitchSelect_body(int selection);
 
+    static wxString m_FormatErrorMessage(DWORD error_no);
+
     DECLARE_EVENT_TABLE();
 
 public:
@@ -133,6 +136,7 @@ public:
     void OnClose(wxCloseEvent& event);
     void OnThreadCallback(wxCommandEvent& evt);
 
+    void OnOpen(wxCommandEvent& evt);           // Menu->File->Open...
     void OnSaveAs(wxCommandEvent& evt);         // Menu->File->Save as...
     void OnExit(wxCommandEvent& evt);           // Menu->File->Exit
     void OnFind(wxCommandEvent& evt);           // Menu->Edit->Find...

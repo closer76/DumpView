@@ -7,7 +7,7 @@
 
 #include "ComPortSetting.h"
 
-const int XFER_BUF_SIZE = 128;
+const int XFER_BUF_SIZE = 4096;
 
 enum {
     MONITOR_STATE_STOPPED,
@@ -19,6 +19,7 @@ enum {
     MONITOR_EVENT_TYPE_DATAREADY,
     MONITOR_EVENT_TYPE_STARTED,
     MONITOR_EVENT_TYPE_STOPPED,
+    MONITOR_EVENT_TYPE_TERMINATED,
     MONITOR_EVENT_TYPE_INIT_FAILED
 };
 
@@ -30,6 +31,7 @@ private:
     HANDLE m_hSerialPort;
     int m_CurrentState;
     int m_NextState;
+    DWORD m_ErrorCode;
 
     int m_PortNum;
     DWORD m_BaudRate;
@@ -52,6 +54,7 @@ public:
         m_hSerialPort(INVALID_HANDLE_VALUE),
         m_CurrentState( MONITOR_STATE_STOPPED),
         m_NextState( MONITOR_STATE_STOPPED),
+        m_ErrorCode(ERROR_SUCCESS),
         m_PortNum(1),
         m_BaudRate(CBR_115200),
         m_Parity(NOPARITY),
@@ -69,6 +72,13 @@ public:
 
     void GetPortSettings( ComPortSetting& settings);
     void SetPortSettings( const ComPortSetting& settings);
+
+    DWORD GetErrorCode(void)
+    {
+        DWORD result = m_ErrorCode;
+        m_ErrorCode = ERROR_SUCCESS;
+        return result;
+    }
 };
 
 #endif

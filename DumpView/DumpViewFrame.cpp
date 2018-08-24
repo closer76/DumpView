@@ -26,6 +26,7 @@ const long DumpViewFrame::ID_TEXT_DEFAULT_FOLDER = wxNewId();
 const long DumpViewFrame::ID_BUTTON_SELECT_FILE = wxNewId();
 const long DumpViewFrame::ID_OUTPUT_BOX = wxNewId();
 const long DumpViewFrame::ID_PANEL1 = wxNewId();
+const long DumpViewFrame::ID_MENU_OPEN = wxNewId();
 const long DumpViewFrame::ID_MENU_SAVEAS = wxNewId();
 const long DumpViewFrame::ID_MENU_QUIT = wxNewId();
 const long DumpViewFrame::ID_MENU_FIND = wxNewId();
@@ -44,6 +45,7 @@ BEGIN_EVENT_TABLE(DumpViewFrame, wxFrame)
     EVT_SIZE( DumpViewFrame::OnResize)
     EVT_CLOSE(DumpViewFrame::OnClose)
     EVT_COMMAND( wxID_ANY, wxEVT_THREAD_CALLBACK, DumpViewFrame::OnThreadCallback)
+    EVT_MENU( ID_MENU_OPEN, DumpViewFrame::OnOpen)
     EVT_MENU( ID_MENU_SAVEAS, DumpViewFrame::OnSaveAs)
     EVT_MENU( ID_MENU_QUIT, DumpViewFrame::OnExit)
     EVT_MENU( ID_MENU_FIND , DumpViewFrame::OnFind)
@@ -148,9 +150,12 @@ void DumpViewFrame::m_InitMenuBar(void)
     wxMenu* m_menuHelp;
     wxMenuItem* m_menuAbout;
     wxMenuItem* m_menuExit;
+    wxMenuItem* m_menuOpen;
 
     MenuBar1 = new wxMenuBar();
     m_menuFile = new wxMenu();
+    m_menuOpen = new wxMenuItem(m_menuFile, ID_MENU_OPEN, _("&Open...\tCtrl-O"), wxEmptyString, wxITEM_NORMAL);
+    m_menuFile->Append( m_menuOpen);
     m_menuSaveAs = new wxMenuItem(m_menuFile, ID_MENU_SAVEAS, _("Save &as...\tCtrl-S"), wxEmptyString, wxITEM_NORMAL);
     m_menuFile->Append(m_menuSaveAs);
     m_menuFile->AppendSeparator();
@@ -231,6 +236,7 @@ void DumpViewFrame::m_InitSizedComponents(wxWindow* parent)
 #ifdef USE_RICH_EDIT
     m_OutputBox = new wxRichTextCtrl( this, ID_OUTPUT_BOX, wxEmptyString, wxDefaultPosition, wxSize(160,120), wxRE_READONLY | wxRE_MULTILINE);
 #else
+//    m_OutputBox = new wxTextCtrl( parent, ID_OUTPUT_BOX, wxEmptyString, wxDefaultPosition, wxSize(160, 120), wxTE_MULTILINE | wxTE_READONLY | wxTE_PROCESS_ENTER | wxTE_RICH);
     m_OutputBox = new wxTextCtrl( parent, ID_OUTPUT_BOX, wxEmptyString, wxDefaultPosition, wxSize(160, 120), wxTE_MULTILINE | wxTE_READONLY | wxTE_PROCESS_ENTER);
 #endif
     BoxSizer3->Add(m_OutputBox, 1, wxALL|wxEXPAND|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
@@ -247,6 +253,13 @@ void DumpViewFrame::m_InitStatusBar(void)
     m_statusBar1->SetFieldsCount(1,__wxStatusBarWidths_1);
     m_statusBar1->SetStatusStyles(1,__wxStatusBarStyles_1);
     SetStatusBar(m_statusBar1);
+}
+
+wxString DumpViewFrame::m_FormatErrorMessage(DWORD error_no)
+{
+    wxChar buf[128];
+    ::FormatMessage( FORMAT_MESSAGE_FROM_SYSTEM, 0, error_no, 0, buf, 128, 0);
+    return wxString(buf);
 }
 
 void DumpViewFrame::OnResize(wxSizeEvent& event)
@@ -356,6 +369,10 @@ void DumpViewFrame::OnThreadCallback(wxCommandEvent& evt)
         m_ResetPort = false;
         break;
 
+    case MONITOR_EVENT_TYPE_TERMINATED:
+        wxMessageBox( wxString::Format( wxT("Cannot read from serial port:\n%s"), m_FormatErrorMessage(m_PortMonitor->GetErrorCode())));
+        m_radioSwitch->SetSelection(1);
+        m_ResetPort = false;
     case MONITOR_EVENT_TYPE_STOPPED:
         m_checkboxPause->SetValue(false);
         m_radioSwitch->Enable();
@@ -367,7 +384,7 @@ void DumpViewFrame::OnThreadCallback(wxCommandEvent& evt)
         break;
 
     case MONITOR_EVENT_TYPE_INIT_FAILED:
-        wxMessageBox( wxT("Specific port cannot be initialized.") );
+        wxMessageBox( wxString::Format( wxT("Specific port cannot be initialized:\n%s"), m_FormatErrorMessage(m_PortMonitor->GetErrorCode()) ));
         m_radioSwitch->Enable();
         m_radioSwitch->SetSelection( SWITCH_OFF);
         m_state = STATE_STOP;
@@ -376,6 +393,16 @@ void DumpViewFrame::OnThreadCallback(wxCommandEvent& evt)
     }
 }
 
+void DumpViewFrame::OnOpen( wxCommandEvent& evt)
+{
+    wxFileDialog* dlg = new wxFileDialog(this, wxT("Open..."), m_strDefaultPath, m_strDumpFilename, wxT("*.*"), wxFD_OPEN);
+    if (wxID_OK == dlg->ShowModal())
+    {
+        m_OutputBox->Clear();
+        m_OutputBox->LoadFile( dlg->GetPath());
+    }
+    dlg->Destroy();
+}
 
 void DumpViewFrame::OnSaveAs(wxCommandEvent& evt)
 {
@@ -403,11 +430,12 @@ void DumpViewFrame::OnFind(wxCommandEvent& evt)
 
     pattern = m_textFindTarget->GetValue();
 
-    if ( pattern != wxT(""))
+    if ( !pattern.IsEmpty())
     {
         long start = 0, end = 0, text_end = 0, result = 0;
         bool case_sensitive = false, has_warpped = false;
 
+        // Prepare for the range to find
         m_OutputBox->GetSelection( &start, &result);
         if ( start != result)
         {

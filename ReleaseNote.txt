@@ -4,6 +4,12 @@
 ===============================================================================
 
 -------------------------------------------------------------------------------
+Version 1.10 - Feb. 22, 2016
+
+1. Added function to flush old and retain only last N lines of log.
+2. Linked to wxWidgets 3.0.2 instead of 2.9.1.
+
+-------------------------------------------------------------------------------
 Version 1.01 - May 13, 2013
 
 1. Added Manual Baud Rate setting function.

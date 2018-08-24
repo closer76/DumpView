@@ -126,6 +126,8 @@ private:
 
     static wxString m_FormatErrorMessage(DWORD error_no);
 
+    void m_ShowPortInfoOnStatusBar( ComPortSetting &settings);
+
     DECLARE_EVENT_TABLE();
 
 public:

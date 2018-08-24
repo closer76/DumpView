@@ -86,6 +86,8 @@ const wxString REG_STOP_BIT         = wxT("StopBit");
 const wxString REG_FONT             = wxT("Font");
 const wxString REG_FONT_COLOR       = wxT("FontColor");
 
+const int STATUS_COLS = 3;
+
 DumpViewFrame::DumpViewFrame(const wxString& title) : 
     wxFrame(NULL, wxID_ANY, title, wxDefaultPosition, wxDefaultSize, wxDEFAULT_FRAME_STYLE),
     m_IsRecording(false),
@@ -146,6 +148,7 @@ DumpViewFrame::DumpViewFrame(const wxString& title) :
     settings.Parity = m_pAppConfig->Read( REG_PARITY, static_cast<long>(NOPARITY));
     settings.ByteSize = m_pAppConfig->Read( REG_BYTE_SIZE, static_cast<int>(8));
     settings.StopBit = m_pAppConfig->Read( REG_STOP_BIT, static_cast<long>(ONESTOPBIT));
+    m_ShowPortInfoOnStatusBar( settings);
 
     //------- Get font info from registry
     if ( m_OutputBox)
@@ -282,10 +285,10 @@ void DumpViewFrame::m_InitSizedComponents(wxWindow* parent)
 void DumpViewFrame::m_InitStatusBar(void)
 {
     m_statusBar1 = new wxStatusBar(this, ID_STATUSBAR1, 0, _T("ID_STATUSBAR1"));
-    int __wxStatusBarWidths_1[1] = { -1 };
-    int __wxStatusBarStyles_1[1] = { wxSB_NORMAL };
-    m_statusBar1->SetFieldsCount(1,__wxStatusBarWidths_1);
-    m_statusBar1->SetStatusStyles(1,__wxStatusBarStyles_1);
+    int __wxStatusBarWidths_1[STATUS_COLS] = { 60, 100, -1 };
+    int __wxStatusBarStyles_1[STATUS_COLS] = { wxSB_NORMAL, wxSB_NORMAL, wxSB_NORMAL };
+    m_statusBar1->SetFieldsCount(STATUS_COLS,__wxStatusBarWidths_1);
+    m_statusBar1->SetStatusStyles(STATUS_COLS,__wxStatusBarStyles_1);
     SetStatusBar(m_statusBar1);
 }
 
@@ -294,6 +297,53 @@ wxString DumpViewFrame::m_FormatErrorMessage(DWORD error_no)
     wxChar buf[128];
     ::FormatMessage( FORMAT_MESSAGE_FROM_SYSTEM, 0, error_no, 0, buf, 128, 0);
     return wxString(buf);
+}
+
+void DumpViewFrame::m_ShowPortInfoOnStatusBar( ComPortSetting &settings)
+{
+    m_statusBar1->SetStatusText( wxString::Format( wxT("COM%d"), settings.PortNum), 0);
+
+    wxString result;
+    result.Printf( wxT("%d %d-"), settings.BaudRate, settings.ByteSize);
+    switch( settings.Parity)
+    {
+    case 0:
+        result += wxT("N-");
+        break;
+    case 1:
+        result += wxT("O-");
+        break;
+    case 2:
+        result += wxT("E-");
+        break;
+    case 3:
+        result += wxT("M-");
+        break;
+    case 4:
+        result += wxT("S-");
+        break;
+    default:
+        result += wxT("?-");
+        break;
+    }
+
+    switch( settings.StopBit)
+    {
+    case 0:
+        result += wxT("1");
+        break;
+    case 1:
+        result += wxT("1.5");
+        break;
+    case 2:
+        result += wxT("2");
+        break;
+    default:
+        result += wxT("?");
+        break;
+    }
+
+    m_statusBar1->SetStatusText( result, 1);
 }
 
 void DumpViewFrame::OnResize(wxSizeEvent& event)
@@ -478,7 +528,7 @@ void DumpViewFrame::OnFind(wxCommandEvent& evt)
     const int LENGTH_PER_READ = 100 * 1024;
     wxString pattern, content;
 
-    m_statusBar1->SetStatusText( wxT(""));
+    m_statusBar1->SetStatusText( wxT(""), STATUS_COLS-1);
 
     pattern = m_textFindTarget->GetValue();
 
@@ -545,12 +595,12 @@ void DumpViewFrame::OnFind(wxCommandEvent& evt)
             //m_statusBar1->SetStatusText( wxString::Format( wxT("%d"), result));
             if ( has_warpped)
             {
-                m_statusBar1->SetStatusText( wxT("Warpped to start..."));
+                m_statusBar1->SetStatusText( wxT("Warpped to start..."), STATUS_COLS-1);
             }
         }
         else
         {
-            m_statusBar1->SetStatusText( wxT("Not found."));
+            m_statusBar1->SetStatusText( wxT("Not found."), STATUS_COLS-1);
         }
     }
 }
@@ -591,6 +641,8 @@ void DumpViewFrame::OnComPortSetting(wxCommandEvent &evt)
                 m_ResetPort = true;
                 m_SwitchSelect_body( SWITCH_OFF);
             }
+            m_ShowPortInfoOnStatusBar( result);
+
         }
     }
 

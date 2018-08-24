@@ -16,6 +16,7 @@
     #include <wx/frame.h>
     #include <wx/file.h>
     #include <wx/filename.h>
+    #include <wx/config.h>
 #else
     #include <wx/wxprec.h>
 #endif
@@ -52,6 +53,8 @@ private:
 
     wxString m_strDefaultPath;
     wxString m_strDumpFilename;
+
+    wxConfig* m_pAppConfig;
 
     // GUI objects
     wxMenuItem* m_menuSetFont;

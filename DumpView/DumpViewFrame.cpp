@@ -1,5 +1,6 @@
 // DumpViewFrame.cpp : implementation of the  class
 //
+#include "version.h"
 #include "DumpViewFrame.h"
 #include "ComSettingDialog.h"
 #include "FileExistDialog.h"
@@ -58,13 +59,21 @@ END_EVENT_TABLE()
 const int SWITCH_ON = 0;
 const int SWITCH_OFF = 1;
 
+const wxString WINDOW_WIDTH = wxT("Window Width");
+const wxString WINDOW_HEIGHT = wxT("Window Height");
+const wxString POS_X = wxT("Position X");
+const wxString POS_Y = wxT("Position Y");
+
 DumpViewFrame::DumpViewFrame(const wxString& title) : 
     wxFrame(NULL, wxID_ANY, title),
     m_IsRecording(false),
     m_fpLog(0),
     m_ResetPort(false),
-    m_bufPause(0)
+    m_bufPause(0),
+    m_pAppConfig(0)
 {
+    int width = 800, height = 540, pos_x = -1, pos_y = -1;
+
     //------- Initiate internal variables
     m_strDefaultPath = wxT(".");
     m_strDumpFilename = wxT("dump.txt");
@@ -72,6 +81,13 @@ DumpViewFrame::DumpViewFrame(const wxString& title) :
     //------- Init buffer
     m_iCurPauseBufSize = 0;
     m_bufPause = new unsigned char[PAUSE_BUF_SIZE];
+
+    //------- Get values from registry
+    m_pAppConfig = new wxConfig(APP_NAME);
+    width = m_pAppConfig->Read( WINDOW_WIDTH, static_cast<int>(800));
+    height = m_pAppConfig->Read( WINDOW_HEIGHT, static_cast<int>(540));
+    pos_x = m_pAppConfig->Read( POS_X, static_cast<int>(-1));
+    pos_y = m_pAppConfig->Read( POS_Y, static_cast<int>(-1));
 
     //------- Set up UI
     wxPanel* panel = new wxPanel( this, wxID_ANY);
@@ -86,7 +102,11 @@ DumpViewFrame::DumpViewFrame(const wxString& title) :
 
     m_InitStatusBar();
 
-    this->SetSize( 800, 540);
+    this->SetSize( width, height);
+    if ( pos_x >= 0 && pos_y >= 0)
+    {
+        this->SetPosition( wxPoint(pos_x, pos_y));
+    }
 
     //------- Create the thread that monitors serial port
     m_PortMonitor = new MonitorThread(this);
@@ -208,6 +228,17 @@ void DumpViewFrame::OnClose(wxCloseEvent& event)
     {
         delete m_fpLog;
         m_fpLog = 0;
+    }
+
+    if ( m_pAppConfig)
+    {
+        m_pAppConfig->Write(WINDOW_WIDTH, static_cast<int>(GetSize().x));
+        m_pAppConfig->Write(WINDOW_HEIGHT, static_cast<int>(GetSize().y));
+        m_pAppConfig->Write(POS_X, static_cast<int>(GetPosition().x));
+        m_pAppConfig->Write(POS_Y, static_cast<int>(GetPosition().y));
+
+        delete m_pAppConfig;
+        m_pAppConfig = 0;
     }
 
     event.Skip();

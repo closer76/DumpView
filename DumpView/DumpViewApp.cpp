@@ -2,12 +2,13 @@
 //
 #include "DumpViewApp.h"
 #include "DumpViewFrame.h"
+#include "version.h"
 
 IMPLEMENT_APP(DumpViewApp)
 
 bool DumpViewApp::OnInit()
 {
-    DumpViewFrame* frame = new DumpViewFrame(wxT("DumpView"));
+    DumpViewFrame* frame = new DumpViewFrame(WINDOW_TITLE);
     SetTopWindow(frame);
     frame->Show(true);
 

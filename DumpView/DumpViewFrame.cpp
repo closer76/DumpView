@@ -4,6 +4,7 @@
 #include "DumpViewFrame.h"
 #include "ComSettingDialog.h"
 #include "FileExistDialog.h"
+#include "OutputBoxMouseHandler.h"
 #include "AboutDialog.h"
 #include <wx/sizer.h>
 #include <wx/fontdlg.h>
@@ -34,6 +35,7 @@ DEFINE_EVENT_TYPE( wxEVT_THREAD_CALLBACK)
 
 BEGIN_EVENT_TABLE(DumpViewFrame, wxFrame)
     ////Manual Code Start
+    EVT_SIZE( DumpViewFrame::OnResize)
     EVT_CLOSE(DumpViewFrame::OnClose)
     EVT_COMMAND( wxID_ANY, wxEVT_THREAD_CALLBACK, DumpViewFrame::OnThreadCallback)
     EVT_MENU( ID_MENU_SAVEAS, DumpViewFrame::OnSaveAs)
@@ -70,9 +72,11 @@ DumpViewFrame::DumpViewFrame(const wxString& title) :
     m_fpLog(0),
     m_ResetPort(false),
     m_bufPause(0),
-    m_pAppConfig(0)
+    m_pAppConfig(0),
+    m_sizeTopWindow(0, 0),
+    m_pMouseEvtHandler(0)
 {
-    int width = 800, height = 540, pos_x = -1, pos_y = -1;
+    int pos_x = -1, pos_y = -1;
 
     //------- Initiate internal variables
     m_strDefaultPath = wxT(".");
@@ -82,14 +86,9 @@ DumpViewFrame::DumpViewFrame(const wxString& title) :
     m_iCurPauseBufSize = 0;
     m_bufPause = new unsigned char[PAUSE_BUF_SIZE];
 
-    //------- Get values from registry
-    m_pAppConfig = new wxConfig(APP_NAME);
-    width = m_pAppConfig->Read( WINDOW_WIDTH, static_cast<int>(800));
-    height = m_pAppConfig->Read( WINDOW_HEIGHT, static_cast<int>(540));
-    pos_x = m_pAppConfig->Read( POS_X, static_cast<int>(-1));
-    pos_y = m_pAppConfig->Read( POS_Y, static_cast<int>(-1));
-
     //------- Set up UI
+    SetIcon( wxIcon(wxT("mondrian"), wxBITMAP_TYPE_ICO_RESOURCE));
+
     wxPanel* panel = new wxPanel( this, wxID_ANY);
     wxBoxSizer* panelSizer = new wxBoxSizer( wxVERTICAL);
     panelSizer->Add( panel, 1, wxALL | wxEXPAND);
@@ -102,7 +101,19 @@ DumpViewFrame::DumpViewFrame(const wxString& title) :
 
     m_InitStatusBar();
 
-    this->SetSize( width, height);
+    //------- Override the context menu of TextCtrl.
+    m_pMouseEvtHandler = new OutputBoxMouseHandler();
+    m_OutputBox->PushEventHandler(m_pMouseEvtHandler);
+    m_pMouseEvtHandler->SetOwner( m_OutputBox);
+
+    //------- Get size & position setting from registry
+    m_pAppConfig = new wxConfig(APP_NAME);
+    m_sizeTopWindow.x = m_pAppConfig->Read( WINDOW_WIDTH, static_cast<int>(800));
+    m_sizeTopWindow.y = m_pAppConfig->Read( WINDOW_HEIGHT, static_cast<int>(540));
+    pos_x = m_pAppConfig->Read( POS_X, static_cast<int>(-1));
+    pos_y = m_pAppConfig->Read( POS_Y, static_cast<int>(-1));
+
+    SetSize( m_sizeTopWindow);
     if ( pos_x >= 0 && pos_y >= 0)
     {
         this->SetPosition( wxPoint(pos_x, pos_y));
@@ -211,6 +222,15 @@ void DumpViewFrame::m_InitStatusBar(void)
     SetStatusBar(m_statusBar1);
 }
 
+void DumpViewFrame::OnResize(wxSizeEvent& event)
+{
+    if ( !IsMaximized())
+    {
+        m_sizeTopWindow = GetSize();
+    }
+    wxFrame::OnSize(event);
+}
+
 void DumpViewFrame::OnClose(wxCloseEvent& event)
 {
     if ( m_PortMonitor && m_PortMonitor->IsAlive())
@@ -232,13 +252,18 @@ void DumpViewFrame::OnClose(wxCloseEvent& event)
 
     if ( m_pAppConfig)
     {
-        m_pAppConfig->Write(WINDOW_WIDTH, static_cast<int>(GetSize().x));
-        m_pAppConfig->Write(WINDOW_HEIGHT, static_cast<int>(GetSize().y));
+        m_pAppConfig->Write(WINDOW_WIDTH, static_cast<int>(m_sizeTopWindow.x));
+        m_pAppConfig->Write(WINDOW_HEIGHT, static_cast<int>(m_sizeTopWindow.y));
         m_pAppConfig->Write(POS_X, static_cast<int>(GetPosition().x));
         m_pAppConfig->Write(POS_Y, static_cast<int>(GetPosition().y));
 
         delete m_pAppConfig;
         m_pAppConfig = 0;
+    }
+
+    if ( m_pMouseEvtHandler)
+    {
+        m_OutputBox->PopEventHandler(true);
     }
 
     event.Skip();
@@ -458,7 +483,13 @@ void DumpViewFrame::OnRec(wxCommandEvent& evt)
         wxFileName filename( m_textLogFilename->GetValue());
         if ( filename.GetFullName() == wxT(""))
         {
-            m_SelectFile_body(false);
+            if ( !m_SelectFile_body(false))
+            {
+                // Do nothing if user didn't select any files
+                m_IsRecording = false;
+                m_checkboxRec->SetValue(false);
+                return;
+            }
             filename.Assign( m_textLogFilename->GetValue());
         }
 
@@ -504,8 +535,10 @@ void DumpViewFrame::OnSelectFile(wxCommandEvent& evt)
     m_SelectFile_body(false);
 }
 
-void DumpViewFrame::m_SelectFile_body( bool prompt_overwrite)
+bool DumpViewFrame::m_SelectFile_body( bool prompt_overwrite)
 {
+    bool result = false;
+
     wxFileDialog* dlg = new wxFileDialog(
         this,
         wxT("Select file to store logs..."),
@@ -518,9 +551,12 @@ void DumpViewFrame::m_SelectFile_body( bool prompt_overwrite)
     {
         m_strDefaultPath = dlg->GetDirectory();
         m_textLogFilename->ChangeValue( dlg->GetPath());
+        result = true;
     }
 
     dlg->Destroy();
+
+    return result;
 }
 
 void DumpViewFrame::OnPause(wxCommandEvent& evt)

@@ -196,6 +196,10 @@
 				RelativePath=".\MonitorThread.cpp"
 				>
 			</File>
+			<File
+				RelativePath=".\OutputBoxMouseHandler.cpp"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -228,6 +232,10 @@
 			</File>
 			<File
 				RelativePath=".\MonitorThread.h"
+				>
+			</File>
+			<File
+				RelativePath=".\OutputBoxMouseHandler.h"
 				>
 			</File>
 			<File

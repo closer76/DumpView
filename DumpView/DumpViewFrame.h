@@ -25,6 +25,7 @@
 #include <wx/richtext/richtextctrl.h>
 #endif
 #include "MonitorThread.h"
+#include "OutputBoxMouseHandler.h"
 
 const int PAUSE_BUF_SIZE = 1024*1024;
 
@@ -33,6 +34,8 @@ DECLARE_EVENT_TYPE( wxEVT_THREAD_CALLBACK, -1)
 class DumpViewFrame : public wxFrame
 {
 private:
+    friend class OutputBoxMouseHandler;
+
     enum MainState {
         STATE_START,
         STATE_STOP,
@@ -55,6 +58,11 @@ private:
     wxString m_strDumpFilename;
 
     wxConfig* m_pAppConfig;
+    wxSize m_sizeTopWindow;
+//    int m_iWindowWidth;
+//    int m_iWindowHeight;
+
+    OutputBoxMouseHandler* m_pMouseEvtHandler;
 
     // GUI objects
     wxMenuItem* m_menuSetFont;
@@ -104,14 +112,16 @@ private:
     void m_InitSizedComponents(wxWindow* parent);
     void m_InitStatusBar(void);
 
-    void m_SelectFile_body(bool prompt_overwrite);
+    bool m_SelectFile_body(bool prompt_overwrite);
     void m_SwitchSelect_body(int selection);
 
     DECLARE_EVENT_TABLE();
 
 public:
+
     DumpViewFrame(const wxString& title);
 
+    void OnResize(wxSizeEvent& event);
     void OnClose(wxCloseEvent& event);
     void OnThreadCallback(wxCommandEvent& evt);
 

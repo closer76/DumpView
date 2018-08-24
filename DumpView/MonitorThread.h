@@ -48,18 +48,18 @@ private:
 
 public:
 
-    MonitorThread(wxEvtHandler* pParent):
+    MonitorThread(wxEvtHandler* pParent, ComPortSetting &settings):
         wxThread(),
         m_pParent(pParent),
         m_hSerialPort(INVALID_HANDLE_VALUE),
         m_CurrentState( MONITOR_STATE_STOPPED),
         m_NextState( MONITOR_STATE_STOPPED),
         m_ErrorCode(ERROR_SUCCESS),
-        m_PortNum(1),
-        m_BaudRate(CBR_115200),
-        m_Parity(NOPARITY),
-        m_ByteSize(8),
-        m_StopBit(ONESTOPBIT)
+        m_PortNum(settings.PortNum),
+        m_BaudRate(settings.BaudRate),
+        m_Parity(settings.Parity),
+        m_ByteSize(settings.ByteSize),
+        m_StopBit(settings.StopBit)
     {}
 
     wxThread::ExitCode Entry();

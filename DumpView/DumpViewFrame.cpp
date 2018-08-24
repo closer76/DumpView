@@ -73,10 +73,16 @@ END_EVENT_TABLE()
 const int SWITCH_ON = 0;
 const int SWITCH_OFF = 1;
 
-const wxString WINDOW_WIDTH = wxT("Window Width");
-const wxString WINDOW_HEIGHT = wxT("Window Height");
-const wxString POS_X = wxT("Position X");
-const wxString POS_Y = wxT("Position Y");
+// Used for registry settings
+const wxString REG_WINDOW_WIDTH     = wxT("Window Width");
+const wxString REG_WINDOW_HEIGHT    = wxT("Window Height");
+const wxString REG_POS_X            = wxT("Position X");
+const wxString REG_POS_Y            = wxT("Position Y");
+const wxString REG_COM_NUM          = wxT("COM Number");
+const wxString REG_BAUD_RATE        = wxT("BAUD Rate");
+const wxString REG_PARITY           = wxT("Parity");
+const wxString REG_BYTE_SIZE        = wxT("ByteSize");
+const wxString REG_STOP_BIT         = wxT("StopBit");
 
 DumpViewFrame::DumpViewFrame(const wxString& title) : 
     wxFrame(NULL, wxID_ANY, title, wxDefaultPosition, wxDefaultSize, wxDEFAULT_FRAME_STYLE),
@@ -120,10 +126,18 @@ DumpViewFrame::DumpViewFrame(const wxString& title) :
 
     //------- Get size & position setting from registry
     m_pAppConfig = new wxConfig(APP_NAME);
-    m_sizeTopWindow.x = m_pAppConfig->Read( WINDOW_WIDTH, static_cast<int>(800));
-    m_sizeTopWindow.y = m_pAppConfig->Read( WINDOW_HEIGHT, static_cast<int>(540));
-    pos_x = m_pAppConfig->Read( POS_X, static_cast<int>(-1));
-    pos_y = m_pAppConfig->Read( POS_Y, static_cast<int>(-1));
+    m_sizeTopWindow.x = m_pAppConfig->Read( REG_WINDOW_WIDTH, static_cast<int>(800));
+    m_sizeTopWindow.y = m_pAppConfig->Read( REG_WINDOW_HEIGHT, static_cast<int>(540));
+    pos_x = m_pAppConfig->Read( REG_POS_X, static_cast<int>(-1));
+    pos_y = m_pAppConfig->Read( REG_POS_Y, static_cast<int>(-1));
+
+    //------- Get port settings from registry
+    ComPortSetting settings;
+    settings.PortNum = m_pAppConfig->Read( REG_COM_NUM, static_cast<int>(1));
+    settings.BaudRate = m_pAppConfig->Read( REG_BAUD_RATE, static_cast<int>(CBR_115200));
+    settings.Parity = m_pAppConfig->Read( REG_PARITY, static_cast<long>(NOPARITY));
+    settings.ByteSize = m_pAppConfig->Read( REG_BYTE_SIZE, static_cast<int>(8));
+    settings.StopBit = m_pAppConfig->Read( REG_STOP_BIT, static_cast<long>(ONESTOPBIT));
 
     SetSize( m_sizeTopWindow);
     if ( pos_x >= 0 && pos_y >= 0)
@@ -132,7 +146,7 @@ DumpViewFrame::DumpViewFrame(const wxString& title) :
     }
 
     //------- Create the thread that monitors serial port
-    m_PortMonitor = new MonitorThread(this);
+    m_PortMonitor = new MonitorThread(this, settings);
     
     if (m_PortMonitor->Create() != wxTHREAD_NO_ERROR || m_PortMonitor->Run() != wxTHREAD_NO_ERROR)
     {
@@ -273,6 +287,29 @@ void DumpViewFrame::OnResize(wxSizeEvent& event)
 
 void DumpViewFrame::OnClose(wxCloseEvent& event)
 {
+    // Save size/position and options to registry
+    if ( m_pAppConfig)
+    {
+        m_pAppConfig->Write(REG_WINDOW_WIDTH, static_cast<int>(m_sizeTopWindow.x));
+        m_pAppConfig->Write(REG_WINDOW_HEIGHT, static_cast<int>(m_sizeTopWindow.y));
+        m_pAppConfig->Write(REG_POS_X, static_cast<int>(GetPosition().x));
+        m_pAppConfig->Write(REG_POS_Y, static_cast<int>(GetPosition().y));
+
+        if ( m_PortMonitor)
+        {
+            ComPortSetting settings = {0};
+            m_PortMonitor->GetPortSettings( settings);
+            m_pAppConfig->Write(REG_COM_NUM , static_cast<int>(settings.PortNum ));
+            m_pAppConfig->Write(REG_BAUD_RATE , static_cast<int>(settings.BaudRate ));
+            m_pAppConfig->Write(REG_PARITY , static_cast<int>(settings.Parity ));
+            m_pAppConfig->Write(REG_BYTE_SIZE , static_cast<int>(settings.ByteSize ));
+            m_pAppConfig->Write(REG_STOP_BIT , static_cast<int>(settings.StopBit ));
+        }
+
+        delete m_pAppConfig;
+        m_pAppConfig = 0;
+    }
+
     if ( m_PortMonitor && m_PortMonitor->IsAlive())
     {
         m_PortMonitor->Delete();
@@ -288,17 +325,6 @@ void DumpViewFrame::OnClose(wxCloseEvent& event)
     {
         delete m_fpLog;
         m_fpLog = 0;
-    }
-
-    if ( m_pAppConfig)
-    {
-        m_pAppConfig->Write(WINDOW_WIDTH, static_cast<int>(m_sizeTopWindow.x));
-        m_pAppConfig->Write(WINDOW_HEIGHT, static_cast<int>(m_sizeTopWindow.y));
-        m_pAppConfig->Write(POS_X, static_cast<int>(GetPosition().x));
-        m_pAppConfig->Write(POS_Y, static_cast<int>(GetPosition().y));
-
-        delete m_pAppConfig;
-        m_pAppConfig = 0;
     }
 
     if ( m_pMouseEvtHandler)

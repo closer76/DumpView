@@ -22,6 +22,8 @@ enum
     ID_OUTPUT_BOX   = 1000
 };
 
+DECLARE_EVENT_TYPE( wxEVT_THREAD_CALLBACK, -1)
+
 class DumpViewFrame : public wxFrame
 {
 public:
@@ -40,6 +42,7 @@ private:
 
     void OnClose(wxCloseEvent& event);
     void OnDataReady(void);
+    void OnThreadCallback(wxCommandEvent& evt);
 
     bool m_InitSerialPort( int port_number, wxString& err_message);
     void m_ReleaseSerialPort( int port_number);

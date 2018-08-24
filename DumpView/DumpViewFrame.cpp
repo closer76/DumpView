@@ -4,9 +4,12 @@
 #include <wx/sizer.h>
 #include <process.h>
 
+DEFINE_EVENT_TYPE( wxEVT_THREAD_CALLBACK)
+
 BEGIN_EVENT_TABLE(DumpViewFrame, wxFrame)
     ////Manual Code Start
     EVT_CLOSE(DumpViewFrame::OnClose)
+    EVT_COMMAND( wxID_ANY, wxEVT_THREAD_CALLBACK, DumpViewFrame::OnThreadCallback)
     ////Manual Code End
 END_EVENT_TABLE()
 
@@ -147,9 +150,19 @@ void DumpViewFrame::OnClose(wxCloseEvent& event)
     event.Skip();
 }
 
+void DumpViewFrame::OnThreadCallback(wxCommandEvent& evt)
+{
+    std::string data;
+    if ( S_OK == m_SerialHelper.ReadAvailable( data))
+    {
+        m_OutputBox->AppendText(wxString(data.c_str(), *wxConvCurrent));
+    }
+}
+
 unsigned __stdcall DumpViewFrame::m_threadMonitor( void* app_void)
 {
     DumpViewFrame* app = (DumpViewFrame*) app_void;
+    wxCommandEvent evt(wxEVT_THREAD_CALLBACK, wxID_ANY);
     HANDLE events[2] = {0};
     DWORD wait;
 
@@ -166,7 +179,7 @@ unsigned __stdcall DumpViewFrame::m_threadMonitor( void* app_void)
             break;
 
         case WAIT_OBJECT_0 + 1:
-            app->OnDataReady();
+            app->AddPendingEvent(evt);
             ResetEvent(events[1]);
             break;
         }

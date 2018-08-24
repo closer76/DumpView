@@ -277,7 +277,7 @@ void DumpViewFrame::m_InitSizedComponents(wxWindow* parent)
     	_("On"),
     	_("Off")
     };
-    m_radioSwitch = new wxRadioBox(parent, ID_RADIOBOX_SWITCH, _("Port Switch"), wxDefaultPosition, wxSize(82,71), 2, __wxRadioBoxChoices_1, 1, 0, wxDefaultValidator, _T("ID_RADIOBOX_SWITCH"));
+    m_radioSwitch = new wxRadioBox(parent, ID_RADIOBOX_SWITCH, _("Port Switch"), wxDefaultPosition, wxDefaultSize, 2, __wxRadioBoxChoices_1, 1, 0, wxDefaultValidator, _T("ID_RADIOBOX_SWITCH"));
     BoxSizer2->Add(m_radioSwitch, 0, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
     BoxSizer8 = new wxBoxSizer(wxVERTICAL);
     BoxSizer7 = new wxBoxSizer(wxHORIZONTAL);
@@ -485,9 +485,43 @@ void DumpViewFrame::OnThreadCallback(wxCommandEvent& evt)
         if ( data_read >= XFER_BUF_SIZE)
             data_read = XFER_BUF_SIZE - 1;
 
-        m_textBuffer[data_read] = 0;
-        if ( data_read > 0)
+		if ( data_read > 0)
         {
+			//+++ Filter out all null charaters.
+			int cur_pos, null_count;
+
+			// skip copying if no null character encountered
+			for ( cur_pos = 0, null_count = 0; cur_pos < data_read; cur_pos++)
+			{
+				if ( m_textBuffer[cur_pos] == '\0')
+				{
+					null_count = 1;
+					break;
+				}
+			}
+
+			if ( null_count)
+			{
+				// there is at least one null charater in buffer, so we have to move following
+				// characters ahead.
+				for ( ++cur_pos; cur_pos < data_read; cur_pos++)
+				{
+					if ( m_textBuffer[cur_pos] == '\0')
+					{
+						++null_count;
+					}
+					else
+					{
+						m_textBuffer[cur_pos - null_count] = m_textBuffer[cur_pos];
+					}
+				}
+
+				data_read -= null_count;
+			}
+			//--- Filter out all null charaters.
+
+			m_textBuffer[data_read] = '\0';
+
             if (m_state == STATE_PAUSE)
             {
                 if ( m_iCurPauseBufSize + data_read < PAUSE_BUF_SIZE &&

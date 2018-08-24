@@ -31,7 +31,7 @@ AboutDialog::AboutDialog(wxWindow* parent,wxWindowID id,const wxPoint& pos,const
     m_imgLogo = new wxStaticBitmap(this, ID_STATICBITMAP1, bmp, wxDefaultPosition, wxDefaultSize, 0, _T("ID_STATICBITMAP1"));
 
     BoxSizer1->Add(m_imgLogo, 0, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
-    m_labelCopyright = new wxStaticText(this, ID_LABEL_COPYRIGHT, wxString::Format( _("Dump View\nVersion %s (%s-%s)\n\nKenneth Lo (closer.tw@gmail.com)\nCopyright (c) 2009"), VER, BUILD_DATE, BUILD_TIME), wxDefaultPosition, wxDefaultSize, 0, _T("ID_LABEL_COPYRIGHT"));
+    m_labelCopyright = new wxStaticText(this, ID_LABEL_COPYRIGHT, wxString::Format( _("Dump View\nVersion %s (%s-%s)\n\nKenneth Lo (closer.tw@gmail.com)\nCopyright (c) 2009-2010"), VER, BUILD_DATE, BUILD_TIME), wxDefaultPosition, wxDefaultSize, 0, _T("ID_LABEL_COPYRIGHT"));
 	BoxSizer1->Add(m_labelCopyright, 1, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
 	m_buttonOk = new wxButton(this, wxID_OK, _("OK"), wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, _T("wxID_OK"));
 	BoxSizer1->Add(m_buttonOk, 0, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);

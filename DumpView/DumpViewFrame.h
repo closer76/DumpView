@@ -59,8 +59,11 @@ private:
     int m_iCurPauseBufSize;
     unsigned char* m_bufPause;
 
+	long m_iLastLength;
+
     wxString m_strDefaultPath;
     wxString m_strDumpFilename;
+	wxString m_strLastLength;
 
 	LogDirSettings* m_LogDirSettings;
 
@@ -103,6 +106,9 @@ private:
     wxCheckBox* m_checkboxCaseSensitive;
 	wxButton* m_buttonTranslateGuid;
 
+	wxCheckBox* m_checkboxShowLastLogs;
+	wxTextCtrl* m_textLastLogLength;
+
 
     // ID for GUI controls
     static const long ID_RADIOBOX_SWITCH;
@@ -130,6 +136,8 @@ private:
 	static const long ID_MENU_LOADGUIDDEF;
     static const long ID_MENU_ABOUT;
     static const long ID_STATUSBAR1;
+	static const long ID_CHECKBOX_SHOW_LAST_LOGS;
+	static const long ID_TEXT_LAST_LOG_LENGTH;
 
     void m_InitMenuBar(void);
     void m_InitSizedComponents(wxWindow* parent);
@@ -142,6 +150,8 @@ private:
     static wxString m_FormatErrorMessage(DWORD error_no);
 
     void m_ShowPortInfoOnStatusBar( ComPortSetting &settings);
+
+	bool m_UpdateLastLength(void);
 
     DECLARE_EVENT_TABLE();
 
@@ -173,6 +183,11 @@ public:
 
     void OnRec(wxCommandEvent& evt);            // Checkbox Record
     void OnPause(wxCommandEvent& evt);          // Checkbox Pause
+
+	void OnShowLastLogsSelected(wxCommandEvent& evt);	// Checkbox "Show Last Logs"
+	void OnLastLogLengthEntered(wxCommandEvent& evt);	// Text LastLogLength
+	void OnFocusOn(wxFocusEvent& evt);
+	void OnFocusOff(wxFocusEvent& evt);	// Text LastLogLength
 };
 
 #endif

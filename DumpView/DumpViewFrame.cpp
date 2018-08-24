@@ -40,6 +40,8 @@ const long DumpViewFrame::ID_MENU_SETFOLDER = wxNewId();
 const long DumpViewFrame::ID_MENU_LOADGUIDDEF = wxNewId();
 const long DumpViewFrame::ID_MENU_ABOUT = wxNewId();
 const long DumpViewFrame::ID_STATUSBAR1 = wxNewId();
+const long DumpViewFrame::ID_CHECKBOX_SHOW_LAST_LOGS = wxNewId();
+const long DumpViewFrame::ID_TEXT_LAST_LOG_LENGTH = wxNewId();
 
 DEFINE_EVENT_TYPE( wxEVT_THREAD_CALLBACK)
 
@@ -69,9 +71,14 @@ BEGIN_EVENT_TABLE(DumpViewFrame, wxFrame)
 
     EVT_CHECKBOX( ID_CHECKBOX_REC, DumpViewFrame::OnRec)
     EVT_CHECKBOX( ID_CHECKBOX_PAUSE, DumpViewFrame::OnPause)
+	EVT_CHECKBOX( ID_CHECKBOX_SHOW_LAST_LOGS, DumpViewFrame::OnShowLastLogsSelected)
 
     EVT_TEXT_ENTER( ID_TEXT_FIND_TARGET, DumpViewFrame::OnFind)
     EVT_TEXT_ENTER( ID_OUTPUT_BOX, DumpViewFrame::OnFind)
+	EVT_TEXT_ENTER( ID_TEXT_LAST_LOG_LENGTH, DumpViewFrame::OnLastLogLengthEntered)
+
+	EVT_SET_FOCUS( DumpViewFrame::OnFocusOn)
+	EVT_KILL_FOCUS( DumpViewFrame::OnFocusOff)
     ////Manual Code End
 END_EVENT_TABLE()
 
@@ -96,6 +103,8 @@ const wxString REG_LAST_LOG_DIR     = wxT("LastVisitedLogDir");
 const wxString REG_USE_LAST_DIR     = wxT("UseLastLogDir");
 const wxString REG_GUID_DEF_FILE	= wxT("GuidDefFile");
 const wxString REG_GUID_AUTO_LOAD	= wxT("GuidAutoLoad");
+const wxString REG_SHOW_LAST_LOGS	= wxT("ShowLastLogsOnly");
+const wxString REG_LAST_LOG_LEN		= wxT("Last Log Length");
 
 const int STATUS_COLS = 3;
 
@@ -105,6 +114,7 @@ DumpViewFrame::DumpViewFrame(const wxString& title) :
     m_fpLog(0),
     m_ResetPort(false),
     m_bufPause(0),
+	m_iLastLength(-1),
 	m_GuidDefSettings(0),
 	m_LogDirSettings(0),
     m_pAppConfig(0),
@@ -211,6 +221,14 @@ DumpViewFrame::DumpViewFrame(const wxString& title) :
 		}
 	}
 
+	//------- Get "show last logs" settings from registry
+	m_checkboxShowLastLogs->SetValue(m_pAppConfig->Read(REG_SHOW_LAST_LOGS, static_cast<long>(0)) == 1 ? true : false);
+	m_textLastLogLength->SetValue(wxString::FromDouble(m_pAppConfig->ReadDouble(REG_LAST_LOG_LEN, 1.0)));
+	if (!m_checkboxShowLastLogs->GetValue())
+	{
+		m_textLastLogLength->Disable();
+	}
+
 	//------- Create the thread that monitors serial port
     m_PortMonitor = new MonitorThread(this, settings);
     
@@ -269,7 +287,7 @@ void DumpViewFrame::m_InitMenuBar(void)
 
 void DumpViewFrame::m_InitSizedComponents(wxWindow* parent)
 {
-    wxBoxSizer* BoxSizer2, *BoxSizer3, *BoxSizer4, *BoxSizer5, *BoxSizer6, *BoxSizer7, *BoxSizer8;
+    wxBoxSizer* BoxSizer2, *BoxSizer3, *BoxSizer4, *BoxSizer5, *BoxSizer6, *BoxSizer7, *BoxSizer8, *BoxSizer9;
     wxStaticText* labelQuickSearch;
 
 
@@ -284,6 +302,7 @@ void DumpViewFrame::m_InitSizedComponents(wxWindow* parent)
     BoxSizer2->Add(m_radioSwitch, 0, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
     BoxSizer8 = new wxBoxSizer(wxVERTICAL);
     BoxSizer7 = new wxBoxSizer(wxHORIZONTAL);
+	BoxSizer9 = new wxBoxSizer(wxHORIZONTAL);
     BoxSizer4 = new wxBoxSizer(wxVERTICAL);
     m_checkboxPause = new wxCheckBox(parent, ID_CHECKBOX_PAUSE, _("Pause"), wxDefaultPosition, wxSize(52,22), 0, wxDefaultValidator, _T("ID_CHECKBOX_PAUSE"));
     m_checkboxPause->SetValue(false);
@@ -297,6 +316,14 @@ void DumpViewFrame::m_InitSizedComponents(wxWindow* parent)
     m_buttonClear = new wxButton(parent, ID_BUTTON_CLEAR, _("Clear logs"), wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, _T("ID_BUTTON_CLEAR"));
     BoxSizer7->Add(m_buttonClear, 1, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
     BoxSizer8->Add(BoxSizer7, 1, wxALL|wxEXPAND|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 0);
+	m_checkboxShowLastLogs = new wxCheckBox(parent, ID_CHECKBOX_SHOW_LAST_LOGS, wxT("Display only last "));
+	BoxSizer9->Add(m_checkboxShowLastLogs, 0, wxLEFT|wxALIGN_CENTER_VERTICAL, 10);
+	m_textLastLogLength = new wxTextCtrl(parent, ID_TEXT_LAST_LOG_LENGTH, wxEmptyString, wxDefaultPosition, wxSize(60, -1), wxTE_RIGHT | wxTE_PROCESS_ENTER);
+	m_textLastLogLength->Bind(wxEVT_SET_FOCUS, &DumpViewFrame::OnFocusOn, this);
+	m_textLastLogLength->Bind(wxEVT_KILL_FOCUS, &DumpViewFrame::OnFocusOff, this);
+	BoxSizer9->Add(m_textLastLogLength, 0, wxALIGN_CENTER_VERTICAL, 5);
+	BoxSizer9->Add(new wxStaticText(parent, wxID_ANY, "MB of logs."), 0, wxRIGHT | wxALIGN_CENTER_VERTICAL, 5);
+	BoxSizer8->Add(BoxSizer9);
     BoxSizer6 = new wxBoxSizer(wxHORIZONTAL);
     labelQuickSearch = new wxStaticText(parent, ID_STATICTEXT1, _("Quick Search:"), wxDefaultPosition, wxSize(88,14), wxALIGN_RIGHT, _T("ID_STATICTEXT1"));
     BoxSizer6->Add(labelQuickSearch, 0, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
@@ -448,6 +475,17 @@ void DumpViewFrame::OnClose(wxCloseEvent& event)
 			m_GuidDefSettings = 0;
 		}
 
+		m_pAppConfig->Write(REG_SHOW_LAST_LOGS, static_cast<long>(m_checkboxShowLastLogs->GetValue() ? 1 : 0));
+		double dblTmp;
+		if (m_textLastLogLength->GetValue().ToDouble(&dblTmp))
+		{
+			m_pAppConfig->Write(REG_LAST_LOG_LEN, static_cast<double>(dblTmp));
+		}
+		else
+		{
+			m_pAppConfig->Write(REG_LAST_LOG_LEN, static_cast<double>(0));
+		}
+
         delete m_pAppConfig;
         m_pAppConfig = 0;
     }
@@ -547,6 +585,14 @@ void DumpViewFrame::OnThreadCallback(wxCommandEvent& evt)
             else
             {
                 m_OutputBox->AppendText(wxString(m_wcTextBuffer));
+				if (m_iLastLength > 0)
+				{
+					auto lastPosition = m_OutputBox->GetLastPosition();
+					if (lastPosition > m_iLastLength)
+					{
+						m_OutputBox->Remove(0, lastPosition - m_iLastLength);
+					}
+				}
 #ifdef USE_RICH_EDIT
                 m_statusBar1->SetStatusText( wxString::Format( wxT("(%d,%d,%d)"),
                     m_OutputBox->GetScrollPos( wxVERTICAL),
@@ -1006,4 +1052,73 @@ void DumpViewFrame::OnPause(wxCommandEvent& evt)
 void DumpViewFrame::OnClear(wxCommandEvent& evt)
 {
     m_OutputBox->Clear();
+}
+
+bool DumpViewFrame::m_UpdateLastLength(void)
+{
+	double dblTmp;
+	if (m_textLastLogLength->GetValue().ToDouble(&dblTmp))
+	{
+		m_iLastLength = static_cast<long>(dblTmp * 1024);
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
+void DumpViewFrame::OnLastLogLengthEntered(wxCommandEvent& evt)
+{
+	if (m_UpdateLastLength())
+	{
+		m_strLastLength = m_textLastLogLength->GetValue();
+	}
+	else
+	{
+		m_textLastLogLength->SetValue(m_strLastLength);
+	}
+}
+
+void DumpViewFrame::OnFocusOn(wxFocusEvent& evt)
+{
+	wxObject* obj = evt.GetEventObject();
+
+	// Backup old setting
+	if (obj && obj == m_textLastLogLength)
+	{
+		m_strLastLength = m_textLastLogLength->GetValue();
+	}
+
+	evt.Skip();
+}
+
+void DumpViewFrame::OnFocusOff(wxFocusEvent& evt)
+{
+	wxObject* obj = evt.GetEventObject();
+
+	if (obj && obj == m_textLastLogLength)
+	{
+		m_textLastLogLength->SetValue(m_strLastLength);
+	}
+
+	evt.Skip();
+}
+
+void DumpViewFrame::OnShowLastLogsSelected(wxCommandEvent& evt)
+{
+	if (m_checkboxShowLastLogs->GetValue())
+	{
+		m_textLastLogLength->Enable();
+		if (!m_UpdateLastLength())
+		{
+			m_iLastLength = 0;
+			m_textLastLogLength->SetValue(wxEmptyString);
+		}
+	}
+	else
+	{
+		m_iLastLength = 0;
+		m_textLastLogLength->Disable();
+	}
 }

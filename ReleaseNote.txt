@@ -4,6 +4,12 @@
 ===============================================================================
 
 -------------------------------------------------------------------------------
+Version 1.11 - Aug. 24, 2018
+
+1. Fixed the bug that COM port number greater than 16 cannot be initialized
+   properly.
+
+-------------------------------------------------------------------------------
 Version 1.10 - Feb. 22, 2016
 
 1. Added function to flush old and retain only last N lines of log.

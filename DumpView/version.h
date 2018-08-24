@@ -6,7 +6,7 @@
 const wxString APP_NAME = wxT("DumpView");
 const wxString WINDOW_TITLE = wxT("Dump View");
 
-const wxString VER = wxT("1.10");
+const wxString VER = wxT("1.11");
 const wxString BUILD_DATE = wxT(__DATE__);
 const wxString BUILD_TIME = wxT(__TIME__);
 

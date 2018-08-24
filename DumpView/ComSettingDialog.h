@@ -8,6 +8,7 @@
 #include <wx/button.h>
 //*)
 
+#include <list>
 #include "ComPortSetting.h"
 
 class ComSettingDialog: public wxDialog
@@ -34,6 +35,8 @@ class ComSettingDialog: public wxDialog
 
         void SetPortSettings( ComPortSetting &settings);
         void GetPortSettings( ComPortSetting &settings);
+
+		void SetAvailableComPorts( std::list<int>* port_list);
 
 	protected:
 

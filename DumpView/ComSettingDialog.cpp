@@ -124,18 +124,45 @@ int StopBitTable [] =
     -1
 };
 
+static int ParseComPortName( const wxString& name)
+{
+	int result = 0;
+	for ( int i = 3; i <= 4 && i < (int)name.length(); i++)
+	{
+		if ( ::wxIsdigit(name[i]))
+		{
+			result *= 10;
+			result += name[i] - wxT('0');
+		}
+	}
+
+	return result;
+}
+
 void ComSettingDialog::SetPortSettings( ComPortSetting &settings)
 {
     int i;
 
     // Port
-    if ( settings.PortNum >= 1 && settings.PortNum <= 8)
+	for ( i = 0; i < (int)m_choicePortNumber->GetCount(); i++)
+	{
+		if ( settings.PortNum == ParseComPortName( m_choicePortNumber->GetString(i)))
+		{
+			m_choicePortNumber->SetSelection(i);
+			break;
+		}
+	}
+
+    if ( i == m_choicePortNumber->GetCount())
     {
-        m_choicePortNumber->SetSelection( settings.PortNum - 1);
-    }
-    else
-    {
-        m_choicePortNumber->SetSelection( 1 - 1);        // Default: COM1
+		if ( settings.PortNum < 1)
+		{
+			m_choicePortNumber->SetSelection(0);
+		}
+		else
+		{
+			m_choicePortNumber->Append( wxString::Format( wxT("COM%d (Not Available)"), settings.PortNum));
+		}
     }
 
     // Byte Size
@@ -180,13 +207,13 @@ void ComSettingDialog::SetPortSettings( ComPortSetting &settings)
             break;
         }
     }
-
 }
 
 void ComSettingDialog::GetPortSettings( ComPortSetting &settings)
 {
     // Port
-    settings.PortNum = m_choicePortNumber->GetSelection() + 1;
+    //settings.PortNum = m_choicePortNumber->GetSelection() + 1;
+	settings.PortNum = ParseComPortName(m_choicePortNumber->GetString( m_choicePortNumber->GetSelection()));
 
     // Byte Size
     settings.ByteSize = m_choiceByteSize->GetSelection() + 5;
@@ -199,4 +226,21 @@ void ComSettingDialog::GetPortSettings( ComPortSetting &settings)
 
     // Stop bit
     settings.StopBit = StopBitTable[m_choiceStopBit->GetSelection()];
+}
+
+void ComSettingDialog::SetAvailableComPorts( std::list<int>* port_list)
+{
+	m_choicePortNumber->Clear();
+
+	if ( port_list->size() == 0)
+	{
+		m_choicePortNumber->Append( wxT("COM1 (Not Available)"));
+	}
+	else
+	{
+		for ( std::list<int>::const_iterator itor = port_list->begin(); itor != port_list->end(); itor++)
+		{
+			m_choicePortNumber->Append( wxString::Format( wxT("COM%d"), *itor));
+		}
+	}
 }

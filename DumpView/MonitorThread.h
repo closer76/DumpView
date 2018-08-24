@@ -5,6 +5,8 @@
 #include "wx/thread.h"
 #include "wx/event.h"
 
+#include <list>
+
 #include "ComPortSetting.h"
 
 const int XFER_BUF_SIZE = 8192;
@@ -39,6 +41,8 @@ private:
     int m_ByteSize;
     int m_StopBit;
 
+	std::list<int> m_AvailComPorts;
+
     static wxMutex s_mutexDataBuffer;
     static unsigned char s_buf[XFER_BUF_SIZE];
     static int s_nBufStartPos;
@@ -59,7 +63,8 @@ public:
         m_BaudRate(settings.BaudRate),
         m_Parity(settings.Parity),
         m_ByteSize(settings.ByteSize),
-        m_StopBit(settings.StopBit)
+        m_StopBit(settings.StopBit),
+		m_AvailComPorts()
     {}
 
     wxThread::ExitCode Entry();
@@ -69,6 +74,8 @@ public:
     void StartMonitoring(void)  { m_NextState = MONITOR_STATE_RUNNING;}
     void StopMonitoring(void)   { m_NextState = MONITOR_STATE_STOPPED;}
     bool IsMonitoring(void)     { return (m_CurrentState == MONITOR_STATE_RUNNING);}
+
+	std::list<int>* GetAvailableComPorts(int max = 16);
 
     void GetPortSettings( ComPortSetting& settings);
     void SetPortSettings( const ComPortSetting& settings);

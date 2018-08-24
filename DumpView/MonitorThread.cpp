@@ -194,6 +194,25 @@ int MonitorThread::CopyBuffer(unsigned char* out_buf)
     return count;
 }
 
+std::list<int>* MonitorThread::GetAvailableComPorts(int max)
+{
+	// Rescan available com ports
+	COMMCONFIG cc;
+	DWORD size = sizeof(cc);
+
+	m_AvailComPorts.clear();
+
+	for ( int i = 0; i <= max; i++)
+	{
+		if ( ::GetDefaultCommConfig( wxString::Format( wxT("COM%d"), i).c_str(), &cc, &size))
+		{
+			m_AvailComPorts.push_back(i);
+		}
+	}
+
+	return &m_AvailComPorts;
+}
+
 void MonitorThread::GetPortSettings(ComPortSetting &settings)
 {
     settings.PortNum = m_PortNum;

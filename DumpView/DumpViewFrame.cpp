@@ -709,6 +709,7 @@ void DumpViewFrame::OnComPortSetting(wxCommandEvent &evt)
     ComPortSetting result = {0};
 
     m_PortMonitor->GetPortSettings( setting);
+	dlg->SetAvailableComPorts( m_PortMonitor->GetAvailableComPorts());
     dlg->SetPortSettings( setting);
 
     if ( dlg->ShowModal() == wxID_OK)

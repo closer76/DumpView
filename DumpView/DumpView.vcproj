@@ -184,14 +184,6 @@
 				RelativePath=".\MonitorThread.cpp"
 				>
 			</File>
-			<File
-				RelativePath=".\SerialBuffer.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\SerialCommHelper.cpp"
-				>
-			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -208,14 +200,6 @@
 			</File>
 			<File
 				RelativePath=".\MonitorThread.h"
-				>
-			</File>
-			<File
-				RelativePath=".\SerialBuffer.h"
-				>
-			</File>
-			<File
-				RelativePath=".\SerialCommHelper.h"
 				>
 			</File>
 		</Filter>

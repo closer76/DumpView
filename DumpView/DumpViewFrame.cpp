@@ -4,6 +4,26 @@
 #include <wx/sizer.h>
 #include <process.h>
 
+
+unsigned char DumpViewFrame::m_textBuffer[BUF_SIZE] = {0};
+
+const long DumpViewFrame::ID_BUTTON_START = wxNewId();
+const long DumpViewFrame::ID_BUTTON_STOP = wxNewId();
+const long DumpViewFrame::ID_BUTTON_REC = wxNewId();
+const long DumpViewFrame::ID_BUTTON_PAUSE = wxNewId();
+const long DumpViewFrame::ID_BUTTON5 = wxNewId();
+const long DumpViewFrame::ID_TEXT_DEFAULT_FOLDER = wxNewId();
+const long DumpViewFrame::ID_OUTPUT_BOX = wxNewId();
+const long DumpViewFrame::ID_MENU_SAVEAS = wxNewId();
+const long DumpViewFrame::ID_MENU_QUIT = wxNewId();
+const long DumpViewFrame::ID_MENU_FIND = wxNewId();
+const long DumpViewFrame::ID_MENU_COPY_ALL = wxNewId();
+const long DumpViewFrame::ID_MENU_COPY = wxNewId();
+const long DumpViewFrame::ID_MENU_SETCOM = wxNewId();
+const long DumpViewFrame::ID_MENU_SETFONT = wxNewId();
+const long DumpViewFrame::ID_MENU_SETFOLDER = wxNewId();
+const long DumpViewFrame::ID_MENU_ABOUT = wxNewId();
+
 DEFINE_EVENT_TYPE( wxEVT_THREAD_CALLBACK)
 
 BEGIN_EVENT_TABLE(DumpViewFrame, wxFrame)
@@ -16,9 +36,7 @@ END_EVENT_TABLE()
 DumpViewFrame::DumpViewFrame(const wxString& title) : 
     wxFrame(NULL, wxID_ANY, title),
     m_OutputBox(0),
-    m_hSerialPort(INVALID_HANDLE_VALUE),
-    m_SerialHelper(),
-    m_hThreadMonitor(INVALID_HANDLE_VALUE)
+    m_PortMonitor(0)
 {
     //------- Set up UI
     m_OutputBox = new wxRichTextCtrl( this, ID_OUTPUT_BOX, wxEmptyString, wxDefaultPosition, wxSize(160,120), wxRE_READONLY | wxRE_MULTILINE);
@@ -30,170 +48,37 @@ DumpViewFrame::DumpViewFrame(const wxString& title) :
     SetSizer(topSizer);
     topSizer->SetSizeHints(this);
 
-    //-------- Initialize serial port
-    /*
-    wxString err_msg;
-    if ( m_InitSerialPort(1, err_msg))
+    //------- Create the thread that monitors serial port
+    m_PortMonitor = new MonitorThread(this);
+    
+    if (m_PortMonitor->Create() != wxTHREAD_NO_ERROR || m_PortMonitor->Run() != wxTHREAD_NO_ERROR)
     {
-        m_OutputBox->AppendText( wxT("COM1 initialize OK.\n"));
+        delete m_PortMonitor;
+        m_PortMonitor = 0;
     }
-    else
-    {
-        m_OutputBox->AppendText( wxString::Format( wxT("There might be something wrong: %s\n"), err_msg));
-    }
-    */
-
-    ::InitializeCriticalSection( &m_CriticalSection);
-
-    if ( S_OK == m_SerialHelper.Init( wxT("COM1"), 115200))
-    {
-        m_hTerminate = ::CreateEvent( 0, 0, 0, 0);
-
-        m_hThreadMonitor = (HANDLE)_beginthreadex( 0, 0, &DumpViewFrame::m_threadMonitor, (void*) this, 0, 0);
-
-        m_SerialHelper.Start();
-    }
-}
-
-bool DumpViewFrame::m_InitSerialPort( int port_number, wxString& error_message)
-{
-    wxString port_name = wxT("COM1");
-    error_message = wxT("");
-
-    wxChar err_str[128];
-
-    err_str[0] = wxT('\0');
-
-    m_hSerialPort = ::CreateFile(
-        port_name.c_str(),
-        GENERIC_READ | GENERIC_WRITE,
-        0,
-        0,
-        OPEN_EXISTING,
-        FILE_FLAG_OVERLAPPED,
-        0);
-
-    if ( m_hSerialPort == INVALID_HANDLE_VALUE)
-    {
-        error_message = m_GetErrorString(::GetLastError());
-        return false;
-    }
-
-    DCB dcb = {0};
-    dcb.DCBlength = sizeof(DCB);
-
-    if ( !::GetCommState( m_hSerialPort, &dcb))
-    {
-        error_message = m_GetErrorString(::GetLastError());
-        return false;
-    }
-
-    dcb.BaudRate = CBR_115200;
-    dcb.ByteSize = 8;
-    dcb.Parity = NOPARITY;
-    dcb.StopBits = ONESTOPBIT;
-
-    if ( !::SetCommState( m_hSerialPort, &dcb))
-    {
-        error_message = m_GetErrorString(::GetLastError());
-        return false;
-    }
-
-    return true;
-}
-
-void DumpViewFrame::m_ReleaseSerialPort( int port_number)
-{
-    if ( m_hSerialPort != INVALID_HANDLE_VALUE)
-    {
-        CloseHandle( m_hSerialPort);
-        m_hSerialPort = INVALID_HANDLE_VALUE;
-    }
-
-    m_SerialHelper.UnInit();
-}
-
-wxString DumpViewFrame::m_GetErrorString( DWORD errId)
-{
-    const int BUF_LEN = 128;
-    wxChar err_str[BUF_LEN];
-
-    ::FormatMessage(
-        FORMAT_MESSAGE_FROM_SYSTEM,
-        0,
-        errId,
-        0,
-        err_str,
-        BUF_LEN,
-        0);
-
-    return wxString(err_str);
 }
 
 void DumpViewFrame::OnClose(wxCloseEvent& event)
 {
-    if ( m_hThreadMonitor != INVALID_HANDLE_VALUE)
+    if ( m_PortMonitor && m_PortMonitor->IsAlive())
     {
-        m_SerialHelper.Stop();
-
-        SetEvent( m_hTerminate);
-        WaitForSingleObject( m_hThreadMonitor, INFINITE);
-
-        CloseHandle( m_hThreadMonitor);
-        m_hThreadMonitor = INVALID_HANDLE_VALUE;
-
-        m_SerialHelper.UnInit();
+        m_PortMonitor->Delete();
     }
     delete m_OutputBox;
-//    m_ReleaseSerialPort(1);
 
     event.Skip();
 }
 
 void DumpViewFrame::OnThreadCallback(wxCommandEvent& evt)
 {
-    std::string data;
-    if ( S_OK == m_SerialHelper.ReadAvailable( data))
+//    std::string data;
+    int data_read = m_PortMonitor->CopyBuffer(m_textBuffer);
+    if ( data_read >= BUF_SIZE)
+        data_read = BUF_SIZE - 1;
+
+    m_textBuffer[data_read] = 0;
+    if ( data_read > 0)
     {
-        m_OutputBox->AppendText(wxString(data.c_str(), *wxConvCurrent));
-    }
-}
-
-unsigned __stdcall DumpViewFrame::m_threadMonitor( void* app_void)
-{
-    DumpViewFrame* app = (DumpViewFrame*) app_void;
-    wxCommandEvent evt(wxEVT_THREAD_CALLBACK, wxID_ANY);
-    HANDLE events[2] = {0};
-    DWORD wait;
-
-    events[0] = app->m_hTerminate;
-    events[1] = app->m_SerialHelper.GetWaitForEvent();
-
-    while (true)
-    {
-        wait = ::WaitForMultipleObjects( 2, events, false, INFINITE);
-        switch (wait)
-        {
-        case WAIT_OBJECT_0:
-            ::_endthreadex(0);
-            break;
-
-        case WAIT_OBJECT_0 + 1:
-            app->AddPendingEvent(evt);
-            ResetEvent(events[1]);
-            break;
-        }
-    }
-    return 0;
-}
-
-void DumpViewFrame::OnDataReady(void)
-{
-    std::string data;
-    if ( S_OK == m_SerialHelper.ReadAvailable( data))
-    {
-        ::EnterCriticalSection( &m_CriticalSection);
-        m_OutputBox->AppendText(wxString(data.c_str(), *wxConvCurrent));
-        ::LeaveCriticalSection( &m_CriticalSection);
+        m_OutputBox->AppendText(wxString((char*)m_textBuffer, *wxConvCurrent));
     }
 }

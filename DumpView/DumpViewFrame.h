@@ -16,41 +16,46 @@
 
 #include <wx/richtext/richtextctrl.h>
 #include "SerialCommHelper.h"
-
-enum
-{
-    ID_OUTPUT_BOX   = 1000
-};
+#include "MonitorThread.h"
 
 DECLARE_EVENT_TYPE( wxEVT_THREAD_CALLBACK, -1)
 
 class DumpViewFrame : public wxFrame
 {
-public:
-    DumpViewFrame(const wxString& title);
-
 private:
     wxRichTextCtrl* m_OutputBox;
-    HANDLE m_hSerialPort;
-    CSerialCommHelper m_SerialHelper;
+    MonitorThread* m_PortMonitor;
 
-    HANDLE m_hTerminate;
-    HANDLE m_hRxDataReady;
-    HANDLE m_hThreadMonitor;
+    static unsigned char m_textBuffer[BUF_SIZE];
 
-    CRITICAL_SECTION m_CriticalSection;
+    // ID for GUI controls
+    static const long ID_BUTTON_START;
+    static const long ID_BUTTON_STOP;
+    static const long ID_BUTTON_REC;
+    static const long ID_BUTTON_PAUSE;
+    static const long ID_BUTTON5;
+    static const long ID_TEXT_DEFAULT_FOLDER;
+    static const long ID_OUTPUT_BOX;
+    static const long ID_MENU_SAVEAS;
+    static const long ID_MENU_QUIT;
+    static const long ID_MENU_FIND;
+    static const long ID_MENU_COPY_ALL;
+    static const long ID_MENU_COPY;
+    static const long ID_MENU_SETCOM;
+    static const long ID_MENU_SETFONT;
+    static const long ID_MENU_SETFOLDER;
+    static const long ID_MENU_ABOUT;
+    static const long ID_STATUSBAR1;
+
+    DECLARE_EVENT_TABLE();
+
+public:
+    DumpViewFrame(const wxString& title);
 
     void OnClose(wxCloseEvent& event);
     void OnDataReady(void);
     void OnThreadCallback(wxCommandEvent& evt);
 
-    bool m_InitSerialPort( int port_number, wxString& err_message);
-    void m_ReleaseSerialPort( int port_number);
-    wxString m_GetErrorString( DWORD errId);
-
-    static unsigned __stdcall m_threadMonitor(void* app);
-
-    DECLARE_EVENT_TABLE();
 };
 
 #endif

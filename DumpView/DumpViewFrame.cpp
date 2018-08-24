@@ -12,7 +12,8 @@
 //#include <process.h>
 
 
-unsigned char DumpViewFrame::m_textBuffer[XFER_BUF_SIZE] = {0};
+char DumpViewFrame::m_textBuffer[XFER_BUF_SIZE] = {0};
+wchar_t DumpViewFrame::m_wcTextBuffer[XFER_BUF_SIZE] = {0};
 
 const long DumpViewFrame::ID_RADIOBOX_SWITCH = wxNewId();
 const long DumpViewFrame::ID_CHECKBOX_PAUSE = wxNewId();
@@ -522,6 +523,9 @@ void DumpViewFrame::OnThreadCallback(wxCommandEvent& evt)
 
 			m_textBuffer[data_read] = '\0';
 
+			// Convert manually because wxWidgets would drop result string if convertion failed.
+			::MultiByteToWideChar( CP_ACP, 0, (LPCSTR)m_textBuffer, -1, m_wcTextBuffer, XFER_BUF_SIZE);
+
             if (m_state == STATE_PAUSE)
             {
                 if ( m_iCurPauseBufSize + data_read < PAUSE_BUF_SIZE &&
@@ -539,7 +543,7 @@ void DumpViewFrame::OnThreadCallback(wxCommandEvent& evt)
             }
             else
             {
-                m_OutputBox->AppendText(wxString((char*)m_textBuffer, *wxConvCurrent));
+                m_OutputBox->AppendText(wxString(m_wcTextBuffer));
 #ifdef USE_RICH_EDIT
                 m_statusBar1->SetStatusText( wxString::Format( wxT("(%d,%d,%d)"),
                     m_OutputBox->GetScrollPos( wxVERTICAL),

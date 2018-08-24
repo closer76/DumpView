@@ -1,16 +1,17 @@
-#ifndef __MONITOR_THREAD_H__
-#define __MONITOR_THREAD_H__
+#ifndef _FAKE_MONITOR_THREAD_H_
+#define _FAKE_MONITOR_THREAD_H_
 
 #include "windows.h"
 #include "wx/thread.h"
 #include "wx/event.h"
+#include <wx/wfstream.h>
+#include "wx/timer.h"
 
 #include <list>
 
 #include "ComPortSetting.h"
 
-const int XFER_BUF_SIZE = 8192;
-
+/*
 enum {
     MONITOR_STATE_STOPPED,
     MONITOR_STATE_RUNNING
@@ -24,50 +25,47 @@ enum {
     MONITOR_EVENT_TYPE_TERMINATED,
     MONITOR_EVENT_TYPE_INIT_FAILED
 };
+*/
 
-class MonitorThread :
-    public wxThread
+#include "MonitorThread.h"
+
+class FakeMonitorThread :
+	public wxThread,
+	public wxTimer
 {
-private:
     wxEvtHandler* m_pParent;
-    HANDLE m_hSerialPort;
+	wxWindow* m_pParentWnd;
     int m_CurrentState;
     int m_NextState;
     DWORD m_ErrorCode;
 
-    int m_PortNum;
-    DWORD m_BaudRate;
-    int m_Parity;
-    int m_ByteSize;
-    int m_StopBit;
+	wxFileInputStream* m_streamInput;
 
 	std::list<int> m_AvailComPorts;
 
-    static wxMutex s_mutexDataBuffer;
-    static char s_buf[XFER_BUF_SIZE];
-    static int s_nBufStartPos;
-
-    bool m_InitSerialPort();
-    bool m_ReleaseSerialPort();
-
 public:
-
-    MonitorThread(wxEvtHandler* pParent, ComPortSetting &settings):
+    FakeMonitorThread(wxEvtHandler* pParent, ComPortSetting &settings):
         wxThread(),
+		wxTimer(this),
         m_pParent(pParent),
-        m_hSerialPort(INVALID_HANDLE_VALUE),
+		m_pParentWnd(0),
         m_CurrentState( MONITOR_STATE_STOPPED),
         m_NextState( MONITOR_STATE_STOPPED),
         m_ErrorCode(ERROR_SUCCESS),
-        m_PortNum(settings.PortNum),
-        m_BaudRate(settings.BaudRate),
-        m_Parity(settings.Parity),
-        m_ByteSize(settings.ByteSize),
-        m_StopBit(settings.StopBit),
+		m_streamInput(0),
 		m_AvailComPorts()
-    {}
+    {
+		m_AvailComPorts.push_back(1);
+		m_AvailComPorts.push_back(6);
+	}
 
+	// derived from wxThread
     wxThread::ExitCode Entry();
+
+	// derived from wxTimer
+	virtual void Notify();
+
+	void SetParentWindow( wxWindow* pWnd) { m_pParentWnd = pWnd;}
 
     int CopyBuffer(char* out_buf);
 

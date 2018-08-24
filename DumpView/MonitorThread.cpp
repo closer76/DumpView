@@ -2,7 +2,7 @@
 #include "DumpViewFrame.h"
 
 wxMutex MonitorThread::s_mutexDataBuffer;
-unsigned char MonitorThread::s_buf[XFER_BUF_SIZE] = {0};
+char MonitorThread::s_buf[XFER_BUF_SIZE] = {0};
 int MonitorThread::s_nBufStartPos = 0;
 
 wxThread::ExitCode MonitorThread::Entry()
@@ -181,7 +181,7 @@ bool MonitorThread::m_ReleaseSerialPort()
     return true;
 }
 
-int MonitorThread::CopyBuffer(unsigned char* out_buf)
+int MonitorThread::CopyBuffer(char* out_buf)
 {
     int count;
 

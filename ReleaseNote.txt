@@ -4,6 +4,12 @@
 ===============================================================================
 
 -------------------------------------------------------------------------------
+Version 0.98 - Nov. 9, 2010
+
+1. Fixed a bug that some messages might be lost if the message contains chara-
+   cters that cannot be converted to Unicode (wide-character) properly.
+
+-------------------------------------------------------------------------------
 Version 0.97 - Nov. 4, 2010
 
 1. Fixed a bug that some messages might be lost if the message contains null

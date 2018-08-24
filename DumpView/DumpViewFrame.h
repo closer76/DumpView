@@ -50,7 +50,8 @@ private:
     MonitorThread* m_PortMonitor;
     bool m_ResetPort;
 
-    static unsigned char m_textBuffer[XFER_BUF_SIZE];
+    static char m_textBuffer[XFER_BUF_SIZE];
+	static wchar_t m_wcTextBuffer[XFER_BUF_SIZE];
 
     bool m_IsRecording;
     wxFile* m_fpLog;

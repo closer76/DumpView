@@ -7,7 +7,7 @@
 
 #include "ComPortSetting.h"
 
-const int XFER_BUF_SIZE = 4096;
+const int XFER_BUF_SIZE = 8192;
 
 enum {
     MONITOR_STATE_STOPPED,

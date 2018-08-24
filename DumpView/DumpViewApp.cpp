@@ -7,7 +7,7 @@ IMPLEMENT_APP(DumpViewApp)
 
 bool DumpViewApp::OnInit()
 {
-    DumpViewFrame* frame = new DumpViewFrame(wxT("Hello wxWidgets"));
+    DumpViewFrame* frame = new DumpViewFrame(wxT("DumpView"));
     SetTopWindow(frame);
     frame->Show(true);
 

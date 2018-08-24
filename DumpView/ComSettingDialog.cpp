@@ -5,6 +5,7 @@
 #include <wx/intl.h>
 #include <wx/string.h>
 //*)
+#include <wx/sizer.h>
 
 //(*IdInit(ComSettingDialog)
 const long ComSettingDialog::ID_LABEL_PORT_NUM = wxNewId();
@@ -28,16 +29,20 @@ END_EVENT_TABLE()
 
 ComSettingDialog::ComSettingDialog(wxWindow* parent,wxWindowID id,const wxPoint& pos,const wxSize& size)
 {
+	wxBoxSizer* top_sizer = new wxBoxSizer( wxVERTICAL);
+	wxFlexGridSizer* grid_sizer = new wxFlexGridSizer( 2, 5, 5);
+	wxBoxSizer* button_sizer = new wxBoxSizer( wxHORIZONTAL);
+
 	//(*Initialize(ComSettingDialog)
 	Create(parent, id, _("COM Port Settings..."), wxDefaultPosition, wxDefaultSize, wxDEFAULT_DIALOG_STYLE, _T("id"));
 	SetClientSize(wxSize(306,244));
 	Move(wxDefaultPosition);
-	m_labelPortNumber = new wxStaticText(this, ID_LABEL_PORT_NUM, _("Port number:"), wxPoint(32,24), wxSize(104,14), wxALIGN_RIGHT, _T("ID_LABEL_PORT_NUM"));
-	m_labelBaudRate = new wxStaticText(this, ID_LABEL_BAUD_RATE, _("Baud rate:"), wxPoint(32,56), wxSize(104,14), wxALIGN_RIGHT, _T("ID_LABEL_BAUD_RATE"));
-	m_labelByteSize = new wxStaticText(this, ID_LABEL_BYTE_SIZE, _("Byte size:"), wxPoint(32,88), wxSize(104,14), wxALIGN_RIGHT, _T("ID_LABEL_BYTE_SIZE"));
-	m_labelParity = new wxStaticText(this, ID_LABEL_PARITY, _("Parity:"), wxPoint(32,120), wxSize(104,14), wxALIGN_RIGHT, _T("ID_LABEL_PARITY"));
-	m_labelStopBit = new wxStaticText(this, ID_LABEL_STOP_BIT, _("Stop bit:"), wxPoint(32,152), wxSize(104,14), wxALIGN_RIGHT, _T("ID_LABEL_STOP_BIT"));
-	m_choicePortNumber = new wxChoice(this, ID_CHOICE_PORT_NUM, wxPoint(144,24), wxDefaultSize, 0, 0, 0, wxDefaultValidator, _T("ID_CHOICE_PORT_NUM"));
+	m_labelPortNumber = new wxStaticText(this, ID_LABEL_PORT_NUM, _("Port number:"), wxDefaultPosition, wxSize(104,14), wxALIGN_RIGHT, _T("ID_LABEL_PORT_NUM"));
+	m_labelBaudRate = new wxStaticText(this, ID_LABEL_BAUD_RATE, _("Baud rate:"), wxDefaultPosition, wxSize(104,14), wxALIGN_RIGHT, _T("ID_LABEL_BAUD_RATE"));
+	m_labelByteSize = new wxStaticText(this, ID_LABEL_BYTE_SIZE, _("Byte size:"), wxDefaultPosition, wxSize(104,14), wxALIGN_RIGHT, _T("ID_LABEL_BYTE_SIZE"));
+	m_labelParity = new wxStaticText(this, ID_LABEL_PARITY, _("Parity:"), wxDefaultPosition, wxSize(104,14), wxALIGN_RIGHT, _T("ID_LABEL_PARITY"));
+	m_labelStopBit = new wxStaticText(this, ID_LABEL_STOP_BIT, _("Stop bit:"), wxDefaultPosition, wxSize(104,14), wxALIGN_RIGHT, _T("ID_LABEL_STOP_BIT"));
+	m_choicePortNumber = new wxChoice(this, ID_CHOICE_PORT_NUM, wxDefaultPosition, wxDefaultSize, 0, 0, 0, wxDefaultValidator, _T("ID_CHOICE_PORT_NUM"));
 	m_choicePortNumber->Append(_("COM1"));
 	m_choicePortNumber->Append(_("COM2"));
 	m_choicePortNumber->Append(_("COM3"));
@@ -46,7 +51,7 @@ ComSettingDialog::ComSettingDialog(wxWindow* parent,wxWindowID id,const wxPoint&
 	m_choicePortNumber->Append(_("COM6"));
 	m_choicePortNumber->Append(_("COM7"));
 	m_choicePortNumber->Append(_("COM8"));
-	m_choiceBaudRate = new wxChoice(this, ID_CHOICE_BAUD_RATE, wxPoint(144,56), wxDefaultSize, 0, 0, 0, wxDefaultValidator, _T("ID_CHOICE_BAUD_RATE"));
+	m_choiceBaudRate = new wxChoice(this, ID_CHOICE_BAUD_RATE, wxDefaultPosition, wxDefaultSize, 0, 0, 0, wxDefaultValidator, _T("ID_CHOICE_BAUD_RATE"));
 	m_choiceBaudRate->Append(_("110"));
 	m_choiceBaudRate->Append(_("300"));
 	m_choiceBaudRate->Append(_("600"));
@@ -61,24 +66,47 @@ ComSettingDialog::ComSettingDialog(wxWindow* parent,wxWindowID id,const wxPoint&
 	m_choiceBaudRate->Append(_("115200"));
 	m_choiceBaudRate->Append(_("128000"));
 	m_choiceBaudRate->Append(_("256000"));
-	m_choiceByteSize = new wxChoice(this, ID_CHOICE_BYTE_SIZE, wxPoint(144,88), wxDefaultSize, 0, 0, 0, wxDefaultValidator, _T("ID_CHOICE_BYTE_SIZE"));
+	m_choiceByteSize = new wxChoice(this, ID_CHOICE_BYTE_SIZE, wxDefaultPosition, wxDefaultSize, 0, 0, 0, wxDefaultValidator, _T("ID_CHOICE_BYTE_SIZE"));
 	m_choiceByteSize->Append(_("5"));
 	m_choiceByteSize->Append(_("6"));
 	m_choiceByteSize->Append(_("7"));
 	m_choiceByteSize->Append(_("8"));
-	m_choiceParity = new wxChoice(this, ID_CHOICE_PARITY, wxPoint(144,120), wxDefaultSize, 0, 0, 0, wxDefaultValidator, _T("ID_CHOICE_PARITY"));
+	m_choiceParity = new wxChoice(this, ID_CHOICE_PARITY, wxDefaultPosition, wxDefaultSize, 0, 0, 0, wxDefaultValidator, _T("ID_CHOICE_PARITY"));
 	m_choiceParity->Append(_("None"));
 	m_choiceParity->Append(_("Odd"));
 	m_choiceParity->Append(_("Even"));
 	m_choiceParity->Append(_("Mark"));
 	m_choiceParity->Append(_("Space"));
-	m_choiceStopBit = new wxChoice(this, ID_CHOICE_STOP_BIT, wxPoint(144,152), wxDefaultSize, 0, 0, 0, wxDefaultValidator, _T("ID_CHOICE_STOP_BIT"));
+	m_choiceStopBit = new wxChoice(this, ID_CHOICE_STOP_BIT, wxDefaultPosition, wxDefaultSize, 0, 0, 0, wxDefaultValidator, _T("ID_CHOICE_STOP_BIT"));
 	m_choiceStopBit->Append(_("1"));
 	m_choiceStopBit->Append(_("1.5"));
 	m_choiceStopBit->Append(_("2"));
-	m_buttonOk = new wxButton(this, ID_BUTTON_OK, _("OK"), wxPoint(56,200), wxDefaultSize, 0, wxDefaultValidator, _T("ID_BUTTON_OK"));
-	m_buttonCancel = new wxButton(this, ID_BUTTON_CANCEL, _("Cancel"), wxPoint(176,200), wxDefaultSize, 0, wxDefaultValidator, _T("ID_BUTTON_CANCEL"));
+	m_buttonOk = new wxButton(this, ID_BUTTON_OK, _("OK"), wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, _T("ID_BUTTON_OK"));
+	m_buttonCancel = new wxButton(this, ID_BUTTON_CANCEL, _("Cancel"), wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, _T("ID_BUTTON_CANCEL"));
 	//*)
+
+	wxSizerFlags flags(1);
+	flags.Expand();
+	grid_sizer->Add(m_labelPortNumber, flags);
+	grid_sizer->Add(m_choicePortNumber, flags);
+	grid_sizer->Add(m_labelBaudRate,flags);
+	grid_sizer->Add(m_choiceBaudRate, flags);
+	grid_sizer->Add(m_textManualBaudRate, flags);
+	grid_sizer->Add(m_labelByteSize, flags);
+	grid_sizer->Add(m_choiceByteSize, flags);
+	grid_sizer->Add(m_labelParity, flags);
+	grid_sizer->Add(m_choiceParity, flags);
+	grid_sizer->Add(m_labelStopBit, flags);
+	grid_sizer->Add(m_choiceStopBit, flags);
+
+	button_sizer->Add( m_buttonOk, wxSizerFlags().Proportion(1).Expand().Border(wxRIGHT, 5));
+	button_sizer->Add( m_buttonCancel, wxSizerFlags().Proportion(1).Expand().Border(wxLEFT, 5));
+
+	top_sizer->Add( grid_sizer, wxSizerFlags().Expand().Border(wxALL, 10).Align(wxALIGN_CENTER_HORIZONTAL));
+	top_sizer->Add( button_sizer, wxSizerFlags().Expand().Border(wxALL, 10).Align(wxALIGN_CENTER_HORIZONTAL));
+
+	SetSizer( top_sizer);
+	top_sizer->SetSizeHints(this);
 }
 
 ComSettingDialog::~ComSettingDialog()

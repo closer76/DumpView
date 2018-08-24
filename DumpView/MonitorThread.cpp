@@ -142,7 +142,7 @@ bool MonitorThread::m_InitSerialPort()
         return false;
     }
 
-    dcb.BaudRate = m_BaudRate;
+    dcb.BaudRate = (-1 == m_BaudRate) ? (m_ManualBaudRate) : (m_BaudRate);
     dcb.ByteSize = m_ByteSize;
     dcb.Parity = m_Parity;
     dcb.StopBits = m_StopBit;
@@ -217,6 +217,7 @@ void MonitorThread::GetPortSettings(ComPortSetting &settings)
 {
     settings.PortNum = m_PortNum;
     settings.BaudRate = m_BaudRate;
+	settings.ManualBaudRate = m_ManualBaudRate;
     settings.ByteSize = m_ByteSize;
     settings.Parity = m_Parity;
     settings.StopBit = m_StopBit;
@@ -226,6 +227,7 @@ void MonitorThread::SetPortSettings(const ComPortSetting &settings)
 {
     m_PortNum = settings.PortNum;
     m_BaudRate = settings.BaudRate;
+	m_ManualBaudRate = settings.ManualBaudRate;
     m_ByteSize = settings.ByteSize;
     m_Parity = settings.Parity;
     m_StopBit = settings.StopBit;

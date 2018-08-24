@@ -85,6 +85,7 @@ const wxString REG_POS_X            = wxT("Position X");
 const wxString REG_POS_Y            = wxT("Position Y");
 const wxString REG_COM_NUM          = wxT("COM Number");
 const wxString REG_BAUD_RATE        = wxT("BAUD Rate");
+const wxString REG_MANUAL_BAUD_RATE = wxT("Manual Baud Rate");
 const wxString REG_PARITY           = wxT("Parity");
 const wxString REG_BYTE_SIZE        = wxT("ByteSize");
 const wxString REG_STOP_BIT         = wxT("StopBit");
@@ -157,6 +158,7 @@ DumpViewFrame::DumpViewFrame(const wxString& title) :
     ComPortSetting settings;
     settings.PortNum = m_pAppConfig->Read( REG_COM_NUM, static_cast<int>(1));
     settings.BaudRate = m_pAppConfig->Read( REG_BAUD_RATE, static_cast<int>(CBR_115200));
+	settings.ManualBaudRate = m_pAppConfig->Read( REG_MANUAL_BAUD_RATE, static_cast<int>(CBR_115200));
     settings.Parity = m_pAppConfig->Read( REG_PARITY, static_cast<long>(NOPARITY));
     settings.ByteSize = m_pAppConfig->Read( REG_BYTE_SIZE, static_cast<int>(8));
     settings.StopBit = m_pAppConfig->Read( REG_STOP_BIT, static_cast<long>(ONESTOPBIT));
@@ -349,7 +351,7 @@ void DumpViewFrame::m_ShowPortInfoOnStatusBar( ComPortSetting &settings)
     m_statusBar1->SetStatusText( wxString::Format( wxT("COM%d"), settings.PortNum), 0);
 
     wxString result;
-    result.Printf( wxT("%d %d-"), settings.BaudRate, settings.ByteSize);
+    result.Printf( wxT("%d %d-"), (-1 == settings.BaudRate) ? settings.ManualBaudRate : settings.BaudRate, settings.ByteSize);
     switch( settings.Parity)
     {
     case 0:
@@ -416,6 +418,7 @@ void DumpViewFrame::OnClose(wxCloseEvent& event)
             m_PortMonitor->GetPortSettings( settings);
             m_pAppConfig->Write(REG_COM_NUM , static_cast<int>(settings.PortNum ));
             m_pAppConfig->Write(REG_BAUD_RATE , static_cast<int>(settings.BaudRate ));
+			m_pAppConfig->Write(REG_MANUAL_BAUD_RATE, static_cast<int>(settings.ManualBaudRate));
             m_pAppConfig->Write(REG_PARITY , static_cast<int>(settings.Parity ));
             m_pAppConfig->Write(REG_BYTE_SIZE , static_cast<int>(settings.ByteSize ));
             m_pAppConfig->Write(REG_STOP_BIT , static_cast<int>(settings.StopBit ));
@@ -755,6 +758,7 @@ void DumpViewFrame::OnComPortSetting(wxCommandEvent &evt)
         dlg->GetPortSettings(result);
         if ( setting.PortNum != result.PortNum ||
              setting.BaudRate != result.BaudRate ||
+			 setting.ManualBaudRate != result.ManualBaudRate ||
              setting.ByteSize != result.ByteSize ||
              setting.Parity != result.Parity ||
              setting.StopBit != result.StopBit)

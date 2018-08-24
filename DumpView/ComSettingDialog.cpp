@@ -6,15 +6,18 @@
 #include <wx/string.h>
 //*)
 #include <wx/sizer.h>
+#include <wx/valtext.h>
 
 //(*IdInit(ComSettingDialog)
 const long ComSettingDialog::ID_LABEL_PORT_NUM = wxNewId();
 const long ComSettingDialog::ID_LABEL_BAUD_RATE = wxNewId();
+const long ComSettingDialog::ID_LABEL_MANUAL_BAUD_RATE = wxNewId();
 const long ComSettingDialog::ID_LABEL_BYTE_SIZE = wxNewId();
 const long ComSettingDialog::ID_LABEL_PARITY = wxNewId();
 const long ComSettingDialog::ID_LABEL_STOP_BIT = wxNewId();
 const long ComSettingDialog::ID_CHOICE_PORT_NUM = wxNewId();
 const long ComSettingDialog::ID_CHOICE_BAUD_RATE = wxNewId();
+const long ComSettingDialog::ID_TEXT_MANUAL_BAUD_RATE = wxNewId();
 const long ComSettingDialog::ID_CHOICE_BYTE_SIZE = wxNewId();
 const long ComSettingDialog::ID_CHOICE_PARITY = wxNewId();
 const long ComSettingDialog::ID_CHOICE_STOP_BIT = wxNewId();
@@ -24,6 +27,7 @@ const long ComSettingDialog::ID_BUTTON_CANCEL = wxID_CANCEL;
 
 BEGIN_EVENT_TABLE(ComSettingDialog,wxDialog)
 	//(*EventTable(ComSettingDialog)
+	EVT_CHOICE( ID_CHOICE_BAUD_RATE, ComSettingDialog::OnBaudRateChanged)
 	//*)
 END_EVENT_TABLE()
 
@@ -39,6 +43,7 @@ ComSettingDialog::ComSettingDialog(wxWindow* parent,wxWindowID id,const wxPoint&
 	Move(wxDefaultPosition);
 	m_labelPortNumber = new wxStaticText(this, ID_LABEL_PORT_NUM, _("Port number:"), wxDefaultPosition, wxSize(104,14), wxALIGN_RIGHT, _T("ID_LABEL_PORT_NUM"));
 	m_labelBaudRate = new wxStaticText(this, ID_LABEL_BAUD_RATE, _("Baud rate:"), wxDefaultPosition, wxSize(104,14), wxALIGN_RIGHT, _T("ID_LABEL_BAUD_RATE"));
+	m_labelManualBaudRate = new wxStaticText(this, ID_LABEL_MANUAL_BAUD_RATE, _("(Manual)"), wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT, _T("ID_LABEL_MANUAL"));
 	m_labelByteSize = new wxStaticText(this, ID_LABEL_BYTE_SIZE, _("Byte size:"), wxDefaultPosition, wxSize(104,14), wxALIGN_RIGHT, _T("ID_LABEL_BYTE_SIZE"));
 	m_labelParity = new wxStaticText(this, ID_LABEL_PARITY, _("Parity:"), wxDefaultPosition, wxSize(104,14), wxALIGN_RIGHT, _T("ID_LABEL_PARITY"));
 	m_labelStopBit = new wxStaticText(this, ID_LABEL_STOP_BIT, _("Stop bit:"), wxDefaultPosition, wxSize(104,14), wxALIGN_RIGHT, _T("ID_LABEL_STOP_BIT"));
@@ -66,6 +71,9 @@ ComSettingDialog::ComSettingDialog(wxWindow* parent,wxWindowID id,const wxPoint&
 	m_choiceBaudRate->Append(_("115200"));
 	m_choiceBaudRate->Append(_("128000"));
 	m_choiceBaudRate->Append(_("256000"));
+	m_choiceBaudRate->Append(_("Manual..."));
+	m_textManualBaudRate = new wxTextCtrl( this, ID_TEXT_MANUAL_BAUD_RATE, _("115200"), wxDefaultPosition, wxDefaultSize, 0, wxTextValidator(wxFILTER_NUMERIC), _T("ID_TEXT_MANUAL_BAUD_RATE"));
+	m_textManualBaudRate->Disable();
 	m_choiceByteSize = new wxChoice(this, ID_CHOICE_BYTE_SIZE, wxDefaultPosition, wxDefaultSize, 0, 0, 0, wxDefaultValidator, _T("ID_CHOICE_BYTE_SIZE"));
 	m_choiceByteSize->Append(_("5"));
 	m_choiceByteSize->Append(_("6"));
@@ -91,6 +99,7 @@ ComSettingDialog::ComSettingDialog(wxWindow* parent,wxWindowID id,const wxPoint&
 	grid_sizer->Add(m_choicePortNumber, flags);
 	grid_sizer->Add(m_labelBaudRate,flags);
 	grid_sizer->Add(m_choiceBaudRate, flags);
+	grid_sizer->Add(m_labelManualBaudRate, flags);
 	grid_sizer->Add(m_textManualBaudRate, flags);
 	grid_sizer->Add(m_labelByteSize, flags);
 	grid_sizer->Add(m_choiceByteSize, flags);
@@ -210,9 +219,17 @@ void ComSettingDialog::SetPortSettings( ComPortSetting &settings)
         if ( BaudRateTable[i] == settings.BaudRate)
         {
             m_choiceBaudRate->SetSelection(i);
+			m_textManualBaudRate->Disable();
             break;
         }
     }
+
+	m_textManualBaudRate->SetValue(wxString::Format(_("%d"), settings.ManualBaudRate));
+	if ( BaudRateTable[i] == -1)
+	{
+		m_choiceBaudRate->SetSelection(m_choiceBaudRate->GetCount() - 1);
+		m_textManualBaudRate->Enable();
+	}
 
     // Parity
     m_choiceParity->SetSelection(0);        // Default: None
@@ -248,6 +265,10 @@ void ComSettingDialog::GetPortSettings( ComPortSetting &settings)
 
     // Baud Rate
     settings.BaudRate = BaudRateTable[m_choiceBaudRate->GetSelection()];
+	if ( !m_textManualBaudRate->GetValue().ToLong( &settings.ManualBaudRate))
+	{
+		settings.ManualBaudRate = 115200;
+	}
 
     // Parity
     settings.Parity = ParityTable[m_choiceParity->GetSelection()];
@@ -270,5 +291,17 @@ void ComSettingDialog::SetAvailableComPorts( std::list<int>* port_list)
 		{
 			m_choicePortNumber->Append( wxString::Format( wxT("COM%d"), *itor));
 		}
+	}
+}
+
+void ComSettingDialog::OnBaudRateChanged( wxCommandEvent& evt)
+{
+	if ( m_choiceBaudRate->GetSelection() == m_choiceBaudRate->GetCount() - 1)
+	{
+		m_textManualBaudRate->Enable();
+	}
+	else
+	{
+		m_textManualBaudRate->Disable();
 	}
 }

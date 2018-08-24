@@ -37,6 +37,7 @@ private:
 
     int m_PortNum;
     DWORD m_BaudRate;
+	DWORD m_ManualBaudRate;
     int m_Parity;
     int m_ByteSize;
     int m_StopBit;
@@ -61,6 +62,7 @@ public:
         m_ErrorCode(ERROR_SUCCESS),
         m_PortNum(settings.PortNum),
         m_BaudRate(settings.BaudRate),
+		m_ManualBaudRate(settings.ManualBaudRate),
         m_Parity(settings.Parity),
         m_ByteSize(settings.ByteSize),
         m_StopBit(settings.StopBit),

@@ -7,6 +7,7 @@ struct ComPortSetting
 {
     int PortNum;
     long BaudRate;
+	long ManualBaudRate;
     int ByteSize;
     int Parity;
     int StopBit;

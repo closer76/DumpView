@@ -5,7 +5,9 @@
 #include "wx/thread.h"
 #include "wx/event.h"
 
-const int BUF_SIZE = 128;
+#include "ComPortSetting.h"
+
+const int XFER_BUF_SIZE = 128;
 
 enum {
     MONITOR_STATE_STOPPED,
@@ -16,7 +18,8 @@ enum {
     MONITOR_EVENT_TYPE_NONE = 0,
     MONITOR_EVENT_TYPE_DATAREADY,
     MONITOR_EVENT_TYPE_STARTED,
-    MONITOR_EVENT_TYPE_STOPPED
+    MONITOR_EVENT_TYPE_STOPPED,
+    MONITOR_EVENT_TYPE_INIT_FAILED
 };
 
 class MonitorThread :
@@ -35,7 +38,7 @@ private:
     int m_StopBit;
 
     static wxMutex s_mutexDataBuffer;
-    static unsigned char s_buf[BUF_SIZE];
+    static unsigned char s_buf[XFER_BUF_SIZE];
     static int s_nBufStartPos;
 
     bool m_InitSerialPort();
@@ -62,6 +65,10 @@ public:
 
     void StartMonitoring(void)  { m_NextState = MONITOR_STATE_RUNNING;}
     void StopMonitoring(void)   { m_NextState = MONITOR_STATE_STOPPED;}
+    bool IsMonitoring(void)     { return (m_CurrentState == MONITOR_STATE_RUNNING);}
+
+    void GetPortSettings( ComPortSetting& settings);
+    void SetPortSettings( const ComPortSetting& settings);
 };
 
 #endif

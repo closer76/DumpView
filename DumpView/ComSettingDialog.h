@@ -8,6 +8,8 @@
 #include <wx/button.h>
 //*)
 
+#include "ComPortSetting.h"
+
 class ComSettingDialog: public wxDialog
 {
 	public:
@@ -29,6 +31,9 @@ class ComSettingDialog: public wxDialog
 		wxButton* m_buttonOk;
 		wxButton* m_buttonCancel;
 		//*)
+
+        void SetPortSettings( ComPortSetting &settings);
+        void GetPortSettings( ComPortSetting &settings);
 
 	protected:
 

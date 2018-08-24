@@ -1,3 +1,4 @@
+#include "windows.h"
 #include "ComSettingDialog.h"
 
 //(*InternalHeaders(ComSettingDialog)
@@ -86,3 +87,116 @@ ComSettingDialog::~ComSettingDialog()
 	//*)
 }
 
+long BaudRateTable [] =
+{
+    CBR_110,
+    CBR_300,
+    CBR_600,
+    CBR_1200,
+    CBR_2400,
+    CBR_4800,
+    CBR_9600,
+    CBR_14400,
+    CBR_19200,
+    CBR_38400,
+    CBR_57600,
+    CBR_115200,
+    CBR_128000,
+    CBR_256000,
+    -1
+};
+
+int ParityTable [] =
+{
+    NOPARITY,
+    ODDPARITY,
+    EVENPARITY,
+    MARKPARITY,
+    SPACEPARITY,
+    -1
+};
+
+int StopBitTable [] =
+{
+    ONESTOPBIT,
+    ONE5STOPBITS,
+    TWOSTOPBITS,
+    -1
+};
+
+void ComSettingDialog::SetPortSettings( ComPortSetting &settings)
+{
+    int i;
+
+    // Port
+    if ( settings.PortNum >= 1 && settings.PortNum <= 8)
+    {
+        m_choicePortNumber->SetSelection( settings.PortNum - 1);
+    }
+    else
+    {
+        m_choicePortNumber->SetSelection( 1 - 1);        // Default: COM1
+    }
+
+    // Byte Size
+    if ( settings.ByteSize >= 5 && settings.ByteSize <= 8)
+    {
+        m_choiceByteSize->SetSelection( settings.ByteSize - 5);
+    }
+    else
+    {
+        m_choiceByteSize->SetSelection( 8 - 5);
+    }
+
+    // Baud Rate
+    m_choiceBaudRate->SetSelection(11);    // Default: 115200
+    for ( i=0; BaudRateTable[i] != -1; i++)
+    {
+        if ( BaudRateTable[i] == settings.BaudRate)
+        {
+            m_choiceBaudRate->SetSelection(i);
+            break;
+        }
+    }
+
+    // Parity
+    m_choiceParity->SetSelection(0);        // Default: None
+    for ( i=0; ParityTable[i] != -1; i++)
+    {
+        if ( ParityTable[i] == settings.Parity)
+        {
+            m_choiceParity->SetSelection(i);
+            break;
+        }
+    }
+
+    // Stop bit
+    m_choiceStopBit->SetSelection(0);        // Default: One
+    for ( i=0; StopBitTable[i] != -1; i++)
+    {
+        if ( StopBitTable[i] == settings.StopBit)
+        {
+            m_choiceStopBit->SetSelection(i);
+            break;
+        }
+    }
+
+}
+
+void ComSettingDialog::GetPortSettings( ComPortSetting &settings)
+{
+    // Port
+    settings.PortNum = m_choicePortNumber->GetSelection() + 1;
+
+    // Byte Size
+    settings.ByteSize = m_choiceByteSize->GetSelection() + 5;
+
+    // Baud Rate
+    settings.BaudRate = BaudRateTable[m_choiceBaudRate->GetSelection()];
+
+    // Parity
+    settings.Parity = ParityTable[m_choiceParity->GetSelection()];
+
+    // Stop bit
+    settings.StopBit = StopBitTable[m_choiceStopBit->GetSelection()];
+}

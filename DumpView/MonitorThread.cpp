@@ -2,7 +2,7 @@
 #include "DumpViewFrame.h"
 
 wxMutex MonitorThread::s_mutexDataBuffer;
-unsigned char MonitorThread::s_buf[BUF_SIZE] = {0};
+unsigned char MonitorThread::s_buf[XFER_BUF_SIZE] = {0};
 int MonitorThread::s_nBufStartPos = 0;
 
 wxThread::ExitCode MonitorThread::Entry()
@@ -20,12 +20,16 @@ wxThread::ExitCode MonitorThread::Entry()
         case MONITOR_STATE_STOPPED:
             if ( m_NextState == MONITOR_STATE_RUNNING)
             {
-                if ( !m_InitSerialPort())
+                if ( m_InitSerialPort())
                 {
-                    return (wxThread::ExitCode)0;
+                    m_CurrentState = MONITOR_STATE_RUNNING;
+                    evt.SetInt(MONITOR_EVENT_TYPE_STARTED);
                 }
-                m_CurrentState = MONITOR_STATE_RUNNING;
-                evt.SetInt(MONITOR_EVENT_TYPE_STARTED);
+                else
+                {
+                    m_NextState = MONITOR_STATE_STOPPED;
+                    evt.SetInt(MONITOR_EVENT_TYPE_INIT_FAILED);
+                }
             }
             break;
 
@@ -40,14 +44,18 @@ wxThread::ExitCode MonitorThread::Entry()
             {
                 sizeRead = 0;
                 s_mutexDataBuffer.Lock();
-                if (!::ReadFile(m_hSerialPort, s_buf+s_nBufStartPos, BUF_SIZE-s_nBufStartPos, &sizeRead, NULL))
+                if (::ReadFile(m_hSerialPort, s_buf+s_nBufStartPos, XFER_BUF_SIZE-s_nBufStartPos, &sizeRead, NULL))
                 {
-                    ::MessageBox( NULL, wxT("Read file error"), wxT("Error"), MB_OK);
+                    s_nBufStartPos += sizeRead;
+                    if ( s_nBufStartPos >= 0)
+                    {
+                        evt.SetInt( MONITOR_EVENT_TYPE_DATAREADY);
+                    }
                 }
-                s_nBufStartPos += sizeRead;
-                if ( s_nBufStartPos >= 0)
+                else
                 {
-                    evt.SetInt( MONITOR_EVENT_TYPE_DATAREADY);
+                    // TODO: shall we do error handling?
+                    ::MessageBox( NULL, wxT("Read file error"), wxT("Error"), MB_OK);
                 }
                 s_mutexDataBuffer.Unlock();
             }
@@ -60,6 +68,7 @@ wxThread::ExitCode MonitorThread::Entry()
         if (evt.GetInt() != MONITOR_EVENT_TYPE_NONE)
         {
             m_pParent->AddPendingEvent(evt);
+            evt.SetInt( MONITOR_EVENT_TYPE_NONE);
         }
 
         wxThread::This()->Sleep(1);
@@ -159,4 +168,22 @@ int MonitorThread::CopyBuffer(unsigned char* out_buf)
     s_mutexDataBuffer.Unlock();
 
     return count;
+}
+
+void MonitorThread::GetPortSettings(ComPortSetting &settings)
+{
+    settings.PortNum = m_PortNum;
+    settings.BaudRate = m_BaudRate;
+    settings.ByteSize = m_ByteSize;
+    settings.Parity = m_Parity;
+    settings.StopBit = m_StopBit;
+}
+
+void MonitorThread::SetPortSettings(const ComPortSetting &settings)
+{
+    m_PortNum = settings.PortNum;
+    m_BaudRate = settings.BaudRate;
+    m_ByteSize = settings.ByteSize;
+    m_Parity = settings.Parity;
+    m_StopBit = settings.StopBit;
 }

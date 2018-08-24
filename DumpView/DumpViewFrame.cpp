@@ -7,7 +7,7 @@
 //#include <process.h>
 
 
-unsigned char DumpViewFrame::m_textBuffer[BUF_SIZE] = {0};
+unsigned char DumpViewFrame::m_textBuffer[XFER_BUF_SIZE] = {0};
 
 const long DumpViewFrame::ID_RADIOBOX_SWITCH = wxNewId();
 const long DumpViewFrame::ID_CHECKBOX_PAUSE = wxNewId();
@@ -53,13 +53,22 @@ BEGIN_EVENT_TABLE(DumpViewFrame, wxFrame)
     ////Manual Code End
 END_EVENT_TABLE()
 
+const int SWITCH_ON = 0;
+const int SWITCH_OFF = 1;
+
 DumpViewFrame::DumpViewFrame(const wxString& title) : 
     wxFrame(NULL, wxID_ANY, title),
-    m_IsRecording(false)
+    m_IsRecording(false),
+    m_ResetPort(false),
+    m_bufPause(0)
 {
     //------- Initiate internal variables
     m_strDefaultPath = wxT(".");
     m_strDumpFilename = wxT("dump.txt");
+
+    //------- Init buffer
+    m_iCurPauseBufSize = 0;
+    m_bufPause = new unsigned char[PAUSE_BUF_SIZE];
 
     //------- Set up UI
     wxPanel* panel = new wxPanel( this, wxID_ANY);
@@ -85,6 +94,7 @@ DumpViewFrame::DumpViewFrame(const wxString& title) :
         m_PortMonitor = 0;
     }
 
+    m_radioSwitch->Disable();
 }
 
 void DumpViewFrame::m_InitMenuBar(void)
@@ -106,7 +116,7 @@ void DumpViewFrame::m_InitMenuBar(void)
     m_menuEdit = new wxMenu();
     m_menuFind = new wxMenuItem(m_menuEdit, ID_MENU_FIND, _("&Find...\tCtrl-F"), wxEmptyString, wxITEM_NORMAL);
     m_menuEdit->Append(m_menuFind);
-    m_menuCopyAll = new wxMenuItem(m_menuEdit, ID_MENU_COPY_ALL, _("Copy all"), wxEmptyString, wxITEM_NORMAL);
+    m_menuCopyAll = new wxMenuItem(m_menuEdit, ID_MENU_COPY_ALL, _("Copy all\tCtrl-A"), wxEmptyString, wxITEM_NORMAL);
     m_menuEdit->Append(m_menuCopyAll);
     m_menuCopy = new wxMenuItem(m_menuEdit, ID_MENU_COPY, _("Copy selected\tCtrl-C"), wxEmptyString, wxITEM_NORMAL);
     m_menuEdit->Append(m_menuCopy);
@@ -166,7 +176,6 @@ void DumpViewFrame::m_InitSizedComponents(wxWindow* parent)
     parent->SetSizer(BoxSizer3);
     BoxSizer3->Fit(parent);
     BoxSizer3->SetSizeHints(parent);
-
 }
 
 void DumpViewFrame::m_InitStatusBar(void)
@@ -186,6 +195,12 @@ void DumpViewFrame::OnClose(wxCloseEvent& event)
         m_PortMonitor->Delete();
     }
 
+    if ( m_bufPause)
+    {
+        delete [] m_bufPause;
+        m_bufPause = 0;
+    }
+
     event.Skip();
 }
 
@@ -197,28 +212,60 @@ void DumpViewFrame::OnThreadCallback(wxCommandEvent& evt)
     {
     case MONITOR_EVENT_TYPE_DATAREADY:
         data_read = m_PortMonitor->CopyBuffer(m_textBuffer);
-        if ( data_read >= BUF_SIZE)
-            data_read = BUF_SIZE - 1;
+        if ( data_read >= XFER_BUF_SIZE)
+            data_read = XFER_BUF_SIZE - 1;
 
         m_textBuffer[data_read] = 0;
         if ( data_read > 0)
         {
-            m_OutputBox->AppendText(wxString((char*)m_textBuffer, *wxConvCurrent));
-    #ifdef USE_RICH_EDIT
-            m_statusBar1->SetStatusText( wxString::Format( wxT("(%d,%d,%d)"),
-                m_OutputBox->GetScrollPos( wxVERTICAL),
-                m_OutputBox->GetScrollRange( wxVERTICAL),
-                m_OutputBox->GetCaretPosition()));
-            m_OutputBox->ScrollIntoView( m_OutputBox->GetCaretPosition(), WXK_DOWN);
-    #else
-            m_OutputBox->ScrollPages(5);
-    #endif
+            if (m_state == STATE_PAUSE)
+            {
+                // TODO: copy m_textBuffer to m_bufPause
+            }
+            else
+            {
+                m_OutputBox->AppendText(wxString((char*)m_textBuffer, *wxConvCurrent));
+#ifdef USE_RICH_EDIT
+                m_statusBar1->SetStatusText( wxString::Format( wxT("(%d,%d,%d)"),
+                    m_OutputBox->GetScrollPos( wxVERTICAL),
+                    m_OutputBox->GetScrollRange( wxVERTICAL),
+                    m_OutputBox->GetCaretPosition()));
+                m_OutputBox->ScrollIntoView( m_OutputBox->GetCaretPosition(), WXK_DOWN);
+#else
+                m_OutputBox->ScrollPages(5);
+#endif
+            }
+
+            if ( m_IsRecording)
+            {
+                // TODO: log messages into log file
+            }
         }
         break;
 
     case MONITOR_EVENT_TYPE_STARTED:
-    case MONITOR_EVENT_TYPE_STOPPED:
+        m_checkboxPause->Enable();
         m_radioSwitch->Enable();
+        m_state = STATE_START;
+        m_ResetPort = false;
+        break;
+
+    case MONITOR_EVENT_TYPE_STOPPED:
+        m_checkboxPause->SetValue(false);
+        m_radioSwitch->Enable();
+        m_state = STATE_STOP;
+        if ( m_ResetPort)
+        {
+            m_SwitchSelect_body( SWITCH_ON);
+        }
+        break;
+
+    case MONITOR_EVENT_TYPE_INIT_FAILED:
+        wxMessageBox( wxT("Specific port cannot be initialized.") );
+        m_radioSwitch->Enable();
+        m_radioSwitch->SetSelection( SWITCH_OFF);
+        m_state = STATE_STOP;
+        m_checkboxPause->Disable();
         break;
     }
 }
@@ -260,10 +307,28 @@ void DumpViewFrame::OnCopySelection(wxCommandEvent& evt)
 void DumpViewFrame::OnComPortSetting(wxCommandEvent &evt)
 {
     ComSettingDialog* dlg = new ComSettingDialog(this);
+    ComPortSetting setting = {0};
+    ComPortSetting result = {0};
+
+    m_PortMonitor->GetPortSettings( setting);
+    dlg->SetPortSettings( setting);
 
     if ( dlg->ShowModal() == wxID_OK)
     {
-        wxMessageBox( wxT("Hello!"));
+        dlg->GetPortSettings(result);
+        if ( setting.PortNum != result.PortNum ||
+             setting.BaudRate != result.BaudRate ||
+             setting.ByteSize != result.ByteSize ||
+             setting.Parity != result.Parity ||
+             setting.StopBit != result.StopBit)
+        {
+            m_PortMonitor->SetPortSettings( result);
+            if ( m_PortMonitor->IsMonitoring())
+            {
+                m_ResetPort = true;
+                m_SwitchSelect_body( SWITCH_OFF);
+            }
+        }
     }
 
     dlg->Destroy();
@@ -297,25 +362,29 @@ void DumpViewFrame::OnAbout(wxCommandEvent& evt)
 
 void DumpViewFrame::OnSwitchSelected(wxCommandEvent& evt)
 {
-    const int SWITCH_ON = 0;
-    const int SWITCH_OFF = 1;
+    m_SwitchSelect_body( evt.GetInt());
 
-    switch( evt.GetInt())
+}
+
+void DumpViewFrame::m_SwitchSelect_body(int selection)
+{
+    switch( selection)
     {
     case SWITCH_ON:
-        m_checkboxPause->Enable();
         m_radioSwitch->Disable();
-        m_PortMonitor->StartMonitoring();
+        if ( !m_PortMonitor->IsMonitoring())
+            m_PortMonitor->StartMonitoring();
         break;
 
     case SWITCH_OFF:
         m_checkboxPause->Disable();
-        m_checkboxPause->SetValue(false);
         m_radioSwitch->Disable();
-        m_PortMonitor->StopMonitoring();
+        if ( m_PortMonitor->IsMonitoring())
+            m_PortMonitor->StopMonitoring();
         break;
     }
 }
+
 
 void DumpViewFrame::OnRec(wxCommandEvent& evt)
 {
@@ -345,7 +414,7 @@ void DumpViewFrame::m_SelectFile_body( bool prompt_overwrite)
     if ( wxID_OK == dlg->ShowModal())
     {
         m_strDefaultPath = dlg->GetDirectory();
-        m_textLogFilename->ChangeValue( dlg->GetFilename());
+        m_textLogFilename->ChangeValue( dlg->GetPath());
     }
 }
 

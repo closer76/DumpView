@@ -17,6 +17,8 @@
 #include <wx/richtext/richtextctrl.h>
 #include "MonitorThread.h"
 
+const int PAUSE_BUF_SIZE = 1024*1024;
+
 //#define USE_RICH_EDIT
 #define USE_BITMAP_BUTTON
 
@@ -35,7 +37,12 @@ private:
     bool m_IsRecording;
     MonitorThread* m_PortMonitor;
 
-    static unsigned char m_textBuffer[BUF_SIZE];
+    bool m_ResetPort;
+
+    static unsigned char m_textBuffer[XFER_BUF_SIZE];
+
+    int m_iCurPauseBufSize;
+    unsigned char* m_bufPause;
 
     wxString m_strDefaultPath;
     wxString m_strDumpFilename;
@@ -89,6 +96,7 @@ private:
     void m_InitStatusBar(void);
 
     void m_SelectFile_body(bool prompt_overwrite);
+    void m_SwitchSelect_body(int selection);
 
     DECLARE_EVENT_TABLE();
 

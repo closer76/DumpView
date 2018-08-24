@@ -10,7 +10,7 @@ wxThread::ExitCode MonitorThread::Entry()
     DWORD sizeRead;
     wxCommandEvent evt(wxEVT_THREAD_CALLBACK, wxID_ANY);
 
-    if ( !m_InitSerialPort(1))
+    if ( !m_InitSerialPort())
     {
         return (wxThread::ExitCode)0;
     }
@@ -32,14 +32,19 @@ wxThread::ExitCode MonitorThread::Entry()
     }
 
     // Clean-up
-    m_ReleaseSerialPort(1);
+    m_ReleaseSerialPort();
 
     return (wxThread::ExitCode)0;
 }
 
-bool MonitorThread::m_InitSerialPort(int portNum)
+bool MonitorThread::m_InitSerialPort()
 {
-    wxString port_name = wxT("COM1");
+    if ( m_PortNum <= 0 || m_PortNum > 8)
+    {
+        return false;
+    }
+
+    wxString port_name = wxString::Format( wxT("COM%d"), m_PortNum);
     //error_message = wxT("");
 
     wxChar err_str[128];
@@ -70,10 +75,10 @@ bool MonitorThread::m_InitSerialPort(int portNum)
         return false;
     }
 
-    dcb.BaudRate = CBR_115200;
-    dcb.ByteSize = 8;
-    dcb.Parity = NOPARITY;
-    dcb.StopBits = ONESTOPBIT;
+    dcb.BaudRate = m_BaudRate;
+    dcb.ByteSize = m_ByteSize;
+    dcb.Parity = m_Parity;
+    dcb.StopBits = m_StopBit;
 
     if ( !::SetCommState( m_hSerialPort, &dcb))
     {
@@ -81,10 +86,23 @@ bool MonitorThread::m_InitSerialPort(int portNum)
         return false;
     }
 
+    // Set timeout parameters
+    COMMTIMEOUTS timeout = {0};
+    timeout.ReadIntervalTimeout = 10;
+    timeout.ReadTotalTimeoutMultiplier = 0;
+    timeout.ReadTotalTimeoutConstant = 50;
+    timeout.WriteTotalTimeoutMultiplier = 0;
+    timeout.WriteTotalTimeoutConstant = 0;
+
+    if (!::SetCommTimeouts( m_hSerialPort, &timeout))
+    {
+        return false;
+    }
+
     return true;
 }
 
-bool MonitorThread::m_ReleaseSerialPort( int portNum)
+bool MonitorThread::m_ReleaseSerialPort()
 {
     if ( m_hSerialPort != INVALID_HANDLE_VALUE)
     {

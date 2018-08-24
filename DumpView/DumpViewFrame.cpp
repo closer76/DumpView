@@ -1,8 +1,10 @@
 // DumpViewFrame.cpp : implementation of the  class
 //
 #include "DumpViewFrame.h"
+#include "ComSettingDialog.h"
 #include <wx/sizer.h>
-#include <process.h>
+#include <wx/fontdlg.h>
+//#include <process.h>
 
 
 unsigned char DumpViewFrame::m_textBuffer[BUF_SIZE] = {0};
@@ -11,7 +13,7 @@ const long DumpViewFrame::ID_BUTTON_START = wxNewId();
 const long DumpViewFrame::ID_BUTTON_STOP = wxNewId();
 const long DumpViewFrame::ID_BUTTON_REC = wxNewId();
 const long DumpViewFrame::ID_BUTTON_PAUSE = wxNewId();
-const long DumpViewFrame::ID_BUTTON5 = wxNewId();
+const long DumpViewFrame::ID_BUTTON_CLEAR = wxNewId();
 const long DumpViewFrame::ID_TEXT_DEFAULT_FOLDER = wxNewId();
 const long DumpViewFrame::ID_OUTPUT_BOX = wxNewId();
 const long DumpViewFrame::ID_MENU_SAVEAS = wxNewId();
@@ -31,19 +33,34 @@ BEGIN_EVENT_TABLE(DumpViewFrame, wxFrame)
     ////Manual Code Start
     EVT_CLOSE(DumpViewFrame::OnClose)
     EVT_COMMAND( wxID_ANY, wxEVT_THREAD_CALLBACK, DumpViewFrame::OnThreadCallback)
+    EVT_MENU( ID_MENU_SAVEAS, DumpViewFrame::OnSaveAs)
     EVT_MENU( ID_MENU_QUIT, DumpViewFrame::OnExit)
+    EVT_MENU( ID_MENU_FIND , DumpViewFrame::OnFind)
+    EVT_MENU( ID_MENU_COPY_ALL , DumpViewFrame::OnCopyAll)
+    EVT_MENU( ID_MENU_COPY , DumpViewFrame::OnCopySelection)
+    EVT_MENU( ID_MENU_SETCOM, DumpViewFrame::OnComPortSetting)
+    EVT_MENU( ID_MENU_SETFONT , DumpViewFrame::OnFontSetting)
+    EVT_MENU( ID_MENU_SETFOLDER , DumpViewFrame::OnFolderSetting)
+    EVT_MENU( ID_MENU_ABOUT , DumpViewFrame::OnAbout)
+    EVT_BUTTON( ID_BUTTON_START , DumpViewFrame::OnStart )
+    EVT_BUTTON( ID_BUTTON_STOP , DumpViewFrame::OnStop )
+    EVT_BUTTON( ID_BUTTON_REC , DumpViewFrame::OnRec )
+    EVT_BUTTON( ID_BUTTON_PAUSE , DumpViewFrame::OnPause )
+    EVT_BUTTON( ID_BUTTON_CLEAR , DumpViewFrame::OnClear )
     ////Manual Code End
 END_EVENT_TABLE()
 
 DumpViewFrame::DumpViewFrame(const wxString& title) : 
-    wxFrame(NULL, wxID_ANY, title),
-    m_OutputBox(0),
-    m_PortMonitor(0)
+    wxFrame(NULL, wxID_ANY, title)
 {
+    //------- Initiate internal variables
+    m_strDefaultPath = wxT(".");
+    m_strDumpFilename = wxT("dump.txt");
+
+    //------- Set up UI
     wxBoxSizer* BoxSizer1;
     wxBoxSizer* BoxSizer2;
 
-    //------- Set up UI
     m_InitMenuBar();
 
     BoxSizer1 = new wxBoxSizer(wxVERTICAL);
@@ -56,12 +73,16 @@ DumpViewFrame::DumpViewFrame(const wxString& title) :
     BoxSizer2->Add(m_buttonRec, 0, wxTOP|wxBOTTOM|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
     m_buttonPause = new wxButton(this, ID_BUTTON_PAUSE, _("Pause"), wxDefaultPosition, wxSize(40,40), 0, wxDefaultValidator, _T("ID_BUTTON_PAUSE"));
     BoxSizer2->Add(m_buttonPause, 0, wxTOP|wxBOTTOM|wxRIGHT|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
-    m_buttonClear = new wxButton(this, ID_BUTTON5, _("Clear logs"), wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, _T("ID_BUTTON5"));
+    m_buttonClear = new wxButton(this, ID_BUTTON_CLEAR, _("Clear logs"), wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, _T("ID_BUTTON5"));
     BoxSizer2->Add(m_buttonClear, 1, wxALL|wxALIGN_BOTTOM|wxALIGN_CENTER_HORIZONTAL, 5);
     BoxSizer1->Add(BoxSizer2, 0, wxALL|wxEXPAND|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
     m_textDefaultFolder = new wxTextCtrl(this, ID_TEXT_DEFAULT_FOLDER, _(""), wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, _T("ID_TEXT_DEFAULT_FOLDER"));
     BoxSizer1->Add(m_textDefaultFolder, 0, wxALL|wxEXPAND|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
+#ifdef USE_RICH_EDIT
     m_OutputBox = new wxRichTextCtrl( this, ID_OUTPUT_BOX, wxEmptyString, wxDefaultPosition, wxSize(160,120), wxRE_READONLY | wxRE_MULTILINE);
+#else
+    m_OutputBox = new wxTextCtrl( this, ID_OUTPUT_BOX, wxEmptyString, wxDefaultPosition, wxSize(160, 120), wxTE_MULTILINE | wxTE_READONLY);
+#endif
     BoxSizer1->Add(m_OutputBox, 1, wxALL|wxEXPAND|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
     SetSizer(BoxSizer1);
     BoxSizer1->Fit(this);
@@ -74,6 +95,8 @@ DumpViewFrame::DumpViewFrame(const wxString& title) :
     m_statusBar1->SetStatusStyles(1,__wxStatusBarStyles_1);
     SetStatusBar(m_statusBar1);
 
+    this->SetSize( 800, 540);
+
     //------- Create the thread that monitors serial port
     m_PortMonitor = new MonitorThread(this);
     
@@ -82,6 +105,7 @@ DumpViewFrame::DumpViewFrame(const wxString& title) :
         delete m_PortMonitor;
         m_PortMonitor = 0;
     }
+
 }
 
 void DumpViewFrame::m_InitMenuBar(void)
@@ -123,25 +147,18 @@ void DumpViewFrame::m_InitMenuBar(void)
     SetMenuBar(MenuBar1);
 }
 
-void DumpViewFrame::OnExit(wxCommandEvent& evt)
-{
-    Close();
-}
-
 void DumpViewFrame::OnClose(wxCloseEvent& event)
 {
     if ( m_PortMonitor && m_PortMonitor->IsAlive())
     {
         m_PortMonitor->Delete();
     }
-    delete m_OutputBox;
 
     event.Skip();
 }
 
 void DumpViewFrame::OnThreadCallback(wxCommandEvent& evt)
 {
-//    std::string data;
     int data_read = m_PortMonitor->CopyBuffer(m_textBuffer);
     if ( data_read >= BUF_SIZE)
         data_read = BUF_SIZE - 1;
@@ -150,5 +167,108 @@ void DumpViewFrame::OnThreadCallback(wxCommandEvent& evt)
     if ( data_read > 0)
     {
         m_OutputBox->AppendText(wxString((char*)m_textBuffer, *wxConvCurrent));
+#ifdef USE_RICH_EDIT
+        m_statusBar1->SetStatusText( wxString::Format( wxT("(%d,%d,%d)"),
+            m_OutputBox->GetScrollPos( wxVERTICAL),
+            m_OutputBox->GetScrollRange( wxVERTICAL),
+            m_OutputBox->GetCaretPosition()));
+        m_OutputBox->ScrollIntoView( m_OutputBox->GetCaretPosition(), WXK_DOWN);
+#else
+        m_OutputBox->ScrollPages(5);
+#endif
     }
+}
+
+
+void DumpViewFrame::OnSaveAs(wxCommandEvent& evt)
+{
+    wxFileDialog* dlg = new wxFileDialog(this, wxT("Save as..."), m_strDefaultPath, m_strDumpFilename, wxT("*.*"), wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
+    if (wxID_OK == dlg->ShowModal())
+    {
+        m_OutputBox->SaveFile( dlg->GetPath());
+
+        m_strDefaultPath = dlg->GetDirectory();
+        m_strDumpFilename
+    }
+    dlg->Destroy();
+}
+
+void DumpViewFrame::OnExit(wxCommandEvent& evt)
+{
+    Close();
+}
+
+void DumpViewFrame::OnFind(wxCommandEvent& evt)
+{
+}
+
+void DumpViewFrame::OnCopyAll(wxCommandEvent& evt)
+{
+    m_OutputBox->SetSelection( -1, -1);
+    m_OutputBox->Copy();
+    m_OutputBox->SetSelection( 0, 0);
+}
+
+void DumpViewFrame::OnCopySelection(wxCommandEvent& evt)
+{
+    m_OutputBox->Copy();
+}
+
+void DumpViewFrame::OnComPortSetting(wxCommandEvent &evt)
+{
+    ComSettingDialog* dlg = new ComSettingDialog(this);
+
+    if ( dlg->ShowModal() == wxID_OK)
+    {
+        wxMessageBox( wxT("Hello!"));
+    }
+
+    dlg->Destroy();
+}
+
+void DumpViewFrame::OnFontSetting(wxCommandEvent& evt)
+{
+    wxFontData font_data;
+
+    font_data.SetInitialFont( m_OutputBox->GetFont());
+    font_data.SetColour( m_OutputBox->GetForegroundColour());
+
+    wxFontDialog* dlg = new wxFontDialog(this, font_data);
+
+    if ( dlg->ShowModal() == wxID_OK)
+    {
+        m_OutputBox->SetFont( dlg->GetFontData().GetChosenFont());
+        m_OutputBox->SetForegroundColour( dlg->GetFontData().GetColour());
+    }
+
+    dlg->Destroy();
+}
+
+void DumpViewFrame::OnFolderSetting(wxCommandEvent& evt)
+{
+}
+
+void DumpViewFrame::OnAbout(wxCommandEvent& evt)
+{
+}
+
+void DumpViewFrame::OnStart(wxCommandEvent& evt)
+{
+}
+
+void DumpViewFrame::OnStop(wxCommandEvent& evt)
+{
+}
+
+void DumpViewFrame::OnRec(wxCommandEvent& evt)
+{
+}
+
+void DumpViewFrame::OnPause(wxCommandEvent& evt)
+{
+}
+
+void DumpViewFrame::OnClear(wxCommandEvent& evt)
+{
+    m_OutputBox->Clear();
 }

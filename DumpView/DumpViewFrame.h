@@ -15,8 +15,9 @@
 #endif
 
 #include <wx/richtext/richtextctrl.h>
-#include "SerialCommHelper.h"
 #include "MonitorThread.h"
+
+//#define USE_RICH_EDIT
 
 DECLARE_EVENT_TYPE( wxEVT_THREAD_CALLBACK, -1)
 
@@ -26,6 +27,9 @@ private:
     MonitorThread* m_PortMonitor;
 
     static unsigned char m_textBuffer[BUF_SIZE];
+
+    wxString m_strDefaultPath;
+    wxString m_strDumpFilename;
 
     // GUI objects
     wxMenuItem* m_menuSetFont;
@@ -44,7 +48,11 @@ private:
     wxButton* m_buttonPause;
     wxTextCtrl* m_textDefaultFolder;
     wxStatusBar* m_statusBar1;
+#ifdef USE_RICH_EDIT
     wxRichTextCtrl* m_OutputBox;
+#else
+    wxTextCtrl* m_OutputBox;
+#endif
 
 
     // ID for GUI controls
@@ -52,7 +60,7 @@ private:
     static const long ID_BUTTON_STOP;
     static const long ID_BUTTON_REC;
     static const long ID_BUTTON_PAUSE;
-    static const long ID_BUTTON5;
+    static const long ID_BUTTON_CLEAR;
     static const long ID_TEXT_DEFAULT_FOLDER;
     static const long ID_OUTPUT_BOX;
     static const long ID_MENU_SAVEAS;
@@ -73,11 +81,24 @@ private:
 public:
     DumpViewFrame(const wxString& title);
 
-    void OnExit(wxCommandEvent& evt);
     void OnClose(wxCloseEvent& event);
-    void OnDataReady(void);
     void OnThreadCallback(wxCommandEvent& evt);
 
+    void OnSaveAs(wxCommandEvent& evt);         // Menu->File->Save as...
+    void OnExit(wxCommandEvent& evt);           // Menu->File->Exit
+    void OnFind(wxCommandEvent& evt);           // Menu->Edit->Find...
+    void OnCopyAll(wxCommandEvent& evt);        // Menu->Edit->Copy all
+    void OnCopySelection(wxCommandEvent& evt);  // Menu->Edit->Copy Selection
+    void OnComPortSetting(wxCommandEvent& evt); // Menu->Settings->Com Port
+    void OnFontSetting(wxCommandEvent& evt);    // Menu->Settings->Display font
+    void OnFolderSetting(wxCommandEvent& evt);  // Menu->Settings->Default Folder
+    void OnAbout(wxCommandEvent& evt);          // Menu->Help->About...
+
+    void OnStart(wxCommandEvent& evt);          // Button Start
+    void OnStop(wxCommandEvent& evt);           // Button Stop
+    void OnRec(wxCommandEvent& evt);            // Button Rec
+    void OnPause(wxCommandEvent& evt);          // Button Pause
+    void OnClear(wxCommandEvent& evt);          // Button Clear
 };
 
 #endif

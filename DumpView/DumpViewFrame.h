@@ -59,11 +59,11 @@ private:
     int m_iCurPauseBufSize;
     unsigned char* m_bufPause;
 
-	long m_iLastLength;
+	long m_iTailCount;
 
     wxString m_strDefaultPath;
     wxString m_strDumpFilename;
-	wxString m_strLastLength;
+	wxString m_strTailCountOld;
 
 	LogDirSettings* m_LogDirSettings;
 
@@ -106,8 +106,8 @@ private:
     wxCheckBox* m_checkboxCaseSensitive;
 	wxButton* m_buttonTranslateGuid;
 
-	wxCheckBox* m_checkboxShowLastLogs;
-	wxTextCtrl* m_textLastLogLength;
+	wxCheckBox* m_checkboxRetainTailLines;
+	wxTextCtrl* m_textTailCount;
 
 
     // ID for GUI controls
@@ -136,8 +136,8 @@ private:
 	static const long ID_MENU_LOADGUIDDEF;
     static const long ID_MENU_ABOUT;
     static const long ID_STATUSBAR1;
-	static const long ID_CHECKBOX_SHOW_LAST_LOGS;
-	static const long ID_TEXT_LAST_LOG_LENGTH;
+	static const long ID_CHECKBOX_RETAIN_TAIL_LINES;
+	static const long ID_TEXT_TAIL_COUNT;
 
     void m_InitMenuBar(void);
     void m_InitSizedComponents(wxWindow* parent);
@@ -151,7 +151,7 @@ private:
 
     void m_ShowPortInfoOnStatusBar( ComPortSetting &settings);
 
-	bool m_UpdateLastLength(void);
+	bool m_UpdateTailCount(void);
 
     DECLARE_EVENT_TABLE();
 
@@ -184,10 +184,10 @@ public:
     void OnRec(wxCommandEvent& evt);            // Checkbox Record
     void OnPause(wxCommandEvent& evt);          // Checkbox Pause
 
-	void OnShowLastLogsSelected(wxCommandEvent& evt);	// Checkbox "Show Last Logs"
-	void OnLastLogLengthEntered(wxCommandEvent& evt);	// Text LastLogLength
-	void OnFocusOn(wxFocusEvent& evt);
-	void OnFocusOff(wxFocusEvent& evt);	// Text LastLogLength
+	void OnRetainTailLinesSelected(wxCommandEvent& evt);	// Checkbox "Show Last Logs"
+	void OnTailCountEntered(wxCommandEvent& evt);	// Text LastLogLength
+	void OnTailCountFocusOn(wxFocusEvent& evt);
+	void OnTailCountFocusOff(wxFocusEvent& evt);	// Text LastLogLength
 };
 
 #endif

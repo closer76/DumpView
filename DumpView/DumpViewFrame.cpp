@@ -9,6 +9,7 @@
 #include <wx/sizer.h>
 #include <wx/fontdlg.h>
 #include <wx/textfile.h>
+#include <wx/valnum.h>
 //#include <process.h>
 
 
@@ -40,8 +41,8 @@ const long DumpViewFrame::ID_MENU_SETFOLDER = wxNewId();
 const long DumpViewFrame::ID_MENU_LOADGUIDDEF = wxNewId();
 const long DumpViewFrame::ID_MENU_ABOUT = wxNewId();
 const long DumpViewFrame::ID_STATUSBAR1 = wxNewId();
-const long DumpViewFrame::ID_CHECKBOX_SHOW_LAST_LOGS = wxNewId();
-const long DumpViewFrame::ID_TEXT_LAST_LOG_LENGTH = wxNewId();
+const long DumpViewFrame::ID_CHECKBOX_RETAIN_TAIL_LINES = wxNewId();
+const long DumpViewFrame::ID_TEXT_TAIL_COUNT = wxNewId();
 
 DEFINE_EVENT_TYPE( wxEVT_THREAD_CALLBACK)
 
@@ -71,14 +72,12 @@ BEGIN_EVENT_TABLE(DumpViewFrame, wxFrame)
 
     EVT_CHECKBOX( ID_CHECKBOX_REC, DumpViewFrame::OnRec)
     EVT_CHECKBOX( ID_CHECKBOX_PAUSE, DumpViewFrame::OnPause)
-	EVT_CHECKBOX( ID_CHECKBOX_SHOW_LAST_LOGS, DumpViewFrame::OnShowLastLogsSelected)
+	EVT_CHECKBOX( ID_CHECKBOX_RETAIN_TAIL_LINES, DumpViewFrame::OnRetainTailLinesSelected)
 
     EVT_TEXT_ENTER( ID_TEXT_FIND_TARGET, DumpViewFrame::OnFind)
     EVT_TEXT_ENTER( ID_OUTPUT_BOX, DumpViewFrame::OnFind)
-	EVT_TEXT_ENTER( ID_TEXT_LAST_LOG_LENGTH, DumpViewFrame::OnLastLogLengthEntered)
+	EVT_TEXT_ENTER( ID_TEXT_TAIL_COUNT, DumpViewFrame::OnTailCountEntered)
 
-	EVT_SET_FOCUS( DumpViewFrame::OnFocusOn)
-	EVT_KILL_FOCUS( DumpViewFrame::OnFocusOff)
     ////Manual Code End
 END_EVENT_TABLE()
 
@@ -103,8 +102,8 @@ const wxString REG_LAST_LOG_DIR     = wxT("LastVisitedLogDir");
 const wxString REG_USE_LAST_DIR     = wxT("UseLastLogDir");
 const wxString REG_GUID_DEF_FILE	= wxT("GuidDefFile");
 const wxString REG_GUID_AUTO_LOAD	= wxT("GuidAutoLoad");
-const wxString REG_SHOW_LAST_LOGS	= wxT("ShowLastLogsOnly");
-const wxString REG_LAST_LOG_LEN		= wxT("Last Log Length");
+const wxString REG_RETAIN_TAIL_LINES	= wxT("RetainOnlyTailLines");
+const wxString REG_TAIL_COUNT		= wxT("TailCount");
 
 const int STATUS_COLS = 3;
 
@@ -114,7 +113,7 @@ DumpViewFrame::DumpViewFrame(const wxString& title) :
     m_fpLog(0),
     m_ResetPort(false),
     m_bufPause(0),
-	m_iLastLength(-1),
+	m_iTailCount(-1),
 	m_GuidDefSettings(0),
 	m_LogDirSettings(0),
     m_pAppConfig(0),
@@ -222,11 +221,15 @@ DumpViewFrame::DumpViewFrame(const wxString& title) :
 	}
 
 	//------- Get "show last logs" settings from registry
-	m_checkboxShowLastLogs->SetValue(m_pAppConfig->Read(REG_SHOW_LAST_LOGS, static_cast<long>(0)) == 1 ? true : false);
-	m_textLastLogLength->SetValue(wxString::FromDouble(m_pAppConfig->ReadDouble(REG_LAST_LOG_LEN, 1.0)));
-	if (!m_checkboxShowLastLogs->GetValue())
+	m_checkboxRetainTailLines->SetValue(m_pAppConfig->Read(REG_RETAIN_TAIL_LINES, static_cast<long>(0)) == 1 ? true : false);
+	m_textTailCount->SetValue(wxString::Format("%d", m_pAppConfig->ReadLong(REG_TAIL_COUNT, 100)));
+	if (!m_checkboxRetainTailLines->GetValue())
 	{
-		m_textLastLogLength->Disable();
+		m_textTailCount->Disable();
+	}
+	else
+	{
+		m_UpdateTailCount();
 	}
 
 	//------- Create the thread that monitors serial port
@@ -316,13 +319,15 @@ void DumpViewFrame::m_InitSizedComponents(wxWindow* parent)
     m_buttonClear = new wxButton(parent, ID_BUTTON_CLEAR, _("Clear logs"), wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, _T("ID_BUTTON_CLEAR"));
     BoxSizer7->Add(m_buttonClear, 1, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
     BoxSizer8->Add(BoxSizer7, 1, wxALL|wxEXPAND|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 0);
-	m_checkboxShowLastLogs = new wxCheckBox(parent, ID_CHECKBOX_SHOW_LAST_LOGS, wxT("Display only last "));
-	BoxSizer9->Add(m_checkboxShowLastLogs, 0, wxLEFT|wxALIGN_CENTER_VERTICAL, 10);
-	m_textLastLogLength = new wxTextCtrl(parent, ID_TEXT_LAST_LOG_LENGTH, wxEmptyString, wxDefaultPosition, wxSize(60, -1), wxTE_RIGHT | wxTE_PROCESS_ENTER);
-	m_textLastLogLength->Bind(wxEVT_SET_FOCUS, &DumpViewFrame::OnFocusOn, this);
-	m_textLastLogLength->Bind(wxEVT_KILL_FOCUS, &DumpViewFrame::OnFocusOff, this);
-	BoxSizer9->Add(m_textLastLogLength, 0, wxALIGN_CENTER_VERTICAL, 5);
-	BoxSizer9->Add(new wxStaticText(parent, wxID_ANY, "MB of logs."), 0, wxRIGHT | wxALIGN_CENTER_VERTICAL, 5);
+	m_checkboxRetainTailLines = new wxCheckBox(parent, ID_CHECKBOX_RETAIN_TAIL_LINES, wxT("Retain only last "));
+	BoxSizer9->Add(m_checkboxRetainTailLines, 0, wxLEFT|wxALIGN_CENTER_VERTICAL, 10);
+	wxIntegerValidator<int> val;
+	val.SetMax(1000000);
+	m_textTailCount = new wxTextCtrl(parent, ID_TEXT_TAIL_COUNT, wxEmptyString, wxDefaultPosition, wxSize(60, -1), wxTE_RIGHT | wxTE_PROCESS_ENTER, val);
+	m_textTailCount->Bind(wxEVT_SET_FOCUS, &DumpViewFrame::OnTailCountFocusOn, this);
+	m_textTailCount->Bind(wxEVT_KILL_FOCUS, &DumpViewFrame::OnTailCountFocusOff, this);
+	BoxSizer9->Add(m_textTailCount, 0, wxALIGN_CENTER_VERTICAL, 5);
+	BoxSizer9->Add(new wxStaticText(parent, wxID_ANY, " lines of log."), 0, wxRIGHT | wxALIGN_CENTER_VERTICAL, 5);
 	BoxSizer8->Add(BoxSizer9);
     BoxSizer6 = new wxBoxSizer(wxHORIZONTAL);
     labelQuickSearch = new wxStaticText(parent, ID_STATICTEXT1, _("Quick Search:"), wxDefaultPosition, wxSize(88,14), wxALIGN_RIGHT, _T("ID_STATICTEXT1"));
@@ -475,15 +480,15 @@ void DumpViewFrame::OnClose(wxCloseEvent& event)
 			m_GuidDefSettings = 0;
 		}
 
-		m_pAppConfig->Write(REG_SHOW_LAST_LOGS, static_cast<long>(m_checkboxShowLastLogs->GetValue() ? 1 : 0));
-		double dblTmp;
-		if (m_textLastLogLength->GetValue().ToDouble(&dblTmp))
+		m_pAppConfig->Write(REG_RETAIN_TAIL_LINES, static_cast<long>(m_checkboxRetainTailLines->GetValue() ? 1 : 0));
+		long lTmp;
+		if (m_textTailCount->GetValue().ToLong(&lTmp))
 		{
-			m_pAppConfig->Write(REG_LAST_LOG_LEN, static_cast<double>(dblTmp));
+			m_pAppConfig->Write(REG_TAIL_COUNT, static_cast<long>(lTmp));
 		}
 		else
 		{
-			m_pAppConfig->Write(REG_LAST_LOG_LEN, static_cast<double>(0));
+			m_pAppConfig->Write(REG_TAIL_COUNT, static_cast<long>(0));
 		}
 
         delete m_pAppConfig;
@@ -585,12 +590,12 @@ void DumpViewFrame::OnThreadCallback(wxCommandEvent& evt)
             else
             {
                 m_OutputBox->AppendText(wxString(m_wcTextBuffer));
-				if (m_iLastLength > 0)
+				if (m_iTailCount > 0)
 				{
-					auto lastPosition = m_OutputBox->GetLastPosition();
-					if (lastPosition > m_iLastLength)
+					int line_count = m_OutputBox->GetNumberOfLines();
+					if (line_count > m_iTailCount)
 					{
-						m_OutputBox->Remove(0, lastPosition - m_iLastLength);
+						m_OutputBox->Remove(0, m_OutputBox->XYToPosition(0, line_count - m_iTailCount) - 1);
 					}
 				}
 #ifdef USE_RICH_EDIT
@@ -1054,12 +1059,12 @@ void DumpViewFrame::OnClear(wxCommandEvent& evt)
     m_OutputBox->Clear();
 }
 
-bool DumpViewFrame::m_UpdateLastLength(void)
+bool DumpViewFrame::m_UpdateTailCount(void)
 {
-	double dblTmp;
-	if (m_textLastLogLength->GetValue().ToDouble(&dblTmp))
+	long lTmp;
+	if (m_textTailCount->GetValue().ToLong(&lTmp))
 	{
-		m_iLastLength = static_cast<long>(dblTmp * 1024);
+		m_iTailCount = lTmp;
 		return true;
 	}
 	else
@@ -1068,57 +1073,57 @@ bool DumpViewFrame::m_UpdateLastLength(void)
 	}
 }
 
-void DumpViewFrame::OnLastLogLengthEntered(wxCommandEvent& evt)
+void DumpViewFrame::OnTailCountEntered(wxCommandEvent& evt)
 {
-	if (m_UpdateLastLength())
+	if (m_UpdateTailCount())
 	{
-		m_strLastLength = m_textLastLogLength->GetValue();
+		m_strTailCountOld = m_textTailCount->GetValue();
 	}
 	else
 	{
-		m_textLastLogLength->SetValue(m_strLastLength);
+		m_textTailCount->SetValue(m_strTailCountOld);
 	}
 }
 
-void DumpViewFrame::OnFocusOn(wxFocusEvent& evt)
+void DumpViewFrame::OnTailCountFocusOn(wxFocusEvent& evt)
 {
 	wxObject* obj = evt.GetEventObject();
 
 	// Backup old setting
-	if (obj && obj == m_textLastLogLength)
+	if (obj && obj == m_textTailCount)
 	{
-		m_strLastLength = m_textLastLogLength->GetValue();
+		m_strTailCountOld = m_textTailCount->GetValue();
 	}
 
 	evt.Skip();
 }
 
-void DumpViewFrame::OnFocusOff(wxFocusEvent& evt)
+void DumpViewFrame::OnTailCountFocusOff(wxFocusEvent& evt)
 {
 	wxObject* obj = evt.GetEventObject();
 
-	if (obj && obj == m_textLastLogLength)
+	if (obj && obj == m_textTailCount)
 	{
-		m_textLastLogLength->SetValue(m_strLastLength);
+		m_textTailCount->SetValue(m_strTailCountOld);
 	}
 
 	evt.Skip();
 }
 
-void DumpViewFrame::OnShowLastLogsSelected(wxCommandEvent& evt)
+void DumpViewFrame::OnRetainTailLinesSelected(wxCommandEvent& evt)
 {
-	if (m_checkboxShowLastLogs->GetValue())
+	if (m_checkboxRetainTailLines->GetValue())
 	{
-		m_textLastLogLength->Enable();
-		if (!m_UpdateLastLength())
+		m_textTailCount->Enable();
+		if (!m_UpdateTailCount())
 		{
-			m_iLastLength = 0;
-			m_textLastLogLength->SetValue(wxEmptyString);
+			m_iTailCount = -1;
+			m_textTailCount->SetValue("-1");
 		}
 	}
 	else
 	{
-		m_iLastLength = 0;
-		m_textLastLogLength->Disable();
+		m_iTailCount = -1;
+		m_textTailCount->Disable();
 	}
 }

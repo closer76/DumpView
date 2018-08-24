@@ -87,6 +87,9 @@ private:
 #else
     wxTextCtrl* m_OutputBox;
 #endif
+    wxButton* m_buttonFind;
+    wxTextCtrl* m_textFindTarget;
+    wxCheckBox* m_checkboxCaseSensitive;
 
 
     // ID for GUI controls
@@ -94,9 +97,14 @@ private:
     static const long ID_CHECKBOX_PAUSE;
     static const long ID_CHECKBOX_REC;
     static const long ID_BUTTON_CLEAR;
+    static const long ID_STATICTEXT1;
+    static const long ID_TEXT_FIND_TARGET;
+    static const long ID_CHECKBOX_CASE_SENSITIVE;
+    static const long ID_BUTTON_FIND;
     static const long ID_TEXT_DEFAULT_FOLDER;
     static const long ID_BUTTON_SELECT_FILE;
     static const long ID_OUTPUT_BOX;
+    static const long ID_PANEL1;
     static const long ID_MENU_SAVEAS;
     static const long ID_MENU_QUIT;
     static const long ID_MENU_FIND;

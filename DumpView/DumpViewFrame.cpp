@@ -8,6 +8,7 @@
 #include "AboutDialog.h"
 #include <wx/sizer.h>
 #include <wx/fontdlg.h>
+#include <wx/textfile.h>
 //#include <process.h>
 
 
@@ -17,9 +18,14 @@ const long DumpViewFrame::ID_RADIOBOX_SWITCH = wxNewId();
 const long DumpViewFrame::ID_CHECKBOX_PAUSE = wxNewId();
 const long DumpViewFrame::ID_CHECKBOX_REC = wxNewId();
 const long DumpViewFrame::ID_BUTTON_CLEAR = wxNewId();
+const long DumpViewFrame::ID_STATICTEXT1 = wxNewId();
+const long DumpViewFrame::ID_TEXT_FIND_TARGET = wxNewId();
+const long DumpViewFrame::ID_CHECKBOX_CASE_SENSITIVE = wxNewId();
+const long DumpViewFrame::ID_BUTTON_FIND = wxNewId();
 const long DumpViewFrame::ID_TEXT_DEFAULT_FOLDER = wxNewId();
 const long DumpViewFrame::ID_BUTTON_SELECT_FILE = wxNewId();
 const long DumpViewFrame::ID_OUTPUT_BOX = wxNewId();
+const long DumpViewFrame::ID_PANEL1 = wxNewId();
 const long DumpViewFrame::ID_MENU_SAVEAS = wxNewId();
 const long DumpViewFrame::ID_MENU_QUIT = wxNewId();
 const long DumpViewFrame::ID_MENU_FIND = wxNewId();
@@ -50,11 +56,15 @@ BEGIN_EVENT_TABLE(DumpViewFrame, wxFrame)
 
     EVT_BUTTON( ID_BUTTON_CLEAR , DumpViewFrame::OnClear )
     EVT_BUTTON( ID_BUTTON_SELECT_FILE, DumpViewFrame::OnSelectFile )
+    EVT_BUTTON( ID_BUTTON_FIND, DumpViewFrame::OnFind )
 
     EVT_RADIOBOX( ID_RADIOBOX_SWITCH, DumpViewFrame::OnSwitchSelected)
 
     EVT_CHECKBOX( ID_CHECKBOX_REC, DumpViewFrame::OnRec)
     EVT_CHECKBOX( ID_CHECKBOX_PAUSE, DumpViewFrame::OnPause)
+
+    EVT_TEXT_ENTER( ID_TEXT_FIND_TARGET, DumpViewFrame::OnFind)
+    EVT_TEXT_ENTER( ID_OUTPUT_BOX, DumpViewFrame::OnFind)
     ////Manual Code End
 END_EVENT_TABLE()
 
@@ -67,7 +77,7 @@ const wxString POS_X = wxT("Position X");
 const wxString POS_Y = wxT("Position Y");
 
 DumpViewFrame::DumpViewFrame(const wxString& title) : 
-    wxFrame(NULL, wxID_ANY, title),
+    wxFrame(NULL, wxID_ANY, title, wxDefaultPosition, wxDefaultSize, wxDEFAULT_FRAME_STYLE),
     m_IsRecording(false),
     m_fpLog(0),
     m_ResetPort(false),
@@ -148,8 +158,8 @@ void DumpViewFrame::m_InitMenuBar(void)
     m_menuFile->Append(m_menuExit);
     MenuBar1->Append(m_menuFile, _("&File"));
     m_menuEdit = new wxMenu();
-    m_menuFind = new wxMenuItem(m_menuEdit, ID_MENU_FIND, _("&Find...\tCtrl-F"), wxEmptyString, wxITEM_NORMAL);
-    m_menuEdit->Append(m_menuFind);
+//    m_menuFind = new wxMenuItem(m_menuEdit, ID_MENU_FIND, _("&Find...\tCtrl-F"), wxEmptyString, wxITEM_NORMAL);
+//    m_menuEdit->Append(m_menuFind);
     m_menuCopyAll = new wxMenuItem(m_menuEdit, ID_MENU_COPY_ALL, _("Copy all\tCtrl-A"), wxEmptyString, wxITEM_NORMAL);
     m_menuEdit->Append(m_menuCopyAll);
     m_menuCopy = new wxMenuItem(m_menuEdit, ID_MENU_COPY, _("Copy selected\tCtrl-C"), wxEmptyString, wxITEM_NORMAL);
@@ -172,7 +182,9 @@ void DumpViewFrame::m_InitMenuBar(void)
 
 void DumpViewFrame::m_InitSizedComponents(wxWindow* parent)
 {
-    wxBoxSizer* BoxSizer2, *BoxSizer3, *BoxSizer4, *BoxSizer5;
+    wxBoxSizer* BoxSizer2, *BoxSizer3, *BoxSizer4, *BoxSizer5, *BoxSizer6, *BoxSizer7, *BoxSizer8;
+    wxStaticText* labelQuickSearch;
+
 
     BoxSizer3 = new wxBoxSizer(wxVERTICAL);
     BoxSizer2 = new wxBoxSizer(wxHORIZONTAL);
@@ -183,6 +195,8 @@ void DumpViewFrame::m_InitSizedComponents(wxWindow* parent)
     };
     m_radioSwitch = new wxRadioBox(parent, ID_RADIOBOX_SWITCH, _("Port Switch"), wxDefaultPosition, wxSize(82,71), 2, __wxRadioBoxChoices_1, 1, 0, wxDefaultValidator, _T("ID_RADIOBOX_SWITCH"));
     BoxSizer2->Add(m_radioSwitch, 0, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
+    BoxSizer8 = new wxBoxSizer(wxVERTICAL);
+    BoxSizer7 = new wxBoxSizer(wxHORIZONTAL);
     BoxSizer4 = new wxBoxSizer(wxVERTICAL);
     m_checkboxPause = new wxCheckBox(parent, ID_CHECKBOX_PAUSE, _("Pause"), wxDefaultPosition, wxSize(52,22), 0, wxDefaultValidator, _T("ID_CHECKBOX_PAUSE"));
     m_checkboxPause->SetValue(false);
@@ -190,12 +204,26 @@ void DumpViewFrame::m_InitSizedComponents(wxWindow* parent)
     m_checkboxRec = new wxCheckBox(parent, ID_CHECKBOX_REC, _("Record"), wxDefaultPosition, wxSize(58,16), 0, wxDefaultValidator, _T("ID_CHECKBOX_REC"));
     m_checkboxRec->SetValue(false);
     BoxSizer4->Add(m_checkboxRec, 0, wxLEFT|wxRIGHT|wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL, 5);
+    BoxSizer7->Add(BoxSizer4, 0, wxALL|wxEXPAND|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
     m_buttonClear = new wxButton(parent, ID_BUTTON_CLEAR, _("Clear logs"), wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, _T("ID_BUTTON_CLEAR"));
-    BoxSizer4->Add(m_buttonClear, 0, wxALL|wxEXPAND|wxALIGN_BOTTOM|wxALIGN_CENTER_HORIZONTAL, 5);
-    BoxSizer2->Add(BoxSizer4, 1, wxALL|wxEXPAND|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
+    BoxSizer7->Add(m_buttonClear, 1, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
+    BoxSizer8->Add(BoxSizer7, 1, wxALL|wxEXPAND|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 0);
+    BoxSizer6 = new wxBoxSizer(wxHORIZONTAL);
+    labelQuickSearch = new wxStaticText(parent, ID_STATICTEXT1, _("Quick Search:"), wxDefaultPosition, wxSize(88,14), wxALIGN_RIGHT, _T("ID_STATICTEXT1"));
+    BoxSizer6->Add(labelQuickSearch, 0, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
+    m_textFindTarget = new wxTextCtrl(parent, ID_TEXT_FIND_TARGET, wxEmptyString, wxDefaultPosition, wxSize(112,24), wxTE_PROCESS_ENTER, wxDefaultValidator, _T("ID_TEXT_FIND_TARGET"));
+    m_textFindTarget->SetMinSize(wxSize(112,24));
+    BoxSizer6->Add(m_textFindTarget, 1, wxTOP|wxBOTTOM|wxLEFT|wxEXPAND|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
+    m_checkboxCaseSensitive = new wxCheckBox(parent, ID_CHECKBOX_CASE_SENSITIVE, _("Case Sensitive"), wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, _T("ID_CHECKBOX_CASE_SENSITIVE"));
+    m_checkboxCaseSensitive->SetValue(false);
+    BoxSizer6->Add(m_checkboxCaseSensitive, 0, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
+    m_buttonFind = new wxButton(parent, ID_BUTTON_FIND, _("Find"), wxDefaultPosition, wxSize(61,24), 0, wxDefaultValidator, _T("ID_BUTTON_FIND"));
+    BoxSizer6->Add(m_buttonFind, 0, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 0);
+    BoxSizer8->Add(BoxSizer6, 0, wxALL|wxEXPAND|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 0);
+    BoxSizer2->Add(BoxSizer8, 1, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
     BoxSizer3->Add(BoxSizer2, 0, wxALL|wxEXPAND|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 0);
     BoxSizer5 = new wxBoxSizer(wxHORIZONTAL);
-    m_textLogFilename = new wxTextCtrl(parent, ID_TEXT_DEFAULT_FOLDER, _(""), wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, _T("ID_TEXT_DEFAULT_FOLDER"));
+    m_textLogFilename = new wxTextCtrl(parent, ID_TEXT_DEFAULT_FOLDER, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, _T("ID_TEXT_DEFAULT_FOLDER"));
     BoxSizer5->Add(m_textLogFilename, 1, wxTOP|wxBOTTOM|wxLEFT|wxEXPAND|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
     m_buttonSelectFile = new wxButton(parent, ID_BUTTON_SELECT_FILE, _("..."), wxDefaultPosition, wxSize(29,24), 0, wxDefaultValidator, _T("ID_BUTTON_SELECT_FILE"));
     BoxSizer5->Add(m_buttonSelectFile, 0, wxTOP|wxBOTTOM|wxRIGHT|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
@@ -203,10 +231,9 @@ void DumpViewFrame::m_InitSizedComponents(wxWindow* parent)
 #ifdef USE_RICH_EDIT
     m_OutputBox = new wxRichTextCtrl( this, ID_OUTPUT_BOX, wxEmptyString, wxDefaultPosition, wxSize(160,120), wxRE_READONLY | wxRE_MULTILINE);
 #else
-    m_OutputBox = new wxTextCtrl( parent, ID_OUTPUT_BOX, wxEmptyString, wxDefaultPosition, wxSize(160, 120), wxTE_MULTILINE | wxTE_READONLY);
+    m_OutputBox = new wxTextCtrl( parent, ID_OUTPUT_BOX, wxEmptyString, wxDefaultPosition, wxSize(160, 120), wxTE_MULTILINE | wxTE_READONLY | wxTE_PROCESS_ENTER);
 #endif
     BoxSizer3->Add(m_OutputBox, 1, wxALL|wxEXPAND|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
-
     parent->SetSizer(BoxSizer3);
     BoxSizer3->Fit(parent);
     BoxSizer3->SetSizeHints(parent);
@@ -369,6 +396,83 @@ void DumpViewFrame::OnExit(wxCommandEvent& evt)
 
 void DumpViewFrame::OnFind(wxCommandEvent& evt)
 {
+    const int LENGTH_PER_READ = 100 * 1024;
+    wxString pattern, content;
+
+    m_statusBar1->SetStatusText( wxT(""));
+
+    pattern = m_textFindTarget->GetValue();
+
+    if ( pattern != wxT(""))
+    {
+        long start = 0, end = 0, text_end = 0, result = 0;
+        bool case_sensitive = false, has_warpped = false;
+
+        m_OutputBox->GetSelection( &start, &result);
+        if ( start != result)
+        {
+            start = result;
+        }
+        else
+        {
+            start = m_OutputBox->GetInsertionPoint();
+        }
+        text_end = m_OutputBox->GetLastPosition();
+        end = (start + LENGTH_PER_READ <= text_end) ? (start + LENGTH_PER_READ) : (text_end);
+        result = wxNOT_FOUND;
+
+        case_sensitive = m_checkboxCaseSensitive->IsChecked();
+
+        if ( !case_sensitive)
+        {
+            pattern.MakeLower();
+        }
+
+        while ( 1)
+        {
+            content = wxTextFile::Translate( m_OutputBox->GetRange( start, end), wxTextFileType_Dos);
+            if ( !case_sensitive)
+            {
+                content.MakeLower();
+            }
+            result = content.find( pattern.c_str(), 0);
+
+            if ( result != wxNOT_FOUND)
+                break;
+
+            if ( end == text_end)
+            {
+                if ( has_warpped)
+                    break;
+
+                text_end = start;
+                start = 0;
+                has_warpped = true;
+            }
+            else
+            {
+                start = end - pattern.Length();     // the pattern might be located at the boundary of search blocks...
+            }
+            end = (start + LENGTH_PER_READ <= text_end) ? (start + LENGTH_PER_READ) : (text_end);
+        }
+
+        if ( result != wxNOT_FOUND)
+        {
+            result += start;
+            m_OutputBox->SetFocus();
+            m_OutputBox->SetInsertionPoint( result);
+            m_OutputBox->SetSelection( result, result + pattern.Length());
+            //m_statusBar1->SetStatusText( wxString::Format( wxT("%d"), result));
+            if ( has_warpped)
+            {
+                m_statusBar1->SetStatusText( wxT("Warpped to start..."));
+            }
+        }
+        else
+        {
+            m_statusBar1->SetStatusText( wxT("Not found."));
+        }
+    }
 }
 
 void DumpViewFrame::OnCopyAll(wxCommandEvent& evt)

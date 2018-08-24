@@ -216,6 +216,7 @@ void DumpViewFrame::OnClose(wxCloseEvent& event)
 void DumpViewFrame::OnThreadCallback(wxCommandEvent& evt)
 {
     int data_read = 0;
+    const char* buffer_full_message = "\n!!!<Buffer Full>!!!\n";
 
     switch ( evt.GetInt())
     {
@@ -229,7 +230,18 @@ void DumpViewFrame::OnThreadCallback(wxCommandEvent& evt)
         {
             if (m_state == STATE_PAUSE)
             {
-                // TODO: copy m_textBuffer to m_bufPause
+                if ( m_iCurPauseBufSize + data_read < PAUSE_BUF_SIZE &&
+                     m_iCurPauseBufSize + strlen( buffer_full_message) + 1 < PAUSE_BUF_SIZE)
+                {
+                    memcpy( m_bufPause+m_iCurPauseBufSize, m_textBuffer, sizeof(unsigned char)*data_read);
+                    m_iCurPauseBufSize += data_read;
+                }
+                else
+                {
+                    memcpy( m_bufPause+m_iCurPauseBufSize, buffer_full_message, strlen( buffer_full_message));
+                    m_iCurPauseBufSize += strlen(buffer_full_message);
+                }
+                m_bufPause[m_iCurPauseBufSize] = 0;
             }
             else
             {
@@ -482,6 +494,25 @@ void DumpViewFrame::m_SelectFile_body( bool prompt_overwrite)
 
 void DumpViewFrame::OnPause(wxCommandEvent& evt)
 {
+    if ( evt.GetSelection() == false)
+    {
+        if ( m_state == STATE_PAUSE)
+        {
+            m_OutputBox->AppendText(wxString((char*)m_bufPause, *wxConvCurrent));
+            m_state = STATE_START;
+            m_iCurPauseBufSize = 0;
+            m_bufPause[0] = 0;
+        }
+    }
+    else
+    {
+        if ( m_state == STATE_START)
+        {
+            m_iCurPauseBufSize = 0;
+            m_bufPause[0] = 0;
+            m_state = STATE_PAUSE;
+        }
+    }
 }
 
 void DumpViewFrame::OnClear(wxCommandEvent& evt)

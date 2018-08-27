@@ -5,7 +5,7 @@
 GuidTranslator::GuidTranslator() :
 	m_reGuid(0)
 {
-	m_reGuid = new wxRegEx( wxT("[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"));
+	m_reGuid = new wxRegEx( "[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}");
 }
 
 GuidTranslator::~GuidTranslator()
@@ -23,7 +23,7 @@ int GuidTranslator::ReadTranslationTable(wxString &filename)
 	}
 
 	wxString line = fp.GetFirstLine();
-	if ( line != wxT("[GUID]"))
+	if ( line != "[GUID]")
 	{
 		// Format error
 		return -2;
@@ -36,7 +36,7 @@ int GuidTranslator::ReadTranslationTable(wxString &filename)
 	m_guidMap.clear();
 	for ( line = fp.GetNextLine(); !fp.Eof(); line = fp.GetNextLine())
 	{
-		if ( wxNOT_FOUND != (pos = line.Find( wxT('='))) )
+		if ( wxNOT_FOUND != (pos = line.Find( '=')) )
 		{
 			key = line.Mid( 0, pos).Upper();
 			value = line.Mid( pos+1);

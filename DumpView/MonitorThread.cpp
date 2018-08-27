@@ -112,7 +112,7 @@ bool MonitorThread::m_InitSerialPort()
         return false;
     }
 
-    wxString port_name = wxString::Format( wxT("\\\\.\\COM%d"), m_PortNum);
+    wxString port_name = wxString::Format( "\\\\.\\COM%d", m_PortNum);
 
     m_hSerialPort = ::CreateFile(
         port_name.c_str(),
@@ -200,7 +200,7 @@ std::list<int>* MonitorThread::GetAvailableComPorts()
 
 	for ( int i = 0; i <= m_MaxPortNum; i++)
 	{
-		if ( ::GetDefaultCommConfig( wxString::Format( wxT("COM%d"), i).c_str(), &cc, &size))
+		if ( ::GetDefaultCommConfig( wxString::Format( "COM%d", i).c_str(), &cc, &size))
 		{
 			m_AvailComPorts.push_back(i);
 		}

@@ -10,11 +10,11 @@ OutputBoxMouseHandler::OutputBoxMouseHandler(void)
     m_pPopupMenu(0)
 {
     m_pPopupMenu = new wxMenu();
-    m_pPopupMenu->Append( DumpViewFrame::ID_MENU_COPY_ALL, wxT("Copy all to clipboard"));
-    m_pPopupMenu->Append( DumpViewFrame::ID_MENU_COPY, wxT("Copy selection to clipboard"));
-    m_pPopupMenu->Append( DumpViewFrame::ID_MENU_SAVEAS, wxT("Save log..."));
+    m_pPopupMenu->Append( DumpViewFrame::ID_MENU_COPY_ALL, "Copy all to clipboard");
+    m_pPopupMenu->Append( DumpViewFrame::ID_MENU_COPY, "Copy selection to clipboard");
+    m_pPopupMenu->Append( DumpViewFrame::ID_MENU_SAVEAS, "Save log...");
     m_pPopupMenu->AppendSeparator();
-    m_pPopupMenu->Append( DumpViewFrame::ID_BUTTON_CLEAR, wxT("Clear log"));
+    m_pPopupMenu->Append( DumpViewFrame::ID_BUTTON_CLEAR, "Clear log");
 }
 
 OutputBoxMouseHandler::~OutputBoxMouseHandler(void)

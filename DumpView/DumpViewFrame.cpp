@@ -85,25 +85,25 @@ const int SWITCH_ON = 0;
 const int SWITCH_OFF = 1;
 
 // Used for registry settings
-const wxString REG_WINDOW_WIDTH     = wxT("Window Width");
-const wxString REG_WINDOW_HEIGHT    = wxT("Window Height");
-const wxString REG_POS_X            = wxT("Position X");
-const wxString REG_POS_Y            = wxT("Position Y");
-const wxString REG_COM_NUM          = wxT("COM Number");
-const wxString REG_BAUD_RATE        = wxT("BAUD Rate");
-const wxString REG_MANUAL_BAUD_RATE = wxT("Manual Baud Rate");
-const wxString REG_PARITY           = wxT("Parity");
-const wxString REG_BYTE_SIZE        = wxT("ByteSize");
-const wxString REG_STOP_BIT         = wxT("StopBit");
-const wxString REG_FONT             = wxT("Font");
-const wxString REG_FONT_COLOR       = wxT("FontColor");
-const wxString REG_DEFAULT_LOG_DIR  = wxT("DefaultLogDir");
-const wxString REG_LAST_LOG_DIR     = wxT("LastVisitedLogDir");
-const wxString REG_USE_LAST_DIR     = wxT("UseLastLogDir");
-const wxString REG_GUID_DEF_FILE	= wxT("GuidDefFile");
-const wxString REG_GUID_AUTO_LOAD	= wxT("GuidAutoLoad");
-const wxString REG_RETAIN_TAIL_LINES	= wxT("RetainOnlyTailLines");
-const wxString REG_TAIL_COUNT		= wxT("TailCount");
+const wxString REG_WINDOW_WIDTH     = "Window Width";
+const wxString REG_WINDOW_HEIGHT    = "Window Height";
+const wxString REG_POS_X            = "Position X";
+const wxString REG_POS_Y            = "Position Y";
+const wxString REG_COM_NUM          = "COM Number";
+const wxString REG_BAUD_RATE        = "BAUD Rate";
+const wxString REG_MANUAL_BAUD_RATE = "Manual Baud Rate";
+const wxString REG_PARITY           = "Parity";
+const wxString REG_BYTE_SIZE        = "ByteSize";
+const wxString REG_STOP_BIT         = "StopBit";
+const wxString REG_FONT             = "Font";
+const wxString REG_FONT_COLOR       = "FontColor";
+const wxString REG_DEFAULT_LOG_DIR  = "DefaultLogDir";
+const wxString REG_LAST_LOG_DIR     = "LastVisitedLogDir";
+const wxString REG_USE_LAST_DIR     = "UseLastLogDir";
+const wxString REG_GUID_DEF_FILE	= "GuidDefFile";
+const wxString REG_GUID_AUTO_LOAD	= "GuidAutoLoad";
+const wxString REG_RETAIN_TAIL_LINES	= "RetainOnlyTailLines";
+const wxString REG_TAIL_COUNT		= "TailCount";
 
 const int STATUS_COLS = 3;
 
@@ -123,15 +123,15 @@ DumpViewFrame::DumpViewFrame(const wxString& title) :
     int pos_x = -1, pos_y = -1;
 
     //------- Initiate internal variables
-	m_strDefaultPath = wxT(".");
-    m_strDumpFilename = wxT("dump.txt");
+	m_strDefaultPath = ".";
+    m_strDumpFilename = "dump.txt";
 
     //------- Init buffer
     m_iCurPauseBufSize = 0;
     m_bufPause = new unsigned char[PAUSE_BUF_SIZE];
 
     //------- Set up UI
-    SetIcon( wxIcon(wxT("mondrian"), wxBITMAP_TYPE_ICO_RESOURCE));
+    SetIcon( wxIcon("mondrian", wxBITMAP_TYPE_ICO_RESOURCE));
 
     wxPanel* panel = new wxPanel( this, wxID_ANY);
     wxBoxSizer* panelSizer = new wxBoxSizer( wxVERTICAL);
@@ -278,7 +278,7 @@ void DumpViewFrame::m_InitMenuBar(void)
     m_menuSettings->Append(m_menuSetFont);
     m_menuSetFolder = new wxMenuItem(m_menuSettings, ID_MENU_SETFOLDER, _("Default log folder..."), wxEmptyString, wxITEM_NORMAL);
     m_menuSettings->Append(m_menuSetFolder);
-	m_menuLoadGuidDef = new wxMenuItem(m_menuSettings, ID_MENU_LOADGUIDDEF, wxT("Load GUID definitions..."), wxEmptyString, wxITEM_NORMAL);
+	m_menuLoadGuidDef = new wxMenuItem(m_menuSettings, ID_MENU_LOADGUIDDEF, "Load GUID definitions...", wxEmptyString, wxITEM_NORMAL);
 	m_menuSettings->Append(m_menuLoadGuidDef);
     MenuBar1->Append(m_menuSettings, _("&Settings"));
     m_menuHelp = new wxMenu();
@@ -301,25 +301,25 @@ void DumpViewFrame::m_InitSizedComponents(wxWindow* parent)
     	_("On"),
     	_("Off")
     };
-    m_radioSwitch = new wxRadioBox(parent, ID_RADIOBOX_SWITCH, _("Port Switch"), wxDefaultPosition, wxDefaultSize, 2, __wxRadioBoxChoices_1, 1, 0, wxDefaultValidator, _T("ID_RADIOBOX_SWITCH"));
+    m_radioSwitch = new wxRadioBox(parent, ID_RADIOBOX_SWITCH, _("Port Switch"), wxDefaultPosition, wxDefaultSize, 2, __wxRadioBoxChoices_1, 1, 0, wxDefaultValidator, "ID_RADIOBOX_SWITCH");
     BoxSizer2->Add(m_radioSwitch, 0, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
     BoxSizer8 = new wxBoxSizer(wxVERTICAL);
     BoxSizer7 = new wxBoxSizer(wxHORIZONTAL);
 	BoxSizer9 = new wxBoxSizer(wxHORIZONTAL);
     BoxSizer4 = new wxBoxSizer(wxVERTICAL);
-    m_checkboxPause = new wxCheckBox(parent, ID_CHECKBOX_PAUSE, _("Pause"), wxDefaultPosition, wxSize(52,22), 0, wxDefaultValidator, _T("ID_CHECKBOX_PAUSE"));
+    m_checkboxPause = new wxCheckBox(parent, ID_CHECKBOX_PAUSE, _("Pause"), wxDefaultPosition, wxSize(52,22), 0, wxDefaultValidator, "ID_CHECKBOX_PAUSE");
     m_checkboxPause->SetValue(false);
     BoxSizer4->Add(m_checkboxPause, 0, wxLEFT|wxRIGHT|wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL, 5);
-    m_checkboxRec = new wxCheckBox(parent, ID_CHECKBOX_REC, _("Record"), wxDefaultPosition, wxSize(58,16), 0, wxDefaultValidator, _T("ID_CHECKBOX_REC"));
+    m_checkboxRec = new wxCheckBox(parent, ID_CHECKBOX_REC, _("Record"), wxDefaultPosition, wxSize(58,16), 0, wxDefaultValidator, "ID_CHECKBOX_REC");
     m_checkboxRec->SetValue(false);
     BoxSizer4->Add(m_checkboxRec, 0, wxLEFT|wxRIGHT|wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL, 5);
     BoxSizer7->Add(BoxSizer4, 0, wxALL|wxEXPAND|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
-	m_buttonTranslateGuid = new wxButton( parent, ID_BUTTON_TRANSLATE_GUID, wxT("Translate GUID"));
+	m_buttonTranslateGuid = new wxButton( parent, ID_BUTTON_TRANSLATE_GUID, "Translate GUID");
 	BoxSizer7->Add( m_buttonTranslateGuid, 0, wxALL | wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL, 5);
-    m_buttonClear = new wxButton(parent, ID_BUTTON_CLEAR, _("Clear logs"), wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, _T("ID_BUTTON_CLEAR"));
+    m_buttonClear = new wxButton(parent, ID_BUTTON_CLEAR, _("Clear logs"), wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, "ID_BUTTON_CLEAR");
     BoxSizer7->Add(m_buttonClear, 1, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
     BoxSizer8->Add(BoxSizer7, 1, wxALL|wxEXPAND|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 0);
-	m_checkboxRetainTailLines = new wxCheckBox(parent, ID_CHECKBOX_RETAIN_TAIL_LINES, wxT("Retain only last "));
+	m_checkboxRetainTailLines = new wxCheckBox(parent, ID_CHECKBOX_RETAIN_TAIL_LINES, "Retain only last ");
 	BoxSizer9->Add(m_checkboxRetainTailLines, 0, wxLEFT|wxALIGN_CENTER_VERTICAL, 10);
 	wxIntegerValidator<int> val;
 	val.SetMax(1000000);
@@ -330,23 +330,23 @@ void DumpViewFrame::m_InitSizedComponents(wxWindow* parent)
 	BoxSizer9->Add(new wxStaticText(parent, wxID_ANY, " lines of log."), 0, wxRIGHT | wxALIGN_CENTER_VERTICAL, 5);
 	BoxSizer8->Add(BoxSizer9);
     BoxSizer6 = new wxBoxSizer(wxHORIZONTAL);
-    labelQuickSearch = new wxStaticText(parent, ID_STATICTEXT1, _("Quick Search:"), wxDefaultPosition, wxSize(88,14), wxALIGN_RIGHT, _T("ID_STATICTEXT1"));
+    labelQuickSearch = new wxStaticText(parent, ID_STATICTEXT1, _("Quick Search:"), wxDefaultPosition, wxSize(88,14), wxALIGN_RIGHT, "ID_STATICTEXT1");
     BoxSizer6->Add(labelQuickSearch, 0, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
-    m_textFindTarget = new wxTextCtrl(parent, ID_TEXT_FIND_TARGET, wxEmptyString, wxDefaultPosition, wxSize(112,24), wxTE_PROCESS_ENTER, wxDefaultValidator, _T("ID_TEXT_FIND_TARGET"));
+    m_textFindTarget = new wxTextCtrl(parent, ID_TEXT_FIND_TARGET, wxEmptyString, wxDefaultPosition, wxSize(112,24), wxTE_PROCESS_ENTER, wxDefaultValidator, "ID_TEXT_FIND_TARGET");
     m_textFindTarget->SetMinSize(wxSize(112,24));
     BoxSizer6->Add(m_textFindTarget, 1, wxTOP|wxBOTTOM|wxLEFT|wxEXPAND|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
-    m_checkboxCaseSensitive = new wxCheckBox(parent, ID_CHECKBOX_CASE_SENSITIVE, _("Case Sensitive"), wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, _T("ID_CHECKBOX_CASE_SENSITIVE"));
+    m_checkboxCaseSensitive = new wxCheckBox(parent, ID_CHECKBOX_CASE_SENSITIVE, _("Case Sensitive"), wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, "ID_CHECKBOX_CASE_SENSITIVE");
     m_checkboxCaseSensitive->SetValue(false);
     BoxSizer6->Add(m_checkboxCaseSensitive, 0, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
-    m_buttonFind = new wxButton(parent, ID_BUTTON_FIND, _("Find"), wxDefaultPosition, wxSize(61,24), 0, wxDefaultValidator, _T("ID_BUTTON_FIND"));
+    m_buttonFind = new wxButton(parent, ID_BUTTON_FIND, _("Find"), wxDefaultPosition, wxSize(61,24), 0, wxDefaultValidator, "ID_BUTTON_FIND");
     BoxSizer6->Add(m_buttonFind, 0, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 0);
     BoxSizer8->Add(BoxSizer6, 0, wxALL|wxEXPAND|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 0);
     BoxSizer2->Add(BoxSizer8, 1, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
     BoxSizer3->Add(BoxSizer2, 0, wxALL|wxEXPAND|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 0);
     BoxSizer5 = new wxBoxSizer(wxHORIZONTAL);
-    m_textLogFilename = new wxTextCtrl(parent, ID_TEXT_DEFAULT_FOLDER, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, _T("ID_TEXT_DEFAULT_FOLDER"));
+    m_textLogFilename = new wxTextCtrl(parent, ID_TEXT_DEFAULT_FOLDER, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, "ID_TEXT_DEFAULT_FOLDER");
     BoxSizer5->Add(m_textLogFilename, 1, wxTOP|wxBOTTOM|wxLEFT|wxEXPAND|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
-    m_buttonSelectFile = new wxButton(parent, ID_BUTTON_SELECT_FILE, _("..."), wxDefaultPosition, wxSize(29,24), 0, wxDefaultValidator, _T("ID_BUTTON_SELECT_FILE"));
+    m_buttonSelectFile = new wxButton(parent, ID_BUTTON_SELECT_FILE, _("..."), wxDefaultPosition, wxSize(29,24), 0, wxDefaultValidator, "ID_BUTTON_SELECT_FILE");
     BoxSizer5->Add(m_buttonSelectFile, 0, wxTOP|wxBOTTOM|wxRIGHT|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
     BoxSizer3->Add(BoxSizer5, 0, wxALL|wxEXPAND|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 0);
 #ifdef USE_RICH_EDIT
@@ -363,7 +363,7 @@ void DumpViewFrame::m_InitSizedComponents(wxWindow* parent)
 
 void DumpViewFrame::m_InitStatusBar(void)
 {
-    m_statusBar1 = new wxStatusBar(this, ID_STATUSBAR1, 0, _T("ID_STATUSBAR1"));
+    m_statusBar1 = new wxStatusBar(this, ID_STATUSBAR1, 0, "ID_STATUSBAR1");
     int __wxStatusBarWidths_1[STATUS_COLS] = { 60, 100, -1 };
     int __wxStatusBarStyles_1[STATUS_COLS] = { wxSB_NORMAL, wxSB_NORMAL, wxSB_NORMAL };
     m_statusBar1->SetFieldsCount(STATUS_COLS,__wxStatusBarWidths_1);
@@ -380,45 +380,45 @@ wxString DumpViewFrame::m_FormatErrorMessage(DWORD error_no)
 
 void DumpViewFrame::m_ShowPortInfoOnStatusBar( ComPortSetting &settings)
 {
-    m_statusBar1->SetStatusText( wxString::Format( wxT("COM%d"), settings.PortNum), 0);
+    m_statusBar1->SetStatusText( wxString::Format( "COM%d", settings.PortNum), 0);
 
     wxString result;
-    result.Printf( wxT("%d %d-"), (-1 == settings.BaudRate) ? settings.ManualBaudRate : settings.BaudRate, settings.ByteSize);
+    result.Printf( "%d %d-", (-1 == settings.BaudRate) ? settings.ManualBaudRate : settings.BaudRate, settings.ByteSize);
     switch( settings.Parity)
     {
     case 0:
-        result += wxT("N-");
+        result += "N-";
         break;
     case 1:
-        result += wxT("O-");
+        result += "O-";
         break;
     case 2:
-        result += wxT("E-");
+        result += "E-";
         break;
     case 3:
-        result += wxT("M-");
+        result += "M-";
         break;
     case 4:
-        result += wxT("S-");
+        result += "S-";
         break;
     default:
-        result += wxT("?-");
+        result += "?-";
         break;
     }
 
     switch( settings.StopBit)
     {
     case 0:
-        result += wxT("1");
+        result += "1";
         break;
     case 1:
-        result += wxT("1.5");
+        result += "1.5";
         break;
     case 2:
-        result += wxT("2");
+        result += "2";
         break;
     default:
-        result += wxT("?");
+        result += "?";
         break;
     }
 
@@ -599,7 +599,7 @@ void DumpViewFrame::OnThreadCallback(wxCommandEvent& evt)
 					}
 				}
 #ifdef USE_RICH_EDIT
-                m_statusBar1->SetStatusText( wxString::Format( wxT("(%d,%d,%d)"),
+                m_statusBar1->SetStatusText( wxString::Format( "(%d,%d,%d)",
                     m_OutputBox->GetScrollPos( wxVERTICAL),
                     m_OutputBox->GetScrollRange( wxVERTICAL),
                     m_OutputBox->GetCaretPosition()));
@@ -626,7 +626,7 @@ void DumpViewFrame::OnThreadCallback(wxCommandEvent& evt)
         break;
 
     case MONITOR_EVENT_TYPE_TERMINATED:
-        wxMessageBox( wxString::Format( wxT("Cannot read from serial port:\n%s"), m_FormatErrorMessage(m_PortMonitor->GetErrorCode())));
+        wxMessageBox( wxString::Format( "Cannot read from serial port:\n%s", m_FormatErrorMessage(m_PortMonitor->GetErrorCode())));
         m_radioSwitch->SetSelection(1);
         m_ResetPort = false;
     case MONITOR_EVENT_TYPE_STOPPED:
@@ -640,7 +640,7 @@ void DumpViewFrame::OnThreadCallback(wxCommandEvent& evt)
         break;
 
     case MONITOR_EVENT_TYPE_INIT_FAILED:
-        wxMessageBox( wxString::Format( wxT("Specific port cannot be initialized:\n%s"), m_FormatErrorMessage(m_PortMonitor->GetErrorCode()) ));
+        wxMessageBox( wxString::Format( "Specific port cannot be initialized:\n%s", m_FormatErrorMessage(m_PortMonitor->GetErrorCode()) ));
         m_radioSwitch->Enable();
         m_radioSwitch->SetSelection( SWITCH_OFF);
         m_state = STATE_STOP;
@@ -651,13 +651,13 @@ void DumpViewFrame::OnThreadCallback(wxCommandEvent& evt)
 
 void DumpViewFrame::OnOpen( wxCommandEvent& evt)
 {
-    wxFileDialog* dlg = new wxFileDialog(this, wxT("Open..."), m_strDefaultPath, m_strDumpFilename, wxT("*.*"), wxFD_OPEN);
+    wxFileDialog* dlg = new wxFileDialog(this, "Open...", m_strDefaultPath, m_strDumpFilename, "*.*", wxFD_OPEN);
     if (wxID_OK == dlg->ShowModal())
     {
         m_OutputBox->Clear();
 		if ( !m_OutputBox->LoadFile( dlg->GetPath()))
 		{
-			wxMessageBox( wxT("Load file failed."));
+			wxMessageBox( "Load file failed.");
 		}
     }
     dlg->Destroy();
@@ -665,7 +665,7 @@ void DumpViewFrame::OnOpen( wxCommandEvent& evt)
 
 void DumpViewFrame::OnSaveAs(wxCommandEvent& evt)
 {
-    wxFileDialog* dlg = new wxFileDialog(this, wxT("Save as..."), m_strDefaultPath, m_strDumpFilename, wxT("*.*"), wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
+    wxFileDialog* dlg = new wxFileDialog(this, "Save as...", m_strDefaultPath, m_strDumpFilename, "*.*", wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
     if (wxID_OK == dlg->ShowModal())
     {
         m_OutputBox->SaveFile( dlg->GetPath());
@@ -689,7 +689,7 @@ void DumpViewFrame::OnFind(wxCommandEvent& evt)
     const int LENGTH_PER_READ = 100 * 1024;
     wxString pattern, content;
 
-    m_statusBar1->SetStatusText( wxT(""), STATUS_COLS-1);
+    m_statusBar1->SetStatusText( "", STATUS_COLS-1);
 
     pattern = m_textFindTarget->GetValue();
 
@@ -753,15 +753,15 @@ void DumpViewFrame::OnFind(wxCommandEvent& evt)
             m_OutputBox->SetFocus();
             m_OutputBox->SetInsertionPoint( result);
             m_OutputBox->SetSelection( result, result + pattern.Length());
-            //m_statusBar1->SetStatusText( wxString::Format( wxT("%d"), result));
+            //m_statusBar1->SetStatusText( wxString::Format( "%d", result));
             if ( has_warpped)
             {
-                m_statusBar1->SetStatusText( wxT("Warpped to start..."), STATUS_COLS-1);
+                m_statusBar1->SetStatusText( "Warpped to start...", STATUS_COLS-1);
             }
         }
         else
         {
-            m_statusBar1->SetStatusText( wxT("Not found."), STATUS_COLS-1);
+            m_statusBar1->SetStatusText( "Not found.", STATUS_COLS-1);
         }
     }
 }
@@ -769,14 +769,14 @@ void DumpViewFrame::OnFind(wxCommandEvent& evt)
 void DumpViewFrame::OnTranslateGuid( wxCommandEvent &evt)
 {
 	int line_count = m_OutputBox->GetNumberOfLines();
-	wxString new_content = wxT("");
+	wxString new_content = "";
 	wxString line_text;
 
 	for ( int i = 0; i < line_count; i++)
 	{
 		line_text = m_OutputBox->GetLineText(i);
 		new_content += m_GuidTranslator.TranslateString( line_text);
-		new_content += wxT("\n");
+		new_content += "\n";
 	}
 
 	m_OutputBox->ChangeValue( new_content);
@@ -886,16 +886,16 @@ void DumpViewFrame::m_LoadGuidDefFile_body(void)
 	}
 	else
 	{
-		wxString reason = wxT("(Reason unknown)");
+		wxString reason = "(Reason unknown)";
 		if ( result == -1)
 		{
-			reason = wxT("Definition file not found.");
+			reason = "Definition file not found.";
 		}
 		else if ( result == -2)
 		{
-			reason = wxT("Definition file format error.");
+			reason = "Definition file format error.";
 		}
-		wxMessageBox( wxT("Error: ") + reason, wxT("Failed to open GUID definition file!"));
+		wxMessageBox( "Error: " + reason, "Failed to open GUID definition file!");
 		m_buttonTranslateGuid->Enable(false);
 	}
 }
@@ -946,7 +946,7 @@ void DumpViewFrame::OnRec(wxCommandEvent& evt)
     else
     {
         wxFileName filename( m_textLogFilename->GetValue());
-        if ( filename.GetFullName() == wxT(""))
+        if ( filename.GetFullName() == "")
         {
             if ( !m_SelectFile_body(false))
             {
@@ -1006,10 +1006,10 @@ bool DumpViewFrame::m_SelectFile_body( bool prompt_overwrite)
 
     wxFileDialog* dlg = new wxFileDialog(
         this,
-        wxT("Select file to store logs..."),
+        "Select file to store logs...",
         m_strDefaultPath,
         m_strDumpFilename,
-        wxT("*.*"),
+        "*.*",
         wxFD_SAVE | (prompt_overwrite?wxFD_OVERWRITE_PROMPT:0));
 
     if ( wxID_OK == dlg->ShowModal())

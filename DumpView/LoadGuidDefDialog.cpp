@@ -16,21 +16,21 @@ BEGIN_EVENT_TABLE( LoadGuidDefDialog, wxDialog)
 END_EVENT_TABLE()
 
 LoadGuidDefDialog::LoadGuidDefDialog(GuidDefSettings* settings, wxWindow* parent) :
-	wxDialog( parent, ID_LOAD_GUID_DEF_DIALOG, wxT("Select GUID definition file...")),
+	wxDialog( parent, ID_LOAD_GUID_DEF_DIALOG, "Select GUID definition file..."),
     m_settings(settings)
 {
 	wxBoxSizer *sizerDefPathAndBtn, *sizerOkCancelBtn, *sizerTop;
 
 	m_textGuidDefFilePath = new wxTextCtrl( this, ID_TEXT_PATH, m_settings->pathToDefFile);
-    m_btnSelectGuidDefFile = new wxButton( this, ID_BTN_SELECT_PATH, wxT("..."), wxDefaultPosition, wxSize( 30, wxDefaultSize.GetY()));
+    m_btnSelectGuidDefFile = new wxButton( this, ID_BTN_SELECT_PATH, "...", wxDefaultPosition, wxSize( 30, wxDefaultSize.GetY()));
 	sizerDefPathAndBtn = new wxBoxSizer( wxHORIZONTAL); 
 	sizerDefPathAndBtn->Add( m_textGuidDefFilePath, 1, wxTOP | wxBOTTOM | wxLEFT | wxALIGN_CENTER_VERTICAL, 5);
 	sizerDefPathAndBtn->Add( m_btnSelectGuidDefFile, 0, wxTOP | wxBOTTOM | wxRIGHT | wxALIGN_CENTER_VERTICAL, 5);
 
-    m_chkboxAutoLoad = new wxCheckBox( this, ID_CHKBOX_AUTO_LOAD, wxT("Automatically load GUID table when start-up."));
+    m_chkboxAutoLoad = new wxCheckBox( this, ID_CHKBOX_AUTO_LOAD, "Automatically load GUID table when start-up.");
 
-	m_btnOk = new wxButton( this, ID_BTN_OK, wxT("OK"));
-    m_btnCancel = new wxButton( this, ID_BTN_CANCEL, wxT("Cancel"));
+	m_btnOk = new wxButton( this, ID_BTN_OK, "OK");
+    m_btnCancel = new wxButton( this, ID_BTN_CANCEL, "Cancel");
 	sizerOkCancelBtn = new wxBoxSizer( wxHORIZONTAL);
 	sizerOkCancelBtn->Add( m_btnOk, 0, wxRIGHT, 10);
 	sizerOkCancelBtn->Add( m_btnCancel, 0, wxLEFT, 10);
@@ -62,7 +62,7 @@ void LoadGuidDefDialog::OnBtnSelecGuidDefFile_Clicked( wxCommandEvent& evt)
 {
 	wxFileName filename(m_settings->pathToDefFile);
 
-	wxFileDialog* dlg = new wxFileDialog( this, wxT("Select GUID definition file..."), filename.GetPath(), filename.GetFullName());
+	wxFileDialog* dlg = new wxFileDialog( this, "Select GUID definition file...", filename.GetPath(), filename.GetFullName());
 
 	if ( dlg->ShowModal() == wxID_OK)
 	{

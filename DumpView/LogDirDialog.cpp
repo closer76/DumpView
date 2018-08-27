@@ -17,21 +17,21 @@ BEGIN_EVENT_TABLE( LogDirDialog, wxDialog)
 END_EVENT_TABLE()
 
 LogDirDialog::LogDirDialog(LogDirSettings* settings, wxWindow* parent, const wxPoint& pos,const wxSize& size) :
-    wxDialog( parent, ID_LOG_DIR_DIALOG, wxT("Set Default Log Directory"), pos, size),
+    wxDialog( parent, ID_LOG_DIR_DIALOG, "Set Default Log Directory", pos, size),
     m_settings(settings)
 {
 	wxBoxSizer *sizerLogDirAndBtn, *sizerOkCancelBtn, *sizerTop;
 
     m_textDefaultDir = new wxTextCtrl( this, ID_TEXT_DEFAULT_DIR, settings->defaultDir);
-    m_btnSelectDefaultDir = new wxButton( this, ID_BTN_SELECT_DEFAULT_DIR, wxT("..."), wxDefaultPosition, wxSize( 30, wxDefaultSize.GetY()));
+    m_btnSelectDefaultDir = new wxButton( this, ID_BTN_SELECT_DEFAULT_DIR, "...", wxDefaultPosition, wxSize( 30, wxDefaultSize.GetY()));
 	sizerLogDirAndBtn = new wxBoxSizer( wxHORIZONTAL); 
 	sizerLogDirAndBtn->Add( m_textDefaultDir, 1, wxTOP | wxBOTTOM | wxLEFT | wxALIGN_CENTER_VERTICAL, 5);
 	sizerLogDirAndBtn->Add( m_btnSelectDefaultDir, 0, wxTOP | wxBOTTOM | wxRIGHT | wxALIGN_CENTER_VERTICAL, 5);
 
-    m_chkboxUseLastDir = new wxCheckBox( this, ID_CHKBOX_USE_LAST_DIR, wxT("Use last-visited directory."));
+    m_chkboxUseLastDir = new wxCheckBox( this, ID_CHKBOX_USE_LAST_DIR, "Use last-visited directory.");
 
-	m_btnOk = new wxButton( this, ID_BTN_OK, wxT("OK"));
-    m_btnCancel = new wxButton( this, ID_BTN_CANCEL, wxT("Cancel"));
+	m_btnOk = new wxButton( this, ID_BTN_OK, "OK");
+    m_btnCancel = new wxButton( this, ID_BTN_CANCEL, "Cancel");
 	sizerOkCancelBtn = new wxBoxSizer( wxHORIZONTAL);
 	sizerOkCancelBtn->Add( m_btnOk, 0, wxRIGHT, 10);
 	sizerOkCancelBtn->Add( m_btnCancel, 0, wxLEFT, 10);
@@ -80,7 +80,7 @@ void LogDirDialog::OnBtnSelecDefaulttDir_Clicked( wxCommandEvent& evt)
 	wxDirDialog* dlg = 
 		new wxDirDialog(
 			this,
-			wxT("Select default directory..."),
+			"Select default directory...",
 			wxDir::Exists(m_textDefaultDir->GetValue()) ? m_textDefaultDir->GetValue() : wxEmptyString);
 
 	if ( dlg->ShowModal() == wxID_OK)

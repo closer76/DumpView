@@ -3,11 +3,11 @@
 
 #include <wx/string.h>
 
-const wxString APP_NAME = wxT("DumpView");
-const wxString WINDOW_TITLE = wxT("Dump View");
+const wxString APP_NAME = "DumpView";
+const wxString WINDOW_TITLE = "Dump View";
 
-const wxString VER = wxT("1.11");
-const wxString BUILD_DATE = wxT(__DATE__);
-const wxString BUILD_TIME = wxT(__TIME__);
+const wxString VER = "1.11";
+const wxString BUILD_DATE = __DATE__;
+const wxString BUILD_TIME = __TIME__;
 
 #endif

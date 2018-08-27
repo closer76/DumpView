@@ -302,60 +302,124 @@ void DumpViewFrame::m_InitSizedComponents(wxWindow* parent)
     	_("Off")
     };
     m_radioSwitch = new wxRadioBox(parent, ID_RADIOBOX_SWITCH, _("Port Switch"), wxDefaultPosition, wxDefaultSize, 2, __wxRadioBoxChoices_1, 1, 0, wxDefaultValidator, "ID_RADIOBOX_SWITCH");
-    BoxSizer2->Add(m_radioSwitch, 0, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
+    BoxSizer2->Add(m_radioSwitch, wxSizerFlags()
+		.Proportion(0)
+		.Border(wxALL, 5)
+		.Center());
     BoxSizer8 = new wxBoxSizer(wxVERTICAL);
     BoxSizer7 = new wxBoxSizer(wxHORIZONTAL);
 	BoxSizer9 = new wxBoxSizer(wxHORIZONTAL);
     BoxSizer4 = new wxBoxSizer(wxVERTICAL);
     m_checkboxPause = new wxCheckBox(parent, ID_CHECKBOX_PAUSE, _("Pause"), wxDefaultPosition, wxSize(52,22), 0, wxDefaultValidator, "ID_CHECKBOX_PAUSE");
     m_checkboxPause->SetValue(false);
-    BoxSizer4->Add(m_checkboxPause, 0, wxLEFT|wxRIGHT|wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL, 5);
+    BoxSizer4->Add(m_checkboxPause, wxSizerFlags()
+		.Proportion(0)
+		.Border(wxLEFT|wxRIGHT, 5)
+		.Align(wxALIGN_LEFT));
     m_checkboxRec = new wxCheckBox(parent, ID_CHECKBOX_REC, _("Record"), wxDefaultPosition, wxSize(58,16), 0, wxDefaultValidator, "ID_CHECKBOX_REC");
     m_checkboxRec->SetValue(false);
-    BoxSizer4->Add(m_checkboxRec, 0, wxLEFT|wxRIGHT|wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL, 5);
-    BoxSizer7->Add(BoxSizer4, 0, wxALL|wxEXPAND|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
+    BoxSizer4->Add(m_checkboxRec, wxSizerFlags()
+		.Proportion(0)
+		.Border(wxLEFT|wxRIGHT, 5)
+		.Align(wxALIGN_LEFT));
+    BoxSizer7->Add(BoxSizer4, wxSizerFlags()
+		.Proportion(0)
+		.Border(wxALL, 5)
+		.Expand());
 	m_buttonTranslateGuid = new wxButton( parent, ID_BUTTON_TRANSLATE_GUID, "Translate GUID");
-	BoxSizer7->Add( m_buttonTranslateGuid, 0, wxALL | wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL, 5);
+	BoxSizer7->Add( m_buttonTranslateGuid, wxSizerFlags()
+		.Proportion(0)
+		.Border(wxALL, 5)
+		.Center());
     m_buttonClear = new wxButton(parent, ID_BUTTON_CLEAR, _("Clear logs"), wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, "ID_BUTTON_CLEAR");
-    BoxSizer7->Add(m_buttonClear, 1, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
-    BoxSizer8->Add(BoxSizer7, 1, wxALL|wxEXPAND|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 0);
+	BoxSizer7->Add(m_buttonClear, wxSizerFlags()
+		.Proportion(1)
+		.Border(wxALL, 5)
+		.Center());
+    BoxSizer8->Add(BoxSizer7, wxSizerFlags()
+		.Proportion(1)
+		.Border(wxALL, 0)
+		.Expand());
 	m_checkboxRetainTailLines = new wxCheckBox(parent, ID_CHECKBOX_RETAIN_TAIL_LINES, "Retain only last ");
-	BoxSizer9->Add(m_checkboxRetainTailLines, 0, wxLEFT|wxALIGN_CENTER_VERTICAL, 10);
+	BoxSizer9->Add(m_checkboxRetainTailLines, wxSizerFlags()
+		.Proportion(0)
+		.Border(wxLEFT, 10)
+		.Center());
 	wxIntegerValidator<int> val;
 	val.SetMax(1000000);
 	m_textTailCount = new wxTextCtrl(parent, ID_TEXT_TAIL_COUNT, wxEmptyString, wxDefaultPosition, wxSize(60, -1), wxTE_RIGHT | wxTE_PROCESS_ENTER, val);
 	m_textTailCount->Bind(wxEVT_SET_FOCUS, &DumpViewFrame::OnTailCountFocusOn, this);
 	m_textTailCount->Bind(wxEVT_KILL_FOCUS, &DumpViewFrame::OnTailCountFocusOff, this);
-	BoxSizer9->Add(m_textTailCount, 0, wxALIGN_CENTER_VERTICAL, 5);
-	BoxSizer9->Add(new wxStaticText(parent, wxID_ANY, " lines of log."), 0, wxRIGHT | wxALIGN_CENTER_VERTICAL, 5);
-	BoxSizer8->Add(BoxSizer9);
+	BoxSizer9->Add(m_textTailCount, wxSizerFlags()
+		.Proportion(0)
+		.Border(wxLEFT | wxRIGHT, 5)
+		.Center());
+	BoxSizer9->Add(new wxStaticText(parent, wxID_ANY, " lines of log."), wxSizerFlags()
+		.Proportion(0)
+		.Border(wxRIGHT, 5)
+		.Center());
+	BoxSizer8->Add(BoxSizer9, wxSizerFlags()
+		.Border(wxALL, 0));
     BoxSizer6 = new wxBoxSizer(wxHORIZONTAL);
     labelQuickSearch = new wxStaticText(parent, ID_STATICTEXT1, _("Quick Search:"), wxDefaultPosition, wxSize(88,14), wxALIGN_RIGHT, "ID_STATICTEXT1");
-    BoxSizer6->Add(labelQuickSearch, 0, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
+    BoxSizer6->Add(labelQuickSearch, wxSizerFlags()
+		.Proportion(0)
+		.Border(wxALL, 5)
+		.Center());
     m_textFindTarget = new wxTextCtrl(parent, ID_TEXT_FIND_TARGET, wxEmptyString, wxDefaultPosition, wxSize(112,24), wxTE_PROCESS_ENTER, wxDefaultValidator, "ID_TEXT_FIND_TARGET");
     m_textFindTarget->SetMinSize(wxSize(112,24));
-    BoxSizer6->Add(m_textFindTarget, 1, wxTOP|wxBOTTOM|wxLEFT|wxEXPAND|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
+    BoxSizer6->Add(m_textFindTarget, wxSizerFlags()
+		.Proportion(1)
+		.Border(wxTOP|wxBOTTOM|wxLEFT, 5)
+		.Expand());
     m_checkboxCaseSensitive = new wxCheckBox(parent, ID_CHECKBOX_CASE_SENSITIVE, _("Case Sensitive"), wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, "ID_CHECKBOX_CASE_SENSITIVE");
     m_checkboxCaseSensitive->SetValue(false);
-    BoxSizer6->Add(m_checkboxCaseSensitive, 0, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
+    BoxSizer6->Add(m_checkboxCaseSensitive, wxSizerFlags()
+		.Proportion(0)
+		.Border(wxALL, 5)
+		.Center());
     m_buttonFind = new wxButton(parent, ID_BUTTON_FIND, _("Find"), wxDefaultPosition, wxSize(61,24), 0, wxDefaultValidator, "ID_BUTTON_FIND");
-    BoxSizer6->Add(m_buttonFind, 0, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 0);
-    BoxSizer8->Add(BoxSizer6, 0, wxALL|wxEXPAND|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 0);
-    BoxSizer2->Add(BoxSizer8, 1, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
-    BoxSizer3->Add(BoxSizer2, 0, wxALL|wxEXPAND|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 0);
+    BoxSizer6->Add(m_buttonFind, wxSizerFlags()
+		.Proportion(0)
+		.Border(wxALL, 0)
+		.Center());
+    BoxSizer8->Add(BoxSizer6, wxSizerFlags()
+		.Proportion(0)
+		.Border(wxALL, 0)
+		.Expand());
+    BoxSizer2->Add(BoxSizer8, wxSizerFlags()
+		.Proportion(1)
+		.Border(wxALL, 5)
+		.Center());
+    BoxSizer3->Add(BoxSizer2, wxSizerFlags()
+		.Proportion(0)
+		.Border(wxALL, 0)
+		.Expand());
     BoxSizer5 = new wxBoxSizer(wxHORIZONTAL);
     m_textLogFilename = new wxTextCtrl(parent, ID_TEXT_DEFAULT_FOLDER, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, "ID_TEXT_DEFAULT_FOLDER");
-    BoxSizer5->Add(m_textLogFilename, 1, wxTOP|wxBOTTOM|wxLEFT|wxEXPAND|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
+    BoxSizer5->Add(m_textLogFilename, wxSizerFlags()
+		.Proportion(1)
+		.Border(wxTOP|wxBOTTOM|wxLEFT, 5)
+		.Expand());
     m_buttonSelectFile = new wxButton(parent, ID_BUTTON_SELECT_FILE, _("..."), wxDefaultPosition, wxSize(29,24), 0, wxDefaultValidator, "ID_BUTTON_SELECT_FILE");
-    BoxSizer5->Add(m_buttonSelectFile, 0, wxTOP|wxBOTTOM|wxRIGHT|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
-    BoxSizer3->Add(BoxSizer5, 0, wxALL|wxEXPAND|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 0);
+    BoxSizer5->Add(m_buttonSelectFile, wxSizerFlags()
+		.Proportion(0)
+		.Border(wxTOP|wxBOTTOM|wxRIGHT, 5)
+		.Center());
+    BoxSizer3->Add(BoxSizer5, wxSizerFlags()
+		.Proportion(0)
+		.Border(wxALL, 0)
+		.Expand());
 #ifdef USE_RICH_EDIT
     m_OutputBox = new wxRichTextCtrl( this, ID_OUTPUT_BOX, wxEmptyString, wxDefaultPosition, wxSize(160,120), wxRE_READONLY | wxRE_MULTILINE);
 #else
 //    m_OutputBox = new wxTextCtrl( parent, ID_OUTPUT_BOX, wxEmptyString, wxDefaultPosition, wxSize(160, 120), wxTE_MULTILINE | wxTE_READONLY | wxTE_PROCESS_ENTER | wxTE_RICH);
     m_OutputBox = new wxTextCtrl( parent, ID_OUTPUT_BOX, wxEmptyString, wxDefaultPosition, wxSize(160, 120), wxTE_MULTILINE | wxTE_READONLY | wxTE_PROCESS_ENTER);
 #endif
-    BoxSizer3->Add(m_OutputBox, 1, wxALL|wxEXPAND|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
+    BoxSizer3->Add(m_OutputBox, wxSizerFlags()
+		.Proportion(1)
+		.Border(wxALL, 5)
+		.Expand());
     parent->SetSizer(BoxSizer3);
     BoxSizer3->Fit(parent);
     BoxSizer3->SetSizeHints(parent);

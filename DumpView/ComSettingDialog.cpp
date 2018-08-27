@@ -108,11 +108,21 @@ ComSettingDialog::ComSettingDialog(wxWindow* parent,wxWindowID id,const wxPoint&
 	grid_sizer->Add(m_labelStopBit, flags);
 	grid_sizer->Add(m_choiceStopBit, flags);
 
-	button_sizer->Add( m_buttonOk, wxSizerFlags().Proportion(1).Expand().Border(wxRIGHT, 5));
-	button_sizer->Add( m_buttonCancel, wxSizerFlags().Proportion(1).Expand().Border(wxLEFT, 5));
+	button_sizer->Add( m_buttonOk, wxSizerFlags()
+		.Proportion(1)
+		.Expand()
+		.Border(wxRIGHT, 5));
+	button_sizer->Add( m_buttonCancel, wxSizerFlags()
+		.Proportion(1)
+		.Expand()
+		.Border(wxLEFT, 5));
 
-	top_sizer->Add( grid_sizer, wxSizerFlags().Expand().Border(wxALL, 10).Align(wxALIGN_CENTER_HORIZONTAL));
-	top_sizer->Add( button_sizer, wxSizerFlags().Expand().Border(wxALL, 10).Align(wxALIGN_CENTER_HORIZONTAL));
+	top_sizer->Add( grid_sizer, wxSizerFlags()
+		.Expand()
+		.Border(wxALL, 10));
+	top_sizer->Add( button_sizer, wxSizerFlags()
+		.Expand()
+		.Border(wxALL, 10));
 
 	SetSizer( top_sizer);
 	top_sizer->SetSizeHints(this);

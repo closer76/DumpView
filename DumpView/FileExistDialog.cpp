@@ -33,19 +33,40 @@ FileExistDialog::FileExistDialog(wxWindow* parent,wxWindowID id,const wxPoint& p
 	Create(parent, wxID_ANY, _("File exists!"), wxDefaultPosition, wxDefaultSize, wxDEFAULT_DIALOG_STYLE, "wxID_ANY");
 	BoxSizer1 = new wxBoxSizer(wxVERTICAL);
 	StaticText1 = new wxStaticText(this, ID_STATICTEXT1, _("This file already exists:"), wxDefaultPosition, wxDefaultSize, 0, "ID_STATICTEXT1");
-	BoxSizer1->Add(StaticText1, 0, wxALL|wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL, 5);
+	BoxSizer1->Add(StaticText1, wxSizerFlags()
+		.Proportion(0)
+		.Border(wxALL, 5)
+		.Left());
 	m_labelFilename = new wxStaticText(this, ID_STATICTEXT2, _("(filename)"), wxDefaultPosition, wxDefaultSize, 0, "ID_STATICTEXT2");
-	BoxSizer1->Add(m_labelFilename, 0, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
+	BoxSizer1->Add(m_labelFilename, wxSizerFlags()
+		.Proportion(0)
+		.Border(wxALL, 5)
+		.Center());
 	StaticText3 = new wxStaticText(this, ID_STATICTEXT3, _("What do you want to do\?"), wxDefaultPosition, wxDefaultSize, 0, "ID_STATICTEXT3");
-	BoxSizer1->Add(StaticText3, 0, wxALL|wxALIGN_LEFT|wxALIGN_CENTER_VERTICAL, 5);
+	BoxSizer1->Add(StaticText3, wxSizerFlags()
+		.Proportion(0)
+		.Border(wxALL, 5)
+		.Left());
 	BoxSizer2 = new wxBoxSizer(wxHORIZONTAL);
 	m_buttonOverwrite = new wxButton(this, ID_BUTTON_OVERWRITE, _("Overwrite"), wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, "ID_BUTTON_OVERWRITE");
-	BoxSizer2->Add(m_buttonOverwrite, 1, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
+	BoxSizer2->Add(m_buttonOverwrite, wxSizerFlags()
+		.Proportion(1)
+		.Border(wxALL, 5)
+		.Center());
 	m_buttonAppend = new wxButton(this, ID_BUTTON_APPEND, _("Append"), wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, "ID_BUTTON_APPEND");
-	BoxSizer2->Add(m_buttonAppend, 1, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
+	BoxSizer2->Add(m_buttonAppend, wxSizerFlags()
+		.Proportion(1)
+		.Border(wxALL, 5)
+		.Center());
 	m_buttonCancel = new wxButton(this, ID_BUTTON_CANCEL, _("Cancel"), wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, "ID_BUTTON_CANCEL");
-	BoxSizer2->Add(m_buttonCancel, 1, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
-	BoxSizer1->Add(BoxSizer2, 1, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
+	BoxSizer2->Add(m_buttonCancel, wxSizerFlags()
+		.Proportion(1)
+		.Border(wxALL, 5)
+		.Center());
+	BoxSizer1->Add(BoxSizer2, wxSizerFlags()
+		.Proportion(1)
+		.Border(wxALL, 5)
+		.Center());
 	SetSizer(BoxSizer1);
 	BoxSizer1->Fit(this);
 	BoxSizer1->SetSizeHints(this);

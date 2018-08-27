@@ -23,7 +23,6 @@ AboutDialog::AboutDialog(wxWindow* parent,wxWindowID id,const wxPoint& pos,const
 	wxRegEx reDate("([A-Za-z]+) ([0-9]+) ([0-9]+)");
 	wxString strYear = ( reDate.IsValid() && reDate.Matches( BUILD_DATE)) ? reDate.GetMatch( BUILD_DATE, 3) : "2013";
 
-	//(*Initialize(AboutDialog)
 	wxBoxSizer* BoxSizer1;
 	
 	Create(parent, wxID_ANY, _("About Dump View..."), wxDefaultPosition, wxDefaultSize, wxDEFAULT_DIALOG_STYLE, "wxID_ANY");
@@ -34,15 +33,24 @@ AboutDialog::AboutDialog(wxWindow* parent,wxWindowID id,const wxPoint& pos,const
     wxBitmap bmp;
     bmp.CopyFromIcon( icon);
     m_imgLogo = new wxStaticBitmap(this, ID_STATICBITMAP1, bmp, wxDefaultPosition, wxDefaultSize, 0, "ID_STATICBITMAP1");
+	BoxSizer1->Add(m_imgLogo, wxSizerFlags()
+		.Border(wxALL, 5)
+		.Align(wxCENTER)
+		.Proportion(0));
 
-    BoxSizer1->Add(m_imgLogo, 0, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
-    m_labelCopyright = new wxStaticText(this, ID_LABEL_COPYRIGHT, wxString::Format( _("Dump View\nVersion %s (%s-%s)\n\nKenneth Lo (closer.tw@gmail.com)\nCopyright (c) 2009-%s"), VER, BUILD_DATE, BUILD_TIME, strYear), wxDefaultPosition, wxDefaultSize, 0, "ID_LABEL_COPYRIGHT");
-	BoxSizer1->Add(m_labelCopyright, 1, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
+	m_labelCopyright = new wxStaticText(this, ID_LABEL_COPYRIGHT, wxString::Format( _("Dump View\nVersion %s (%s-%s)\n\nKenneth Lo (closer.tw@gmail.com)\nCopyright (c) 2009-%s"), VER, BUILD_DATE, BUILD_TIME, strYear), wxDefaultPosition, wxDefaultSize, 0, "ID_LABEL_COPYRIGHT");
+	BoxSizer1->Add(m_labelCopyright, wxSizerFlags()
+		.Proportion(1)
+		.Border(wxALL, 5)
+		.Align(wxCENTER));
+
 	m_buttonOk = new wxButton(this, wxID_OK, _("OK"), wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, "wxID_OK");
-	BoxSizer1->Add(m_buttonOk, 0, wxALL|wxALIGN_CENTER_HORIZONTAL|wxALIGN_CENTER_VERTICAL, 5);
+	BoxSizer1->Add(m_buttonOk, wxSizerFlags()
+		.Proportion(1)
+		.Border(wxALL, 5)
+		.Align(wxCENTER));
 	SetSizer(BoxSizer1);
 	BoxSizer1->SetSizeHints(this);
-	//*)
 }
 
 AboutDialog::~AboutDialog()

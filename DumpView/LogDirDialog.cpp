@@ -25,21 +25,39 @@ LogDirDialog::LogDirDialog(LogDirSettings* settings, wxWindow* parent, const wxP
     m_textDefaultDir = new wxTextCtrl( this, ID_TEXT_DEFAULT_DIR, settings->defaultDir);
     m_btnSelectDefaultDir = new wxButton( this, ID_BTN_SELECT_DEFAULT_DIR, "...", wxDefaultPosition, wxSize( 30, wxDefaultSize.GetY()));
 	sizerLogDirAndBtn = new wxBoxSizer( wxHORIZONTAL); 
-	sizerLogDirAndBtn->Add( m_textDefaultDir, 1, wxTOP | wxBOTTOM | wxLEFT | wxALIGN_CENTER_VERTICAL, 5);
-	sizerLogDirAndBtn->Add( m_btnSelectDefaultDir, 0, wxTOP | wxBOTTOM | wxRIGHT | wxALIGN_CENTER_VERTICAL, 5);
+	sizerLogDirAndBtn->Add(m_textDefaultDir, wxSizerFlags()
+		.Proportion(1)
+		.Border(wxTOP | wxBOTTOM | wxLEFT, 5)
+		.Center());
+	sizerLogDirAndBtn->Add( m_btnSelectDefaultDir, wxSizerFlags()
+		.Proportion(0)
+		.Border(wxTOP | wxBOTTOM | wxRIGHT, 5)
+		.Center());
 
     m_chkboxUseLastDir = new wxCheckBox( this, ID_CHKBOX_USE_LAST_DIR, "Use last-visited directory.");
 
 	m_btnOk = new wxButton( this, ID_BTN_OK, "OK");
     m_btnCancel = new wxButton( this, ID_BTN_CANCEL, "Cancel");
 	sizerOkCancelBtn = new wxBoxSizer( wxHORIZONTAL);
-	sizerOkCancelBtn->Add( m_btnOk, 0, wxRIGHT, 10);
-	sizerOkCancelBtn->Add( m_btnCancel, 0, wxLEFT, 10);
+	sizerOkCancelBtn->Add( m_btnOk, wxSizerFlags()
+		.Proportion(0)
+		.Border(wxRIGHT, 10));
+	sizerOkCancelBtn->Add( m_btnCancel, wxSizerFlags()
+		.Proportion(0)
+		.Border(wxLEFT, 10));
 
 	sizerTop = new wxBoxSizer( wxVERTICAL);
-	sizerTop->Add( sizerLogDirAndBtn, 0, wxEXPAND | wxALL, 5);
-	sizerTop->Add( m_chkboxUseLastDir, 0, wxLEFT | wxRIGHT | wxBOTTOM, 10);
-	sizerTop->Add( sizerOkCancelBtn, 0, wxALL | wxALIGN_CENTER, 10);
+	sizerTop->Add( sizerLogDirAndBtn, wxSizerFlags()
+		.Proportion(0)
+		.Expand()
+		.Border(wxALL, 5));
+	sizerTop->Add( m_chkboxUseLastDir, wxSizerFlags()
+		.Proportion(0)
+		.Border(wxLEFT | wxRIGHT | wxBOTTOM, 10));
+	sizerTop->Add( sizerOkCancelBtn, wxSizerFlags()
+		.Proportion(0)
+		.Border(wxALL, 10)
+		.Center());
 
 	this->SetSizer( sizerTop);
 	sizerTop->Fit( this);

@@ -24,21 +24,39 @@ LoadGuidDefDialog::LoadGuidDefDialog(GuidDefSettings* settings, wxWindow* parent
 	m_textGuidDefFilePath = new wxTextCtrl( this, ID_TEXT_PATH, m_settings->pathToDefFile);
     m_btnSelectGuidDefFile = new wxButton( this, ID_BTN_SELECT_PATH, "...", wxDefaultPosition, wxSize( 30, wxDefaultSize.GetY()));
 	sizerDefPathAndBtn = new wxBoxSizer( wxHORIZONTAL); 
-	sizerDefPathAndBtn->Add( m_textGuidDefFilePath, 1, wxTOP | wxBOTTOM | wxLEFT | wxALIGN_CENTER_VERTICAL, 5);
-	sizerDefPathAndBtn->Add( m_btnSelectGuidDefFile, 0, wxTOP | wxBOTTOM | wxRIGHT | wxALIGN_CENTER_VERTICAL, 5);
+	sizerDefPathAndBtn->Add(m_textGuidDefFilePath, wxSizerFlags()
+		.Proportion(1)
+		.Border(wxTOP | wxBOTTOM | wxLEFT, 5)
+		.Center());
+	sizerDefPathAndBtn->Add(m_btnSelectGuidDefFile, wxSizerFlags()
+		.Proportion(0)
+		.Border(wxTOP | wxBOTTOM | wxRIGHT, 5)
+		.Center());
 
     m_chkboxAutoLoad = new wxCheckBox( this, ID_CHKBOX_AUTO_LOAD, "Automatically load GUID table when start-up.");
 
 	m_btnOk = new wxButton( this, ID_BTN_OK, "OK");
     m_btnCancel = new wxButton( this, ID_BTN_CANCEL, "Cancel");
 	sizerOkCancelBtn = new wxBoxSizer( wxHORIZONTAL);
-	sizerOkCancelBtn->Add( m_btnOk, 0, wxRIGHT, 10);
-	sizerOkCancelBtn->Add( m_btnCancel, 0, wxLEFT, 10);
+	sizerOkCancelBtn->Add( m_btnOk, wxSizerFlags()
+		.Proportion(0)
+		.Border(wxRIGHT, 10));
+	sizerOkCancelBtn->Add( m_btnCancel, wxSizerFlags()
+		.Proportion(0)
+		.Border(wxLEFT, 10));
 
 	sizerTop = new wxBoxSizer( wxVERTICAL);
-	sizerTop->Add( sizerDefPathAndBtn, 0, wxEXPAND | wxALL, 5);
-	sizerTop->Add( m_chkboxAutoLoad, 0, wxLEFT | wxRIGHT | wxBOTTOM, 10);
-	sizerTop->Add( sizerOkCancelBtn, 0, wxALL | wxALIGN_CENTER, 10);
+	sizerTop->Add(sizerDefPathAndBtn, wxSizerFlags()
+		.Proportion(0)
+		.Expand()
+		.Border(wxALL, 5));
+	sizerTop->Add(m_chkboxAutoLoad, wxSizerFlags()
+		.Proportion(0)
+		.Border(wxLEFT | wxRIGHT | wxBOTTOM, 10));
+	sizerTop->Add( sizerOkCancelBtn, wxSizerFlags()
+		.Proportion(0)
+		.Border(wxALL, 10)
+		.Center());
 
 	this->SetSizer( sizerTop);
 	sizerTop->Fit( this);

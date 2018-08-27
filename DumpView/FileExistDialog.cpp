@@ -23,42 +23,46 @@ BEGIN_EVENT_TABLE(FileExistDialog,wxDialog)
 END_EVENT_TABLE()
 
 FileExistDialog::FileExistDialog(wxWindow* parent,wxWindowID id,const wxPoint& pos,const wxSize& size)
+	: wxDialog(parent, id, _("File exists!"))
 {
-	//(*Initialize(FileExistDialog)
 	wxStaticText* StaticText1;
 	wxBoxSizer* BoxSizer2;
 	wxStaticText* StaticText3;
 	wxBoxSizer* BoxSizer1;
 	
-	Create(parent, wxID_ANY, _("File exists!"), wxDefaultPosition, wxDefaultSize, wxDEFAULT_DIALOG_STYLE, "wxID_ANY");
 	BoxSizer1 = new wxBoxSizer(wxVERTICAL);
-	StaticText1 = new wxStaticText(this, ID_STATICTEXT1, _("This file already exists:"), wxDefaultPosition, wxDefaultSize, 0, "ID_STATICTEXT1");
+	StaticText1 = new wxStaticText(this, wxID_ANY, _("This file already exists:"));
 	BoxSizer1->Add(StaticText1, wxSizerFlags()
 		.Proportion(0)
 		.Border(wxALL, 5)
 		.Left());
-	m_labelFilename = new wxStaticText(this, ID_STATICTEXT2, _("(filename)"), wxDefaultPosition, wxDefaultSize, 0, "ID_STATICTEXT2");
+
+	m_labelFilename = new wxStaticText(this, wxID_ANY, _("(filename)"));
 	BoxSizer1->Add(m_labelFilename, wxSizerFlags()
 		.Proportion(0)
 		.Border(wxALL, 5)
 		.Center());
-	StaticText3 = new wxStaticText(this, ID_STATICTEXT3, _("What do you want to do\?"), wxDefaultPosition, wxDefaultSize, 0, "ID_STATICTEXT3");
+	StaticText3 = new wxStaticText(this, wxID_ANY, _("What do you want to do\?"));
 	BoxSizer1->Add(StaticText3, wxSizerFlags()
 		.Proportion(0)
 		.Border(wxALL, 5)
 		.Left());
+
 	BoxSizer2 = new wxBoxSizer(wxHORIZONTAL);
-	m_buttonOverwrite = new wxButton(this, ID_BUTTON_OVERWRITE, _("Overwrite"), wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, "ID_BUTTON_OVERWRITE");
+
+	m_buttonOverwrite = new wxButton(this, ID_BUTTON_OVERWRITE, _("Overwrite"));
 	BoxSizer2->Add(m_buttonOverwrite, wxSizerFlags()
 		.Proportion(1)
 		.Border(wxALL, 5)
 		.Center());
-	m_buttonAppend = new wxButton(this, ID_BUTTON_APPEND, _("Append"), wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, "ID_BUTTON_APPEND");
+
+	m_buttonAppend = new wxButton(this, ID_BUTTON_APPEND, _("Append"));
 	BoxSizer2->Add(m_buttonAppend, wxSizerFlags()
 		.Proportion(1)
 		.Border(wxALL, 5)
 		.Center());
-	m_buttonCancel = new wxButton(this, ID_BUTTON_CANCEL, _("Cancel"), wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, "ID_BUTTON_CANCEL");
+
+	m_buttonCancel = new wxButton(this, ID_BUTTON_CANCEL, _("Cancel"));
 	BoxSizer2->Add(m_buttonCancel, wxSizerFlags()
 		.Proportion(1)
 		.Border(wxALL, 5)
@@ -70,13 +74,10 @@ FileExistDialog::FileExistDialog(wxWindow* parent,wxWindowID id,const wxPoint& p
 	SetSizer(BoxSizer1);
 	BoxSizer1->Fit(this);
 	BoxSizer1->SetSizeHints(this);
-	//*)
 }
 
 FileExistDialog::~FileExistDialog()
 {
-	//(*Destroy(FileExistDialog)
-	//*)
 }
 
 void FileExistDialog::OnButtonClicks(wxCommandEvent &evt)

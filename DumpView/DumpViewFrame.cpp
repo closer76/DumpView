@@ -74,7 +74,6 @@ BEGIN_EVENT_TABLE(DumpViewFrame, wxFrame)
     EVT_CHECKBOX( ID_CHECKBOX_PAUSE, DumpViewFrame::OnPause)
 	EVT_CHECKBOX( ID_CHECKBOX_RETAIN_TAIL_LINES, DumpViewFrame::OnRetainTailLinesSelected)
 
-    EVT_TEXT_ENTER( ID_TEXT_FIND_TARGET, DumpViewFrame::OnFind)
     EVT_TEXT_ENTER( ID_OUTPUT_BOX, DumpViewFrame::OnFind)
 	EVT_TEXT_ENTER( ID_TEXT_TAIL_COUNT, DumpViewFrame::OnTailCountEntered)
 
@@ -107,18 +106,18 @@ const wxString REG_TAIL_COUNT		= "TailCount";
 
 const int STATUS_COLS = 3;
 
-DumpViewFrame::DumpViewFrame(const wxString& title) : 
-    wxFrame(NULL, wxID_ANY, title, wxDefaultPosition, wxDefaultSize, wxDEFAULT_FRAME_STYLE),
-    m_IsRecording(false),
-    m_fpLog(0),
-    m_ResetPort(false),
-    m_bufPause(0),
-	m_iTailCount(-1),
-	m_GuidDefSettings(0),
-	m_LogDirSettings(0),
-    m_pAppConfig(0),
-    m_sizeTopWindow(0, 0),
-    m_pMouseEvtHandler(0)
+DumpViewFrame::DumpViewFrame(const wxString& title)
+	: wxFrame(NULL, wxID_ANY, title, wxDefaultPosition, wxDefaultSize, wxDEFAULT_FRAME_STYLE)
+	, m_IsRecording(false)
+	, m_fpLog(0)
+	, m_ResetPort(false)
+	, m_bufPause(0)
+	, m_iTailCount(-1)
+	, m_GuidDefSettings(0)
+	, m_LogDirSettings(0)
+	, m_pAppConfig(0)
+	, m_sizeTopWindow(0, 0)
+	, m_pMouseEvtHandler(0)
 {
     int pos_x = -1, pos_y = -1;
 
@@ -255,34 +254,34 @@ void DumpViewFrame::m_InitMenuBar(void)
 
     MenuBar1 = new wxMenuBar();
     m_menuFile = new wxMenu();
-    m_menuOpen = new wxMenuItem(m_menuFile, ID_MENU_OPEN, _("&Open...\tCtrl-O"), wxEmptyString, wxITEM_NORMAL);
+    m_menuOpen = new wxMenuItem(m_menuFile, ID_MENU_OPEN, _("&Open...\tCtrl-O"));
     m_menuFile->Append( m_menuOpen);
-    m_menuSaveAs = new wxMenuItem(m_menuFile, ID_MENU_SAVEAS, _("Save &as...\tCtrl-S"), wxEmptyString, wxITEM_NORMAL);
+    m_menuSaveAs = new wxMenuItem(m_menuFile, ID_MENU_SAVEAS, _("Save &as...\tCtrl-S"));
     m_menuFile->Append(m_menuSaveAs);
     m_menuFile->AppendSeparator();
-    m_menuExit = new wxMenuItem(m_menuFile, ID_MENU_QUIT, _("E&xit\tAlt-F4"), _("Quit the application"), wxITEM_NORMAL);
+    m_menuExit = new wxMenuItem(m_menuFile, ID_MENU_QUIT, _("E&xit\tAlt-F4"), _("Quit the application"));
     m_menuFile->Append(m_menuExit);
     MenuBar1->Append(m_menuFile, _("&File"));
     m_menuEdit = new wxMenu();
-//    m_menuFind = new wxMenuItem(m_menuEdit, ID_MENU_FIND, _("&Find...\tCtrl-F"), wxEmptyString, wxITEM_NORMAL);
+//    m_menuFind = new wxMenuItem(m_menuEdit, ID_MENU_FIND, _("&Find...\tCtrl-F"));
 //    m_menuEdit->Append(m_menuFind);
-    m_menuCopyAll = new wxMenuItem(m_menuEdit, ID_MENU_COPY_ALL, _("Copy all\tCtrl-A"), wxEmptyString, wxITEM_NORMAL);
+    m_menuCopyAll = new wxMenuItem(m_menuEdit, ID_MENU_COPY_ALL, _("Copy all\tCtrl-A"));
     m_menuEdit->Append(m_menuCopyAll);
-    m_menuCopy = new wxMenuItem(m_menuEdit, ID_MENU_COPY, _("Copy selected\tCtrl-C"), wxEmptyString, wxITEM_NORMAL);
+    m_menuCopy = new wxMenuItem(m_menuEdit, ID_MENU_COPY, _("Copy selected\tCtrl-C"));
     m_menuEdit->Append(m_menuCopy);
     MenuBar1->Append(m_menuEdit, _("Edit"));
     m_menuSettings = new wxMenu();
-    m_menuSetCom = new wxMenuItem(m_menuSettings, ID_MENU_SETCOM, _("COM port..."), wxEmptyString, wxITEM_NORMAL);
+    m_menuSetCom = new wxMenuItem(m_menuSettings, ID_MENU_SETCOM, _("COM port..."));
     m_menuSettings->Append(m_menuSetCom);
-    m_menuSetFont = new wxMenuItem(m_menuSettings, ID_MENU_SETFONT, _("Display font..."), wxEmptyString, wxITEM_NORMAL);
+    m_menuSetFont = new wxMenuItem(m_menuSettings, ID_MENU_SETFONT, _("Display font..."));
     m_menuSettings->Append(m_menuSetFont);
-    m_menuSetFolder = new wxMenuItem(m_menuSettings, ID_MENU_SETFOLDER, _("Default log folder..."), wxEmptyString, wxITEM_NORMAL);
+    m_menuSetFolder = new wxMenuItem(m_menuSettings, ID_MENU_SETFOLDER, _("Default log folder..."));
     m_menuSettings->Append(m_menuSetFolder);
-	m_menuLoadGuidDef = new wxMenuItem(m_menuSettings, ID_MENU_LOADGUIDDEF, "Load GUID definitions...", wxEmptyString, wxITEM_NORMAL);
+	m_menuLoadGuidDef = new wxMenuItem(m_menuSettings, ID_MENU_LOADGUIDDEF, "Load GUID definitions...");
 	m_menuSettings->Append(m_menuLoadGuidDef);
     MenuBar1->Append(m_menuSettings, _("&Settings"));
     m_menuHelp = new wxMenu();
-    m_menuAbout = new wxMenuItem(m_menuHelp, ID_MENU_ABOUT, _("About...\tF1"), _("Show info about this application"), wxITEM_NORMAL);
+    m_menuAbout = new wxMenuItem(m_menuHelp, ID_MENU_ABOUT, _("About...\tF1"), _("Show info about this application"));
     m_menuHelp->Append(m_menuAbout);
     MenuBar1->Append(m_menuHelp, _("Help"));
     SetMenuBar(MenuBar1);
@@ -296,12 +295,12 @@ void DumpViewFrame::m_InitSizedComponents(wxWindow* parent)
 
     BoxSizer3 = new wxBoxSizer(wxVERTICAL);
     BoxSizer2 = new wxBoxSizer(wxHORIZONTAL);
-    wxString __wxRadioBoxChoices_1[2] =
+    wxString switch_opt[2] =
     {
     	_("On"),
     	_("Off")
     };
-    m_radioSwitch = new wxRadioBox(parent, ID_RADIOBOX_SWITCH, _("Port Switch"), wxDefaultPosition, wxDefaultSize, 2, __wxRadioBoxChoices_1, 1, 0, wxDefaultValidator, "ID_RADIOBOX_SWITCH");
+    m_radioSwitch = new wxRadioBox(parent, ID_RADIOBOX_SWITCH, _("Port Switch"), wxDefaultPosition, wxDefaultSize, 2, switch_opt, 1);
     BoxSizer2->Add(m_radioSwitch, wxSizerFlags()
 		.Proportion(0)
 		.Border(wxALL, 5)
@@ -310,17 +309,17 @@ void DumpViewFrame::m_InitSizedComponents(wxWindow* parent)
     BoxSizer7 = new wxBoxSizer(wxHORIZONTAL);
 	BoxSizer9 = new wxBoxSizer(wxHORIZONTAL);
     BoxSizer4 = new wxBoxSizer(wxVERTICAL);
-    m_checkboxPause = new wxCheckBox(parent, ID_CHECKBOX_PAUSE, _("Pause"), wxDefaultPosition, wxSize(52,22), 0, wxDefaultValidator, "ID_CHECKBOX_PAUSE");
+    m_checkboxPause = new wxCheckBox(parent, ID_CHECKBOX_PAUSE, _("Pause"));
     m_checkboxPause->SetValue(false);
     BoxSizer4->Add(m_checkboxPause, wxSizerFlags()
 		.Proportion(0)
 		.Border(wxLEFT|wxRIGHT, 5)
 		.Align(wxALIGN_LEFT));
-    m_checkboxRec = new wxCheckBox(parent, ID_CHECKBOX_REC, _("Record"), wxDefaultPosition, wxSize(58,16), 0, wxDefaultValidator, "ID_CHECKBOX_REC");
+    m_checkboxRec = new wxCheckBox(parent, ID_CHECKBOX_REC, _("Record"));
     m_checkboxRec->SetValue(false);
     BoxSizer4->Add(m_checkboxRec, wxSizerFlags()
 		.Proportion(0)
-		.Border(wxLEFT|wxRIGHT, 5)
+		.Border(wxLEFT|wxRIGHT|wxTOP, 5)
 		.Align(wxALIGN_LEFT));
     BoxSizer7->Add(BoxSizer4, wxSizerFlags()
 		.Proportion(0)
@@ -331,7 +330,7 @@ void DumpViewFrame::m_InitSizedComponents(wxWindow* parent)
 		.Proportion(0)
 		.Border(wxALL, 5)
 		.Center());
-    m_buttonClear = new wxButton(parent, ID_BUTTON_CLEAR, _("Clear logs"), wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, "ID_BUTTON_CLEAR");
+    m_buttonClear = new wxButton(parent, ID_BUTTON_CLEAR, _("Clear logs"));
 	BoxSizer7->Add(m_buttonClear, wxSizerFlags()
 		.Proportion(1)
 		.Border(wxALL, 5)
@@ -345,11 +344,19 @@ void DumpViewFrame::m_InitSizedComponents(wxWindow* parent)
 		.Proportion(0)
 		.Border(wxLEFT, 10)
 		.Center());
+
 	wxIntegerValidator<int> val;
 	val.SetMax(1000000);
-	m_textTailCount = new wxTextCtrl(parent, ID_TEXT_TAIL_COUNT, wxEmptyString, wxDefaultPosition, wxSize(60, -1), wxTE_RIGHT | wxTE_PROCESS_ENTER, val);
+	m_textTailCount = new wxTextCtrl(parent,
+		ID_TEXT_TAIL_COUNT,
+		wxEmptyString,
+		wxDefaultPosition,
+		wxSize(60, -1),
+		wxTE_RIGHT | wxTE_PROCESS_ENTER,
+		val);
 	m_textTailCount->Bind(wxEVT_SET_FOCUS, &DumpViewFrame::OnTailCountFocusOn, this);
 	m_textTailCount->Bind(wxEVT_KILL_FOCUS, &DumpViewFrame::OnTailCountFocusOff, this);
+
 	BoxSizer9->Add(m_textTailCount, wxSizerFlags()
 		.Proportion(0)
 		.Border(wxLEFT | wxRIGHT, 5)
@@ -361,29 +368,36 @@ void DumpViewFrame::m_InitSizedComponents(wxWindow* parent)
 	BoxSizer8->Add(BoxSizer9, wxSizerFlags()
 		.Border(wxALL, 0));
     BoxSizer6 = new wxBoxSizer(wxHORIZONTAL);
-    labelQuickSearch = new wxStaticText(parent, ID_STATICTEXT1, _("Quick Search:"), wxDefaultPosition, wxSize(88,14), wxALIGN_RIGHT, "ID_STATICTEXT1");
+    labelQuickSearch = new wxStaticText(parent, ID_STATICTEXT1, _("Quick Search:"));
     BoxSizer6->Add(labelQuickSearch, wxSizerFlags()
 		.Proportion(0)
 		.Border(wxALL, 5)
 		.Center());
-    m_textFindTarget = new wxTextCtrl(parent, ID_TEXT_FIND_TARGET, wxEmptyString, wxDefaultPosition, wxSize(112,24), wxTE_PROCESS_ENTER, wxDefaultValidator, "ID_TEXT_FIND_TARGET");
-    m_textFindTarget->SetMinSize(wxSize(112,24));
+
+	m_textFindTarget = new wxTextCtrl(parent, wxID_ANY);
+	m_textFindTarget->SetWindowStyle(wxTE_PROCESS_ENTER);
+	m_textFindTarget->SetMinSize(wxSize(112,24));
+	m_textFindTarget->Bind(wxEVT_TEXT_ENTER, &DumpViewFrame::OnFind, this);
     BoxSizer6->Add(m_textFindTarget, wxSizerFlags()
 		.Proportion(1)
 		.Border(wxTOP|wxBOTTOM|wxLEFT, 5)
 		.Expand());
-    m_checkboxCaseSensitive = new wxCheckBox(parent, ID_CHECKBOX_CASE_SENSITIVE, _("Case Sensitive"), wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, "ID_CHECKBOX_CASE_SENSITIVE");
+
+	m_checkboxCaseSensitive = new wxCheckBox(parent, ID_CHECKBOX_CASE_SENSITIVE, _("Case Sensitive"));
     m_checkboxCaseSensitive->SetValue(false);
     BoxSizer6->Add(m_checkboxCaseSensitive, wxSizerFlags()
 		.Proportion(0)
 		.Border(wxALL, 5)
 		.Center());
-    m_buttonFind = new wxButton(parent, ID_BUTTON_FIND, _("Find"), wxDefaultPosition, wxSize(61,24), 0, wxDefaultValidator, "ID_BUTTON_FIND");
-    BoxSizer6->Add(m_buttonFind, wxSizerFlags()
+
+	m_buttonFind = new wxButton(parent, ID_BUTTON_FIND, _("Find"));
+	m_buttonFind->SetMinSize(wxSize(61, 24));
+	BoxSizer6->Add(m_buttonFind, wxSizerFlags()
 		.Proportion(0)
 		.Border(wxALL, 0)
 		.Center());
-    BoxSizer8->Add(BoxSizer6, wxSizerFlags()
+
+	BoxSizer8->Add(BoxSizer6, wxSizerFlags()
 		.Proportion(0)
 		.Border(wxALL, 0)
 		.Expand());
@@ -396,12 +410,15 @@ void DumpViewFrame::m_InitSizedComponents(wxWindow* parent)
 		.Border(wxALL, 0)
 		.Expand());
     BoxSizer5 = new wxBoxSizer(wxHORIZONTAL);
-    m_textLogFilename = new wxTextCtrl(parent, ID_TEXT_DEFAULT_FOLDER, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, "ID_TEXT_DEFAULT_FOLDER");
+
+	m_textLogFilename = new wxTextCtrl(parent, ID_TEXT_DEFAULT_FOLDER);
     BoxSizer5->Add(m_textLogFilename, wxSizerFlags()
 		.Proportion(1)
 		.Border(wxTOP|wxBOTTOM|wxLEFT, 5)
 		.Expand());
-    m_buttonSelectFile = new wxButton(parent, ID_BUTTON_SELECT_FILE, _("..."), wxDefaultPosition, wxSize(29,24), 0, wxDefaultValidator, "ID_BUTTON_SELECT_FILE");
+
+	m_buttonSelectFile = new wxButton(parent, ID_BUTTON_SELECT_FILE, _("..."));
+	m_buttonSelectFile->SetMinSize(wxSize(29, 24));
     BoxSizer5->Add(m_buttonSelectFile, wxSizerFlags()
 		.Proportion(0)
 		.Border(wxTOP|wxBOTTOM|wxRIGHT, 5)
@@ -410,13 +427,25 @@ void DumpViewFrame::m_InitSizedComponents(wxWindow* parent)
 		.Proportion(0)
 		.Border(wxALL, 0)
 		.Expand());
+
 #ifdef USE_RICH_EDIT
-    m_OutputBox = new wxRichTextCtrl( this, ID_OUTPUT_BOX, wxEmptyString, wxDefaultPosition, wxSize(160,120), wxRE_READONLY | wxRE_MULTILINE);
+	m_OutputBox = new wxRichTextCtrl(
+		this,
+		wxID_ANY,
+		wxEmptyString,
+		wxDefaultPosition,
+		wxSize(160, 120),
+		wxRE_READONLY | wxRE_MULTILINE);
 #else
-//    m_OutputBox = new wxTextCtrl( parent, ID_OUTPUT_BOX, wxEmptyString, wxDefaultPosition, wxSize(160, 120), wxTE_MULTILINE | wxTE_READONLY | wxTE_PROCESS_ENTER | wxTE_RICH);
-    m_OutputBox = new wxTextCtrl( parent, ID_OUTPUT_BOX, wxEmptyString, wxDefaultPosition, wxSize(160, 120), wxTE_MULTILINE | wxTE_READONLY | wxTE_PROCESS_ENTER);
+	m_OutputBox = new wxTextCtrl(
+		parent,
+		wxID_ANY,
+		wxEmptyString,
+		wxDefaultPosition,
+		wxSize(160, 120),
+		wxTE_MULTILINE | wxTE_READONLY | wxTE_PROCESS_ENTER);
 #endif
-    BoxSizer3->Add(m_OutputBox, wxSizerFlags()
+	BoxSizer3->Add(m_OutputBox, wxSizerFlags()
 		.Proportion(1)
 		.Border(wxALL, 5)
 		.Expand());
@@ -427,7 +456,7 @@ void DumpViewFrame::m_InitSizedComponents(wxWindow* parent)
 
 void DumpViewFrame::m_InitStatusBar(void)
 {
-    m_statusBar1 = new wxStatusBar(this, ID_STATUSBAR1, 0, "ID_STATUSBAR1");
+    m_statusBar1 = new wxStatusBar(this, wxID_ANY);
     int __wxStatusBarWidths_1[STATUS_COLS] = { 60, 100, -1 };
     int __wxStatusBarStyles_1[STATUS_COLS] = { wxSB_NORMAL, wxSB_NORMAL, wxSB_NORMAL };
     m_statusBar1->SetFieldsCount(STATUS_COLS,__wxStatusBarWidths_1);

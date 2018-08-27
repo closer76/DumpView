@@ -6,8 +6,8 @@ BEGIN_EVENT_TABLE( OutputBoxMouseHandler, wxEvtHandler)
 END_EVENT_TABLE()
 
 OutputBoxMouseHandler::OutputBoxMouseHandler(void)
-    : m_pOwner(0),
-    m_pPopupMenu(0)
+    : m_pOwner(0)
+	, m_pPopupMenu(0)
 {
     m_pPopupMenu = new wxMenu();
     m_pPopupMenu->Append( DumpViewFrame::ID_MENU_COPY_ALL, "Copy all to clipboard");
@@ -27,7 +27,7 @@ void OutputBoxMouseHandler::OnRightButtonUp(wxMouseEvent &evt)
 {
     if ( m_pOwner)
     {
-        m_pOwner->PopupMenu( m_pPopupMenu, evt.GetPosition().x, evt.GetPosition().y);
+        m_pOwner->PopupMenu( m_pPopupMenu, evt.GetPosition());
     }
 }
 

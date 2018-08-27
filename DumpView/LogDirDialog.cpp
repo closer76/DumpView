@@ -23,7 +23,7 @@ LogDirDialog::LogDirDialog(LogDirSettings* settings, wxWindow* parent, const wxP
 	wxBoxSizer *sizerLogDirAndBtn, *sizerOkCancelBtn, *sizerTop;
 
     m_textDefaultDir = new wxTextCtrl( this, ID_TEXT_DEFAULT_DIR, settings->defaultDir);
-    m_btnSelectDefaultDir = new wxButton( this, ID_BTN_SELECT_DEFAULT_DIR, "...", wxDefaultPosition, wxSize( 30, wxDefaultSize.GetY()));
+	m_btnSelectDefaultDir = new wxButton(this, ID_BTN_SELECT_DEFAULT_DIR, "...", wxDefaultPosition, wxSize(30, -1));
 	sizerLogDirAndBtn = new wxBoxSizer( wxHORIZONTAL); 
 	sizerLogDirAndBtn->Add(m_textDefaultDir, wxSizerFlags()
 		.Proportion(1)

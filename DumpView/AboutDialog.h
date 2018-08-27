@@ -16,25 +16,13 @@ class AboutDialog: public wxDialog
 		AboutDialog(wxWindow* parent,wxWindowID id=wxID_ANY,const wxPoint& pos=wxDefaultPosition,const wxSize& size=wxDefaultSize);
 		virtual ~AboutDialog();
 
-		//(*Declarations(AboutDialog)
 		wxStaticBitmap* m_imgLogo;
 		wxStaticText* m_labelCopyright;
 		wxButton* m_buttonOk;
-		//*)
 
 	protected:
 
-		//(*Identifiers(AboutDialog)
-		static const long ID_STATICBITMAP1;
-		static const long ID_LABEL_COPYRIGHT;
-		//*)
-
 	private:
-
-		//(*Handlers(AboutDialog)
-		//*)
-
-		DECLARE_EVENT_TABLE()
 };
 
 #endif

@@ -8,46 +8,21 @@
 #include <wx/sizer.h>
 #include <wx/valtext.h>
 
-//(*IdInit(ComSettingDialog)
-const long ComSettingDialog::ID_LABEL_PORT_NUM = wxNewId();
-const long ComSettingDialog::ID_LABEL_BAUD_RATE = wxNewId();
-const long ComSettingDialog::ID_LABEL_MANUAL_BAUD_RATE = wxNewId();
-const long ComSettingDialog::ID_LABEL_BYTE_SIZE = wxNewId();
-const long ComSettingDialog::ID_LABEL_PARITY = wxNewId();
-const long ComSettingDialog::ID_LABEL_STOP_BIT = wxNewId();
-const long ComSettingDialog::ID_CHOICE_PORT_NUM = wxNewId();
-const long ComSettingDialog::ID_CHOICE_BAUD_RATE = wxNewId();
-const long ComSettingDialog::ID_TEXT_MANUAL_BAUD_RATE = wxNewId();
-const long ComSettingDialog::ID_CHOICE_BYTE_SIZE = wxNewId();
-const long ComSettingDialog::ID_CHOICE_PARITY = wxNewId();
-const long ComSettingDialog::ID_CHOICE_STOP_BIT = wxNewId();
-const long ComSettingDialog::ID_BUTTON_OK = wxID_OK;
-const long ComSettingDialog::ID_BUTTON_CANCEL = wxID_CANCEL;
-//*)
-
-BEGIN_EVENT_TABLE(ComSettingDialog,wxDialog)
-	//(*EventTable(ComSettingDialog)
-	EVT_CHOICE( ID_CHOICE_BAUD_RATE, ComSettingDialog::OnBaudRateChanged)
-	//*)
-END_EVENT_TABLE()
-
 ComSettingDialog::ComSettingDialog(wxWindow* parent,wxWindowID id,const wxPoint& pos,const wxSize& size)
+	: wxDialog(parent, id, _("COM Port Settings..."))
 {
 	wxBoxSizer* top_sizer = new wxBoxSizer( wxVERTICAL);
-	wxFlexGridSizer* grid_sizer = new wxFlexGridSizer( 2, 5, 5);
+	wxFlexGridSizer* grid_sizer = new wxFlexGridSizer( 2, 15, 15);
 	wxBoxSizer* button_sizer = new wxBoxSizer( wxHORIZONTAL);
 
-	//(*Initialize(ComSettingDialog)
-	Create(parent, id, _("COM Port Settings..."), wxDefaultPosition, wxDefaultSize, wxDEFAULT_DIALOG_STYLE, "id");
-	SetClientSize(wxSize(306,244));
-	Move(wxDefaultPosition);
-	m_labelPortNumber = new wxStaticText(this, ID_LABEL_PORT_NUM, _("Port number:"), wxDefaultPosition, wxSize(104,14), wxALIGN_RIGHT, "ID_LABEL_PORT_NUM");
-	m_labelBaudRate = new wxStaticText(this, ID_LABEL_BAUD_RATE, _("Baud rate:"), wxDefaultPosition, wxSize(104,14), wxALIGN_RIGHT, "ID_LABEL_BAUD_RATE");
-	m_labelManualBaudRate = new wxStaticText(this, ID_LABEL_MANUAL_BAUD_RATE, _("(Manual)"), wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT, "ID_LABEL_MANUAL");
-	m_labelByteSize = new wxStaticText(this, ID_LABEL_BYTE_SIZE, _("Byte size:"), wxDefaultPosition, wxSize(104,14), wxALIGN_RIGHT, "ID_LABEL_BYTE_SIZE");
-	m_labelParity = new wxStaticText(this, ID_LABEL_PARITY, _("Parity:"), wxDefaultPosition, wxSize(104,14), wxALIGN_RIGHT, "ID_LABEL_PARITY");
-	m_labelStopBit = new wxStaticText(this, ID_LABEL_STOP_BIT, _("Stop bit:"), wxDefaultPosition, wxSize(104,14), wxALIGN_RIGHT, "ID_LABEL_STOP_BIT");
-	m_choicePortNumber = new wxChoice(this, ID_CHOICE_PORT_NUM, wxDefaultPosition, wxDefaultSize, 0, 0, 0, wxDefaultValidator, "ID_CHOICE_PORT_NUM");
+	m_labelPortNumber = new wxStaticText(this, wxID_ANY, _("Port number:"), wxDefaultPosition, wxSize(104,14), wxALIGN_RIGHT);
+	m_labelBaudRate = new wxStaticText(this, wxID_ANY, _("Baud rate:"), wxDefaultPosition, wxSize(104,14), wxALIGN_RIGHT);
+	m_labelManualBaudRate = new wxStaticText(this, wxID_ANY, _("(Manual)"), wxDefaultPosition, wxSize(104, 14), wxALIGN_RIGHT);
+	m_labelByteSize = new wxStaticText(this, wxID_ANY, _("Byte size:"), wxDefaultPosition, wxSize(104,14), wxALIGN_RIGHT);
+	m_labelParity = new wxStaticText(this, wxID_ANY, _("Parity:"), wxDefaultPosition, wxSize(104,14), wxALIGN_RIGHT);
+	m_labelStopBit = new wxStaticText(this, wxID_ANY, _("Stop bit:"), wxDefaultPosition, wxSize(104,14), wxALIGN_RIGHT);
+
+	m_choicePortNumber = new wxChoice(this, wxID_ANY);
 	m_choicePortNumber->Append(_("COM1"));
 	m_choicePortNumber->Append(_("COM2"));
 	m_choicePortNumber->Append(_("COM3"));
@@ -56,7 +31,8 @@ ComSettingDialog::ComSettingDialog(wxWindow* parent,wxWindowID id,const wxPoint&
 	m_choicePortNumber->Append(_("COM6"));
 	m_choicePortNumber->Append(_("COM7"));
 	m_choicePortNumber->Append(_("COM8"));
-	m_choiceBaudRate = new wxChoice(this, ID_CHOICE_BAUD_RATE, wxDefaultPosition, wxDefaultSize, 0, 0, 0, wxDefaultValidator, "ID_CHOICE_BAUD_RATE");
+
+	m_choiceBaudRate = new wxChoice(this, wxID_ANY);
 	m_choiceBaudRate->Append(_("110"));
 	m_choiceBaudRate->Append(_("300"));
 	m_choiceBaudRate->Append(_("600"));
@@ -72,41 +48,48 @@ ComSettingDialog::ComSettingDialog(wxWindow* parent,wxWindowID id,const wxPoint&
 	m_choiceBaudRate->Append(_("128000"));
 	m_choiceBaudRate->Append(_("256000"));
 	m_choiceBaudRate->Append(_("Manual..."));
-	m_textManualBaudRate = new wxTextCtrl( this, ID_TEXT_MANUAL_BAUD_RATE, _("115200"), wxDefaultPosition, wxDefaultSize, 0, wxTextValidator(wxFILTER_NUMERIC), "ID_TEXT_MANUAL_BAUD_RATE");
+	m_choiceBaudRate->Bind(wxEVT_CHOICE, &ComSettingDialog::OnBaudRateChanged, this);
+
+	m_textManualBaudRate = new wxTextCtrl( this, wxID_ANY, _("115200"), wxDefaultPosition, wxDefaultSize, 0, wxTextValidator(wxFILTER_NUMERIC));
 	m_textManualBaudRate->Disable();
-	m_choiceByteSize = new wxChoice(this, ID_CHOICE_BYTE_SIZE, wxDefaultPosition, wxDefaultSize, 0, 0, 0, wxDefaultValidator, "ID_CHOICE_BYTE_SIZE");
+
+	m_choiceByteSize = new wxChoice(this, wxID_ANY);
 	m_choiceByteSize->Append(_("5"));
 	m_choiceByteSize->Append(_("6"));
 	m_choiceByteSize->Append(_("7"));
 	m_choiceByteSize->Append(_("8"));
-	m_choiceParity = new wxChoice(this, ID_CHOICE_PARITY, wxDefaultPosition, wxDefaultSize, 0, 0, 0, wxDefaultValidator, "ID_CHOICE_PARITY");
+
+	m_choiceParity = new wxChoice(this, wxID_ANY);
 	m_choiceParity->Append(_("None"));
 	m_choiceParity->Append(_("Odd"));
 	m_choiceParity->Append(_("Even"));
 	m_choiceParity->Append(_("Mark"));
 	m_choiceParity->Append(_("Space"));
-	m_choiceStopBit = new wxChoice(this, ID_CHOICE_STOP_BIT, wxDefaultPosition, wxDefaultSize, 0, 0, 0, wxDefaultValidator, "ID_CHOICE_STOP_BIT");
+
+	m_choiceStopBit = new wxChoice(this, wxID_ANY);
 	m_choiceStopBit->Append(_("1"));
 	m_choiceStopBit->Append(_("1.5"));
 	m_choiceStopBit->Append(_("2"));
-	m_buttonOk = new wxButton(this, ID_BUTTON_OK, _("OK"), wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, "ID_BUTTON_OK");
-	m_buttonCancel = new wxButton(this, ID_BUTTON_CANCEL, _("Cancel"), wxDefaultPosition, wxDefaultSize, 0, wxDefaultValidator, "ID_BUTTON_CANCEL");
-	//*)
 
-	wxSizerFlags flags(1);
-	flags.Expand();
-	grid_sizer->Add(m_labelPortNumber, flags);
-	grid_sizer->Add(m_choicePortNumber, flags);
-	grid_sizer->Add(m_labelBaudRate,flags);
-	grid_sizer->Add(m_choiceBaudRate, flags);
-	grid_sizer->Add(m_labelManualBaudRate, flags);
-	grid_sizer->Add(m_textManualBaudRate, flags);
-	grid_sizer->Add(m_labelByteSize, flags);
-	grid_sizer->Add(m_choiceByteSize, flags);
-	grid_sizer->Add(m_labelParity, flags);
-	grid_sizer->Add(m_choiceParity, flags);
-	grid_sizer->Add(m_labelStopBit, flags);
-	grid_sizer->Add(m_choiceStopBit, flags);
+	m_buttonOk = new wxButton(this, wxID_OK, _("OK"));
+	m_buttonCancel = new wxButton(this, wxID_CANCEL, _("Cancel"));
+
+	wxSizerFlags flags_field(1);
+	flags_field.Expand();
+	wxSizerFlags flags_label(1);
+	flags_label.CenterVertical();
+	grid_sizer->Add(m_labelPortNumber, flags_label);
+	grid_sizer->Add(m_choicePortNumber, flags_field);
+	grid_sizer->Add(m_labelBaudRate, flags_label);
+	grid_sizer->Add(m_choiceBaudRate, flags_field);
+	grid_sizer->Add(m_labelManualBaudRate, flags_label);
+	grid_sizer->Add(m_textManualBaudRate, flags_field);
+	grid_sizer->Add(m_labelByteSize, flags_label);
+	grid_sizer->Add(m_choiceByteSize, flags_field);
+	grid_sizer->Add(m_labelParity, flags_label);
+	grid_sizer->Add(m_choiceParity, flags_field);
+	grid_sizer->Add(m_labelStopBit, flags_label);
+	grid_sizer->Add(m_choiceStopBit, flags_field);
 
 	button_sizer->Add( m_buttonOk, wxSizerFlags()
 		.Proportion(1)
@@ -119,10 +102,10 @@ ComSettingDialog::ComSettingDialog(wxWindow* parent,wxWindowID id,const wxPoint&
 
 	top_sizer->Add( grid_sizer, wxSizerFlags()
 		.Expand()
-		.Border(wxALL, 10));
+		.Border(wxALL, 30));
 	top_sizer->Add( button_sizer, wxSizerFlags()
 		.Expand()
-		.Border(wxALL, 10));
+		.Border(wxRIGHT | wxLEFT | wxBOTTOM, 10));
 
 	SetSizer( top_sizer);
 	top_sizer->SetSizeHints(this);
@@ -173,17 +156,9 @@ int StopBitTable [] =
 
 static int ParseComPortName( const wxString& name)
 {
-	int result = 0;
-	for ( int i = 3; i <= 4 && i < (int)name.length(); i++)
-	{
-		if ( ::wxIsdigit(name[i]))
-		{
-			result *= 10;
-			result += name[i] - '0';
-		}
-	}
+	int result = wxAtoi(name.Mid(3));
 
-	return result;
+	return result ? result : 1;
 }
 
 void ComSettingDialog::SetPortSettings( ComPortSetting &settings)

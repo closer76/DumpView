@@ -22,7 +22,7 @@ LoadGuidDefDialog::LoadGuidDefDialog(GuidDefSettings* settings, wxWindow* parent
 	wxBoxSizer *sizerDefPathAndBtn, *sizerOkCancelBtn, *sizerTop;
 
 	m_textGuidDefFilePath = new wxTextCtrl( this, ID_TEXT_PATH, m_settings->pathToDefFile);
-    m_btnSelectGuidDefFile = new wxButton( this, ID_BTN_SELECT_PATH, "...", wxDefaultPosition, wxSize( 30, wxDefaultSize.GetY()));
+	m_btnSelectGuidDefFile = new wxButton(this, ID_BTN_SELECT_PATH, "...", wxDefaultPosition, wxSize(30, -1));
 	sizerDefPathAndBtn = new wxBoxSizer( wxHORIZONTAL); 
 	sizerDefPathAndBtn->Add(m_textGuidDefFilePath, wxSizerFlags()
 		.Proportion(1)

@@ -114,10 +114,6 @@ bool MonitorThread::m_InitSerialPort()
 
     wxString port_name = wxString::Format( wxT("\\\\.\\COM%d"), m_PortNum);
 
-    wxChar err_str[128];
-
-    err_str[0] = wxT('\0');
-
     m_hSerialPort = ::CreateFile(
         port_name.c_str(),
         GENERIC_READ | GENERIC_WRITE,

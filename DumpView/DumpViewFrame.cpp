@@ -4,7 +4,6 @@
 #include "DumpViewFrame.h"
 #include "ComSettingDialog.h"
 #include "FileExistDialog.h"
-#include "OutputBoxMouseHandler.h"
 #include "AboutDialog.h"
 #include <wx/sizer.h>
 #include <wx/fontdlg.h>
@@ -19,7 +18,6 @@ wchar_t DumpViewFrame::m_wcTextBuffer[XFER_BUF_SIZE] = {0};
 const long DumpViewFrame::ID_MENU_OPEN = wxNewId();
 const long DumpViewFrame::ID_MENU_SAVEAS = wxNewId();
 const long DumpViewFrame::ID_MENU_QUIT = wxNewId();
-const long DumpViewFrame::ID_MENU_FIND = wxNewId();
 const long DumpViewFrame::ID_MENU_COPY_ALL = wxNewId();
 const long DumpViewFrame::ID_MENU_COPY = wxNewId();
 const long DumpViewFrame::ID_MENU_SETCOM = wxNewId();
@@ -72,7 +70,7 @@ DumpViewFrame::DumpViewFrame(const wxString& title)
 	, m_LogDirSettings(0)
 	, m_pAppConfig(0)
 	, m_sizeTopWindow(0, 0)
-	, m_pMouseEvtHandler(0)
+	, m_menuPopup(nullptr)
 {
     int pos_x = -1, pos_y = -1;
 
@@ -100,11 +98,6 @@ DumpViewFrame::DumpViewFrame(const wxString& title)
     m_InitStatusBar();
 
 	m_InitEventHandlers();
-
-    //------- Override the context menu of TextCtrl.
-    m_pMouseEvtHandler = new OutputBoxMouseHandler();
-    m_OutputBox->PushEventHandler(m_pMouseEvtHandler);
-    m_pMouseEvtHandler->SetOwner( m_OutputBox);
 
     //------- Get size & position setting from registry
     m_pAppConfig = new wxConfig(APP_NAME);
@@ -202,77 +195,64 @@ DumpViewFrame::DumpViewFrame(const wxString& title)
 
 void DumpViewFrame::m_InitMenuBar(void)
 {
-    wxMenuBar* MenuBar1;
-    wxMenu* m_menuFile;
-    wxMenu* m_menuHelp;
-    wxMenuItem* m_menuAbout;
-    wxMenuItem* m_menuExit;
-    wxMenuItem* m_menuOpen;
-
-    MenuBar1 = new wxMenuBar();
-    m_menuFile = new wxMenu();
+	wxMenuBar* mainMenuBar = new wxMenuBar();
+	wxMenu* menuFile = new wxMenu();
     
-	m_menuOpen = new wxMenuItem(m_menuFile, ID_MENU_OPEN, _("&Open...\tCtrl-O"));
-	m_menuFile->Append( m_menuOpen);
+	menuFile->Append(ID_MENU_OPEN, _("&Open...\tCtrl-O"));
 	Bind(wxEVT_MENU, &DumpViewFrame::OnOpen, this, ID_MENU_OPEN);
 
-	m_menuSaveAs = new wxMenuItem(m_menuFile, ID_MENU_SAVEAS, _("Save &as...\tCtrl-S"));
-    m_menuFile->Append(m_menuSaveAs);
+    menuFile->Append(ID_MENU_SAVEAS, _("Save &as...\tCtrl-S"));
 	Bind(wxEVT_MENU, &DumpViewFrame::OnSaveAs, this, ID_MENU_SAVEAS);
 
-	m_menuFile->AppendSeparator();
+	menuFile->AppendSeparator();
     
-	m_menuExit = new wxMenuItem(m_menuFile, ID_MENU_QUIT, _("E&xit\tAlt-F4"), _("Quit the application"));
-	m_menuFile->Append(m_menuExit);
+	menuFile->Append(ID_MENU_QUIT, _("E&xit\tAlt-F4"), _("Quit the application"));
 	Bind(wxEVT_MENU, &DumpViewFrame::OnExit, this, ID_MENU_QUIT);
 
-	MenuBar1->Append(m_menuFile, _("&File"));
+	mainMenuBar->Append(menuFile, _("&File"));
 
-	m_menuEdit = new wxMenu();
+	wxMenu* m_menuEdit = new wxMenu();
 
-//    m_menuFind = new wxMenuItem(m_menuEdit, ID_MENU_FIND, _("&Find...\tCtrl-F"));
-//    m_menuEdit->Append(m_menuFind);
-	Bind(wxEVT_MENU, &DumpViewFrame::OnFind, this, ID_MENU_FIND);
-
-	m_menuCopyAll = new wxMenuItem(m_menuEdit, ID_MENU_COPY_ALL, _("Copy all\tCtrl-A"));
-    m_menuEdit->Append(m_menuCopyAll);
+    m_menuEdit->Append(ID_MENU_COPY_ALL, _("Copy all\tCtrl-A"));
 	Bind(wxEVT_MENU, &DumpViewFrame::OnCopyAll, this, ID_MENU_COPY_ALL);
 
-	m_menuCopy = new wxMenuItem(m_menuEdit, ID_MENU_COPY, _("Copy selected\tCtrl-C"));
-    m_menuEdit->Append(m_menuCopy);
+    m_menuEdit->Append(ID_MENU_COPY, _("Copy selected\tCtrl-C"));
 	Bind(wxEVT_MENU, &DumpViewFrame::OnCopySelection, this, ID_MENU_COPY);
 
-	MenuBar1->Append(m_menuEdit, _("Edit"));
+	mainMenuBar->Append(m_menuEdit, _("Edit"));
 
-	m_menuSettings = new wxMenu();
+	wxMenu* m_menuSettings = new wxMenu();
 
-	m_menuSetCom = new wxMenuItem(m_menuSettings, ID_MENU_SETCOM, _("COM port..."));
-    m_menuSettings->Append(m_menuSetCom);
+    m_menuSettings->Append(ID_MENU_SETCOM, _("COM port..."));
 	Bind(wxEVT_MENU, &DumpViewFrame::OnComPortSetting, this, ID_MENU_SETCOM);
 	
-	m_menuSetFont = new wxMenuItem(m_menuSettings, ID_MENU_SETFONT, _("Display font..."));
-    m_menuSettings->Append(m_menuSetFont);
+    m_menuSettings->Append(ID_MENU_SETFONT, _("Display font..."));
 	Bind(wxEVT_MENU, &DumpViewFrame::OnFontSetting, this, ID_MENU_SETFONT);
 
-	m_menuSetFolder = new wxMenuItem(m_menuSettings, ID_MENU_SETFOLDER, _("Default log folder..."));
-    m_menuSettings->Append(m_menuSetFolder);
+    m_menuSettings->Append(ID_MENU_SETFOLDER, _("Default log folder..."));
 	Bind(wxEVT_MENU, &DumpViewFrame::OnFolderSetting, this, ID_MENU_SETFOLDER);
 
-	m_menuLoadGuidDef = new wxMenuItem(m_menuSettings, ID_MENU_LOADGUIDDEF, "Load GUID definitions...");
-	m_menuSettings->Append(m_menuLoadGuidDef);
+	m_menuSettings->Append(ID_MENU_LOADGUIDDEF, "Load GUID definitions...");
 	Bind(wxEVT_MENU, &DumpViewFrame::OnLoadGuidDef, this, ID_MENU_LOADGUIDDEF);
 
-	MenuBar1->Append(m_menuSettings, _("&Settings"));
+	mainMenuBar->Append(m_menuSettings, _("&Settings"));
     
-	m_menuHelp = new wxMenu();
+	wxMenu* menuHelp = new wxMenu();
 	
-	m_menuAbout = new wxMenuItem(m_menuHelp, ID_MENU_ABOUT, _("About...\tF1"), _("Show info about this application"));
-    m_menuHelp->Append(m_menuAbout);
+    menuHelp->Append(ID_MENU_ABOUT, _("About...\tF1"),
+		_("Show info about this application"));
 	Bind(wxEVT_MENU, &DumpViewFrame::OnAbout, this, ID_MENU_ABOUT);
 	
-	MenuBar1->Append(m_menuHelp, _("Help"));
-    SetMenuBar(MenuBar1);
+	mainMenuBar->Append(menuHelp, _("Help"));
+    SetMenuBar(mainMenuBar);
 
+	// Define popup menu for "output box".
+	m_menuPopup = std::make_unique<wxMenu>();
+	m_menuPopup->Append(ID_MENU_COPY_ALL, "Copy all to clipboard");
+	m_menuPopup->Append(ID_MENU_COPY, "Copy selection to clipboard");
+	m_menuPopup->Append(ID_MENU_SAVEAS, "Save log...");
+	m_menuPopup->AppendSeparator();
+	m_menuPopup->Append(ID_MENU_CLEAR, "Clear log");
 	Bind(wxEVT_MENU, &DumpViewFrame::OnClear, this, ID_MENU_CLEAR);
 }
 
@@ -462,6 +442,7 @@ void DumpViewFrame::m_InitSizedComponents(wxWindow* parent)
 		wxTE_MULTILINE | wxTE_READONLY | wxTE_PROCESS_ENTER);
 #endif
 	m_OutputBox->Bind(wxEVT_TEXT_ENTER, &DumpViewFrame::OnFind, this);
+	m_OutputBox->Bind(wxEVT_RIGHT_UP, &DumpViewFrame::OnOutputRightUp, this);
 
 	BoxSizer3->Add(m_OutputBox, wxSizerFlags()
 		.Proportion(1)
@@ -628,11 +609,6 @@ void DumpViewFrame::OnClose(wxCloseEvent& event)
     {
         delete m_fpLog;
         m_fpLog = 0;
-    }
-
-    if ( m_pMouseEvtHandler)
-    {
-        m_OutputBox->PopEventHandler(true);
     }
 
     event.Skip();
@@ -1226,6 +1202,11 @@ void DumpViewFrame::OnTailCountFocusOff(wxFocusEvent& evt)
 	}
 
 	evt.Skip();
+}
+
+void DumpViewFrame::OnOutputRightUp(wxMouseEvent & evt)
+{
+	PopupMenu(m_menuPopup.get());
 }
 
 void DumpViewFrame::OnRetainTailLinesSelected(wxCommandEvent& evt)

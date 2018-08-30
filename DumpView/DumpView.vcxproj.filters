@@ -42,9 +42,6 @@
     <ClCompile Include="MonitorThread.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="OutputBoxMouseHandler.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AboutDialog.h">
@@ -75,9 +72,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="MonitorThread.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="OutputBoxMouseHandler.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="version.h">

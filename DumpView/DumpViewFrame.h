@@ -25,11 +25,12 @@
 #include <wx/richtext/richtextctrl.h>
 #endif
 #include "MonitorThread.h"
-#include "OutputBoxMouseHandler.h"
 
 #include "LogDirDialog.h"
 #include "LoadGuidDefDialog.h"
 #include "GuidTranslator.h"
+
+#include <memory>
 
 const int PAUSE_BUF_SIZE = 1024*1024;
 
@@ -38,8 +39,6 @@ DECLARE_EVENT_TYPE( wxEVT_THREAD_CALLBACK, -1)
 class DumpViewFrame : public wxFrame
 {
 private:
-    friend class OutputBoxMouseHandler;
-
     enum MainState {
         STATE_START,
         STATE_STOP,
@@ -75,20 +74,7 @@ private:
 //    int m_iWindowWidth;
 //    int m_iWindowHeight;
 
-    OutputBoxMouseHandler* m_pMouseEvtHandler;
-
     // GUI objects
-    wxMenuItem* m_menuSetFont;
-    wxMenuItem* m_menuSetCom;
-    wxMenuItem* m_menuCopyAll;
-    wxMenuItem* m_menuFind;
-    wxMenuItem* m_menuSaveAs;
-    wxMenuItem* m_menuCopy;
-    wxMenuItem* m_menuSetFolder;
-	wxMenuItem* m_menuLoadGuidDef;
-    wxMenu* m_menuEdit;
-    wxMenu* m_menuSettings;
-
     wxRadioBox* m_radioSwitch;
     wxCheckBox* m_checkboxPause;
     wxCheckBox* m_checkboxRec;
@@ -109,12 +95,12 @@ private:
 	wxCheckBox* m_checkboxRetainTailLines;
 	wxTextCtrl* m_textTailCount;
 
+	std::unique_ptr<wxMenu> m_menuPopup;
 
     // ID for GUI controls
     static const long ID_MENU_OPEN;
     static const long ID_MENU_SAVEAS;
     static const long ID_MENU_QUIT;
-    static const long ID_MENU_FIND;
     static const long ID_MENU_COPY_ALL;
     static const long ID_MENU_COPY;
     static const long ID_MENU_SETCOM;
@@ -174,6 +160,8 @@ public:
 	void OnTailCountEntered(wxCommandEvent& evt);	// Text LastLogLength
 	void OnTailCountFocusOn(wxFocusEvent& evt);
 	void OnTailCountFocusOff(wxFocusEvent& evt);	// Text LastLogLength
+
+	void OnOutputRightUp(wxMouseEvent &evt);	// Text Output
 };
 
 #endif

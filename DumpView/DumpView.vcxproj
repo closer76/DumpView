@@ -114,7 +114,6 @@
     <ClCompile Include="LoadGuidDefDialog.cpp" />
     <ClCompile Include="LogDirDialog.cpp" />
     <ClCompile Include="MonitorThread.cpp" />
-    <ClCompile Include="OutputBoxMouseHandler.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AboutDialog.h" />
@@ -127,7 +126,6 @@
     <ClInclude Include="LoadGuidDefDialog.h" />
     <ClInclude Include="LogDirDialog.h" />
     <ClInclude Include="MonitorThread.h" />
-    <ClInclude Include="OutputBoxMouseHandler.h" />
     <ClInclude Include="version.h" />
   </ItemGroup>
   <ItemGroup>

@@ -27,11 +27,7 @@ const long DumpViewFrame::ID_MENU_LOADGUIDDEF = wxNewId();
 const long DumpViewFrame::ID_MENU_ABOUT = wxNewId();
 const long DumpViewFrame::ID_MENU_CLEAR = wxNewId();
 
-DEFINE_EVENT_TYPE( wxEVT_THREAD_CALLBACK)
-
-BEGIN_EVENT_TABLE(DumpViewFrame, wxFrame)
-    EVT_COMMAND( wxID_ANY, wxEVT_THREAD_CALLBACK, DumpViewFrame::OnThreadCallback)
-END_EVENT_TABLE()
+wxDEFINE_EVENT(klEVT_THREAD_CALLBACK, wxCommandEvent);
 
 const int SWITCH_ON = 0;
 const int SWITCH_OFF = 1;
@@ -468,6 +464,7 @@ void DumpViewFrame::m_InitEventHandlers(void)
 {
 	Bind(wxEVT_CLOSE_WINDOW, &DumpViewFrame::OnClose, this);
 	Bind(wxEVT_SIZE, &DumpViewFrame::OnResize, this);
+	Bind(klEVT_THREAD_CALLBACK, &DumpViewFrame::OnThreadCallback, this);
 }
 
 wxString DumpViewFrame::m_FormatErrorMessage(DWORD error_no)

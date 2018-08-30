@@ -9,7 +9,7 @@ wxThread::ExitCode MonitorThread::Entry()
 {
     DWORD sizeRead;
     int retry_count;
-    wxCommandEvent evt(wxEVT_THREAD_CALLBACK, wxID_ANY);
+    wxCommandEvent evt(klEVT_THREAD_CALLBACK, wxID_ANY);
 
     evt.SetInt(MONITOR_EVENT_TYPE_NONE);
     m_NextState = m_NextState = MONITOR_STATE_RUNNING;

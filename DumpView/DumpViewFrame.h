@@ -34,7 +34,7 @@
 
 const int PAUSE_BUF_SIZE = 1024*1024;
 
-DECLARE_EVENT_TYPE( wxEVT_THREAD_CALLBACK, -1)
+wxDECLARE_EVENT(klEVT_THREAD_CALLBACK, wxCommandEvent);
 
 class DumpViewFrame : public wxFrame
 {
@@ -124,8 +124,6 @@ private:
     void m_ShowPortInfoOnStatusBar( ComPortSetting &settings);
 
 	bool m_UpdateTailCount(void);
-
-    DECLARE_EVENT_TABLE();
 
 public:
 

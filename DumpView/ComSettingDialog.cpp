@@ -48,9 +48,19 @@ ComSettingDialog::ComSettingDialog(wxWindow* parent,wxWindowID id,const wxPoint&
 	m_choiceBaudRate->Append(_("128000"));
 	m_choiceBaudRate->Append(_("256000"));
 	m_choiceBaudRate->Append(_("Manual..."));
-	m_choiceBaudRate->Bind(wxEVT_CHOICE, &ComSettingDialog::OnBaudRateChanged, this);
+	m_choiceBaudRate->Bind(
+		wxEVT_CHOICE,
+		&ComSettingDialog::OnBaudRateChanged,
+		this);
 
-	m_textManualBaudRate = new wxTextCtrl( this, wxID_ANY, _("115200"), wxDefaultPosition, wxDefaultSize, 0, wxTextValidator(wxFILTER_NUMERIC));
+	m_textManualBaudRate = new wxTextCtrl(
+		this,
+		wxID_ANY,
+		_("115200"),
+		wxDefaultPosition,
+		wxDefaultSize,
+		0,
+		wxTextValidator(wxFILTER_NUMERIC));
 	m_textManualBaudRate->Disable();
 
 	m_choiceByteSize = new wxChoice(this, wxID_ANY);

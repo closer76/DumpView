@@ -25,29 +25,18 @@ class FileExistDialog: public wxDialog
 
 	protected:
 
-		//(*Identifiers(FileExistDialog)
-		static const long ID_STATICTEXT1;
-		static const long ID_STATICTEXT2;
-		static const long ID_STATICTEXT3;
 		static const long ID_BUTTON_OVERWRITE;
 		static const long ID_BUTTON_APPEND;
 		static const long ID_BUTTON_CANCEL;
-		//*)
 
 	private:
 
-		//(*Declarations(FileExistDialog)
 		wxButton* m_buttonAppend;
 		wxButton* m_buttonCancel;
 		wxStaticText* m_labelFilename;
 		wxButton* m_buttonOverwrite;
-		//*)
 
-		//(*Handlers(FileExistDialog)
         void OnButtonClicks( wxCommandEvent& evt);
-		//*)
-
-		DECLARE_EVENT_TABLE()
 };
 
 #endif

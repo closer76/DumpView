@@ -1,26 +1,11 @@
 #include "FileExistDialog.h"
 
-//(*InternalHeaders(FileExistDialog)
 #include <wx/intl.h>
 #include <wx/string.h>
-//*)
 
-//(*IdInit(FileExistDialog)
-const long FileExistDialog::ID_STATICTEXT1 = wxNewId();
-const long FileExistDialog::ID_STATICTEXT2 = wxNewId();
-const long FileExistDialog::ID_STATICTEXT3 = wxNewId();
 const long FileExistDialog::ID_BUTTON_OVERWRITE = wxNewId();
 const long FileExistDialog::ID_BUTTON_APPEND = wxNewId();
 const long FileExistDialog::ID_BUTTON_CANCEL = wxNewId();
-//*)
-
-BEGIN_EVENT_TABLE(FileExistDialog,wxDialog)
-	//(*EventTable(FileExistDialog)
-    EVT_BUTTON( ID_BUTTON_OVERWRITE, FileExistDialog::OnButtonClicks)
-    EVT_BUTTON( ID_BUTTON_APPEND, FileExistDialog::OnButtonClicks)
-    EVT_BUTTON( ID_BUTTON_CANCEL, FileExistDialog::OnButtonClicks)
-	//*)
-END_EVENT_TABLE()
 
 FileExistDialog::FileExistDialog(wxWindow* parent,wxWindowID id,const wxPoint& pos,const wxSize& size)
 	: wxDialog(parent, id, _("File exists!"))
@@ -74,6 +59,9 @@ FileExistDialog::FileExistDialog(wxWindow* parent,wxWindowID id,const wxPoint& p
 	SetSizer(BoxSizer1);
 	BoxSizer1->Fit(this);
 	BoxSizer1->SetSizeHints(this);
+
+	// Route all button events to one function
+	Bind(wxEVT_BUTTON, &FileExistDialog::OnButtonClicks, this);
 }
 
 FileExistDialog::~FileExistDialog()

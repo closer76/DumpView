@@ -4,12 +4,14 @@
 #include <wx/wx.h>
 #include <wx/event.h>
 
+#include <memory>
+
 class OutputBoxMouseHandler :
     public wxEvtHandler
 {
 private:
     wxWindow* m_pOwner;
-    wxMenu* m_pPopupMenu;
+    std::unique_ptr<wxMenu> m_pPopupMenu;
 
 public:
     OutputBoxMouseHandler(void);
@@ -19,7 +21,7 @@ public:
 
     void OnRightButtonUp( wxMouseEvent& evt);
 
-    DECLARE_EVENT_TABLE()
+//    DECLARE_EVENT_TABLE()
 };
 
 #endif

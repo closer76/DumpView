@@ -3,27 +3,17 @@
 #include "wx/dirdlg.h"
 #include "wx/dir.h"
 
-const long LogDirDialog::ID_LOG_DIR_DIALOG = wxNewId();
-const long LogDirDialog::ID_TEXT_DEFAULT_DIR = wxNewId();
-const long LogDirDialog::ID_BTN_SELECT_DEFAULT_DIR = wxNewId();
-const long LogDirDialog::ID_CHKBOX_USE_LAST_DIR = wxNewId();
-const long LogDirDialog::ID_BTN_OK = wxNewId();
-const long LogDirDialog::ID_BTN_CANCEL = wxID_CANCEL;
-
-BEGIN_EVENT_TABLE( LogDirDialog, wxDialog)
-	EVT_BUTTON( ID_BTN_OK, LogDirDialog::OnBtnOk_Clicked)
-	EVT_BUTTON( ID_BTN_SELECT_DEFAULT_DIR, LogDirDialog::OnBtnSelecDefaulttDir_Clicked)
-	EVT_CHECKBOX( ID_CHKBOX_USE_LAST_DIR, LogDirDialog::OnChkboxUseLastDir_Clicked)
-END_EVENT_TABLE()
-
-LogDirDialog::LogDirDialog(LogDirSettings* settings, wxWindow* parent, const wxPoint& pos,const wxSize& size) :
-    wxDialog( parent, ID_LOG_DIR_DIALOG, "Set Default Log Directory", pos, size),
-    m_settings(settings)
+LogDirDialog::LogDirDialog(LogDirSettings* settings, wxWindow* parent, const wxPoint& pos,const wxSize& size)
+	: wxDialog( parent, wxID_ANY, "Set Default Log Directory", pos, size)
+	, m_settings(settings)
 {
 	wxBoxSizer *sizerLogDirAndBtn, *sizerOkCancelBtn, *sizerTop;
 
-    m_textDefaultDir = new wxTextCtrl( this, ID_TEXT_DEFAULT_DIR, settings->defaultDir);
-	m_btnSelectDefaultDir = new wxButton(this, ID_BTN_SELECT_DEFAULT_DIR, "...", wxDefaultPosition, wxSize(30, -1));
+    m_textDefaultDir = new wxTextCtrl( this, wxID_ANY, settings->defaultDir);
+	m_btnSelectDefaultDir = new wxButton(this, wxID_ANY, "...", wxDefaultPosition, wxSize(30, -1));
+	m_btnSelectDefaultDir->Bind(wxEVT_BUTTON,
+		&LogDirDialog::OnBtnSelecDefaulttDir_Clicked,
+		this);
 	sizerLogDirAndBtn = new wxBoxSizer( wxHORIZONTAL); 
 	sizerLogDirAndBtn->Add(m_textDefaultDir, wxSizerFlags()
 		.Proportion(1)
@@ -34,10 +24,18 @@ LogDirDialog::LogDirDialog(LogDirSettings* settings, wxWindow* parent, const wxP
 		.Border(wxTOP | wxBOTTOM | wxRIGHT, 5)
 		.Center());
 
-    m_chkboxUseLastDir = new wxCheckBox( this, ID_CHKBOX_USE_LAST_DIR, "Use last-visited directory.");
+    m_chkboxUseLastDir = new wxCheckBox( this, wxID_ANY, "Use last-visited directory.");
+	m_chkboxUseLastDir->Bind(wxEVT_CHECKBOX,
+		&LogDirDialog::OnChkboxUseLastDir_Clicked,
+		this);
 
-	m_btnOk = new wxButton( this, ID_BTN_OK, "OK");
-    m_btnCancel = new wxButton( this, ID_BTN_CANCEL, "Cancel");
+	m_btnOk = new wxButton( this, wxID_ANY, "OK");
+	m_btnOk->Bind(wxEVT_BUTTON,
+		&LogDirDialog::OnBtnOk_Clicked,
+		this);
+
+	m_btnCancel = new wxButton( this, wxID_CANCEL, "Cancel");
+
 	sizerOkCancelBtn = new wxBoxSizer( wxHORIZONTAL);
 	sizerOkCancelBtn->Add( m_btnOk, wxSizerFlags()
 		.Proportion(0)

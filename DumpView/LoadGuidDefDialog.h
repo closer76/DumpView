@@ -30,17 +30,8 @@ public:
 	virtual ~LoadGuidDefDialog(void);
 
 protected:
-	static const long ID_LOAD_GUID_DEF_DIALOG;
-    static const long ID_TEXT_PATH;
-    static const long ID_BTN_SELECT_PATH;
-    static const long ID_CHKBOX_AUTO_LOAD;
-    static const long ID_BTN_OK;
-    static const long ID_BTN_CANCEL;
-
 	void OnBtnSelecGuidDefFile_Clicked( wxCommandEvent& evt);
 	void OnChkboxAutoLoad_Clicked( wxCommandEvent& evt);
-
-	DECLARE_EVENT_TABLE()
 };
 
 #endif

@@ -111,19 +111,6 @@ private:
 
 
     // ID for GUI controls
-    static const long ID_RADIOBOX_SWITCH;
-    static const long ID_CHECKBOX_PAUSE;
-    static const long ID_CHECKBOX_REC;
-    static const long ID_BUTTON_CLEAR;
-    static const long ID_STATICTEXT1;
-    static const long ID_TEXT_FIND_TARGET;
-    static const long ID_CHECKBOX_CASE_SENSITIVE;
-    static const long ID_BUTTON_FIND;
-    static const long ID_TEXT_DEFAULT_FOLDER;
-    static const long ID_BUTTON_SELECT_FILE;
-	static const long ID_BUTTON_TRANSLATE_GUID;
-    static const long ID_OUTPUT_BOX;
-    static const long ID_PANEL1;
     static const long ID_MENU_OPEN;
     static const long ID_MENU_SAVEAS;
     static const long ID_MENU_QUIT;
@@ -135,13 +122,12 @@ private:
     static const long ID_MENU_SETFOLDER;
 	static const long ID_MENU_LOADGUIDDEF;
     static const long ID_MENU_ABOUT;
-    static const long ID_STATUSBAR1;
-	static const long ID_CHECKBOX_RETAIN_TAIL_LINES;
-	static const long ID_TEXT_TAIL_COUNT;
+	static const long ID_MENU_CLEAR;
 
     void m_InitMenuBar(void);
     void m_InitSizedComponents(wxWindow* parent);
     void m_InitStatusBar(void);
+	void m_InitEventHandlers(void);
 
     bool m_SelectFile_body(bool prompt_overwrite);
     void m_SwitchSelect_body(int selection);

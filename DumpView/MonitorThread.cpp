@@ -1,6 +1,8 @@
 #include "MonitorThread.h"
 #include "DumpViewFrame.h"
 
+#include <algorithm>
+
 wxMutex MonitorThread::s_mutexDataBuffer;
 char MonitorThread::s_buf[XFER_BUF_SIZE] = {0};
 int MonitorThread::s_nBufStartPos = 0;
@@ -107,12 +109,16 @@ wxThread::ExitCode MonitorThread::Entry()
 
 bool MonitorThread::m_InitSerialPort()
 {
-    if ( m_PortNum <= 0 || m_PortNum > m_MaxPortNum)
-    {
-        return false;
-    }
+	auto itor = std::find(
+		m_AvailComPorts.begin(),
+		m_AvailComPorts.end(),
+		m_settings.PortName);
+	if (itor == m_AvailComPorts.end())
+	{
+		return false;
+	}
 
-    wxString port_name = wxString::Format( "\\\\.\\COM%d", m_PortNum);
+    wxString port_name = "\\\\.\\" + m_settings.PortName;
 
     m_hSerialPort = ::CreateFile(
         port_name.c_str(),
@@ -138,10 +144,11 @@ bool MonitorThread::m_InitSerialPort()
         return false;
     }
 
-    dcb.BaudRate = (-1 == m_BaudRate) ? (m_ManualBaudRate) : (m_BaudRate);
-    dcb.ByteSize = m_ByteSize;
-    dcb.Parity = m_Parity;
-    dcb.StopBits = m_StopBit;
+    dcb.BaudRate = (-1 == m_settings.BaudRate) ?
+		(m_settings.ManualBaudRate) : (m_settings.BaudRate);
+    dcb.ByteSize = m_settings.ByteSize;
+    dcb.Parity = m_settings.Parity;
+    dcb.StopBits = m_settings.StopBit;
 
     if ( !::SetCommState( m_hSerialPort, &dcb))
     {
@@ -177,6 +184,23 @@ bool MonitorThread::m_ReleaseSerialPort()
     return true;
 }
 
+void MonitorThread::m_scanPorts()
+{
+	COMMCONFIG cc;
+	DWORD size = sizeof(cc);
+
+	m_AvailComPorts.clear();
+
+	for (int i = 0; i <= m_MaxPortNum; i++)
+	{
+		wxString port_name = wxString::Format("COM%d", i);
+		if (::GetDefaultCommConfig(port_name.c_str(), &cc, &size))
+		{
+			m_AvailComPorts.push_back(port_name);
+		}
+	}
+}
+
 int MonitorThread::CopyBuffer(char* out_buf)
 {
     int count;
@@ -190,41 +214,20 @@ int MonitorThread::CopyBuffer(char* out_buf)
     return count;
 }
 
-std::list<int>* MonitorThread::GetAvailableComPorts()
+const std::list<wxString>& MonitorThread::GetAvailableComPorts()
 {
 	// Rescan available com ports
-	COMMCONFIG cc;
-	DWORD size = sizeof(cc);
+	m_scanPorts();
 
-	m_AvailComPorts.clear();
-
-	for ( int i = 0; i <= m_MaxPortNum; i++)
-	{
-		if ( ::GetDefaultCommConfig( wxString::Format( "COM%d", i).c_str(), &cc, &size))
-		{
-			m_AvailComPorts.push_back(i);
-		}
-	}
-
-	return &m_AvailComPorts;
+	return m_AvailComPorts;
 }
 
-void MonitorThread::GetPortSettings(ComPortSetting &settings)
+ComPortSetting MonitorThread::GetPortSettings()
 {
-    settings.PortNum = m_PortNum;
-    settings.BaudRate = m_BaudRate;
-	settings.ManualBaudRate = m_ManualBaudRate;
-    settings.ByteSize = m_ByteSize;
-    settings.Parity = m_Parity;
-    settings.StopBit = m_StopBit;
+	return m_settings;
 }
 
 void MonitorThread::SetPortSettings(const ComPortSetting &settings)
 {
-    m_PortNum = settings.PortNum;
-    m_BaudRate = settings.BaudRate;
-	m_ManualBaudRate = settings.ManualBaudRate;
-    m_ByteSize = settings.ByteSize;
-    m_Parity = settings.Parity;
-    m_StopBit = settings.StopBit;
+	m_settings = settings;
 }

@@ -15,22 +15,14 @@ ComSettingDialog::ComSettingDialog(wxWindow* parent,wxWindowID id,const wxPoint&
 	wxFlexGridSizer* grid_sizer = new wxFlexGridSizer( 2, 15, 15);
 	wxBoxSizer* button_sizer = new wxBoxSizer( wxHORIZONTAL);
 
-	m_labelPortNumber = new wxStaticText(this, wxID_ANY, _("Port number:"), wxDefaultPosition, wxSize(104,14), wxALIGN_RIGHT);
+	m_labelPortName = new wxStaticText(this, wxID_ANY, _("Port name:"), wxDefaultPosition, wxSize(104,14), wxALIGN_RIGHT);
 	m_labelBaudRate = new wxStaticText(this, wxID_ANY, _("Baud rate:"), wxDefaultPosition, wxSize(104,14), wxALIGN_RIGHT);
 	m_labelManualBaudRate = new wxStaticText(this, wxID_ANY, _("(Manual)"), wxDefaultPosition, wxSize(104, 14), wxALIGN_RIGHT);
 	m_labelByteSize = new wxStaticText(this, wxID_ANY, _("Byte size:"), wxDefaultPosition, wxSize(104,14), wxALIGN_RIGHT);
 	m_labelParity = new wxStaticText(this, wxID_ANY, _("Parity:"), wxDefaultPosition, wxSize(104,14), wxALIGN_RIGHT);
 	m_labelStopBit = new wxStaticText(this, wxID_ANY, _("Stop bit:"), wxDefaultPosition, wxSize(104,14), wxALIGN_RIGHT);
 
-	m_choicePortNumber = new wxChoice(this, wxID_ANY);
-	m_choicePortNumber->Append(_("COM1"));
-	m_choicePortNumber->Append(_("COM2"));
-	m_choicePortNumber->Append(_("COM3"));
-	m_choicePortNumber->Append(_("COM4"));
-	m_choicePortNumber->Append(_("COM5"));
-	m_choicePortNumber->Append(_("COM6"));
-	m_choicePortNumber->Append(_("COM7"));
-	m_choicePortNumber->Append(_("COM8"));
+	m_choicePortName = new wxChoice(this, wxID_ANY);
 
 	m_choiceBaudRate = new wxChoice(this, wxID_ANY);
 	m_choiceBaudRate->Append(_("110"));
@@ -88,8 +80,8 @@ ComSettingDialog::ComSettingDialog(wxWindow* parent,wxWindowID id,const wxPoint&
 	flags_field.Expand();
 	wxSizerFlags flags_label(1);
 	flags_label.CenterVertical();
-	grid_sizer->Add(m_labelPortNumber, flags_label);
-	grid_sizer->Add(m_choicePortNumber, flags_field);
+	grid_sizer->Add(m_labelPortName, flags_label);
+	grid_sizer->Add(m_choicePortName, flags_field);
 	grid_sizer->Add(m_labelBaudRate, flags_label);
 	grid_sizer->Add(m_choiceBaudRate, flags_field);
 	grid_sizer->Add(m_labelManualBaudRate, flags_label);
@@ -171,30 +163,23 @@ static int ParseComPortName( const wxString& name)
 	return result ? result : 1;
 }
 
-void ComSettingDialog::SetPortSettings( ComPortSetting &settings)
+void ComSettingDialog::SetPortSettings(const ComPortSetting &settings)
 {
     int i;
 
     // Port
-	for ( i = 0; i < (int)m_choicePortNumber->GetCount(); i++)
+	for ( i = 0; i < (int)m_choicePortName->GetCount(); i++)
 	{
-		if ( settings.PortNum == ParseComPortName( m_choicePortNumber->GetString(i)))
+		if ( settings.PortName == m_choicePortName->GetString(i))
 		{
-			m_choicePortNumber->SetSelection(i);
+			m_choicePortName->SetSelection(i);
 			break;
 		}
 	}
 
-    if ( i == m_choicePortNumber->GetCount())
+    if ( i == m_choicePortName->GetCount())
     {
-		if ( settings.PortNum < 1)
-		{
-			m_choicePortNumber->SetSelection(0);
-		}
-		else
-		{
-			m_choicePortNumber->Append( wxString::Format( "COM%d (Not Available)", settings.PortNum));
-		}
+		m_choicePortName->Append( wxString::Format( "%s (Not Available)", settings.PortName));
     }
 
     // Byte Size
@@ -249,11 +234,13 @@ void ComSettingDialog::SetPortSettings( ComPortSetting &settings)
     }
 }
 
-void ComSettingDialog::GetPortSettings( ComPortSetting &settings)
+ComPortSetting ComSettingDialog::GetPortSettings( )
 {
+	ComPortSetting settings;
+
     // Port
-    //settings.PortNum = m_choicePortNumber->GetSelection() + 1;
-	settings.PortNum = ParseComPortName(m_choicePortNumber->GetString( m_choicePortNumber->GetSelection()));
+    //settings.PortNum = m_choicePortName->GetSelection() + 1;
+	settings.PortName = m_choicePortName->GetString(m_choicePortName->GetSelection());
 
     // Byte Size
     settings.ByteSize = m_choiceByteSize->GetSelection() + 5;
@@ -270,21 +257,23 @@ void ComSettingDialog::GetPortSettings( ComPortSetting &settings)
 
     // Stop bit
     settings.StopBit = StopBitTable[m_choiceStopBit->GetSelection()];
+
+	return settings;
 }
 
-void ComSettingDialog::SetAvailableComPorts( std::list<int>* port_list)
+void ComSettingDialog::SetAvailableComPorts(const std::list<wxString>& port_list)
 {
-	m_choicePortNumber->Clear();
+	m_choicePortName->Clear();
 
-	if ( port_list->size() == 0)
+	if ( port_list.size() == 0)
 	{
-		m_choicePortNumber->Append( "COM1 (Not Available)");
+		m_choicePortName->Append( "COM1 (Not Available)");
 	}
 	else
 	{
-		for ( std::list<int>::const_iterator itor = port_list->begin(); itor != port_list->end(); itor++)
+		for (const auto& port_name : port_list)
 		{
-			m_choicePortNumber->Append( wxString::Format( "COM%d", *itor));
+			m_choicePortName->Append(port_name);
 		}
 	}
 }

@@ -35,15 +35,10 @@ private:
     int m_NextState;
     DWORD m_ErrorCode;
 
-    int m_PortNum;
-    DWORD m_BaudRate;
-	DWORD m_ManualBaudRate;
-    int m_Parity;
-    int m_ByteSize;
-    int m_StopBit;
+	ComPortSetting m_settings;
 	int m_MaxPortNum;
 
-	std::list<int> m_AvailComPorts;
+	std::list<wxString> m_AvailComPorts;
 
     static wxMutex s_mutexDataBuffer;
     static char s_buf[XFER_BUF_SIZE];
@@ -51,6 +46,8 @@ private:
 
     bool m_InitSerialPort();
     bool m_ReleaseSerialPort();
+
+	void m_scanPorts();
 
 public:
 
@@ -61,15 +58,12 @@ public:
 		m_CurrentState(MONITOR_STATE_STOPPED),
 		m_NextState(MONITOR_STATE_STOPPED),
 		m_ErrorCode(ERROR_SUCCESS),
-		m_PortNum(settings.PortNum),
-		m_BaudRate(settings.BaudRate),
-		m_ManualBaudRate(settings.ManualBaudRate),
-		m_Parity(settings.Parity),
-		m_ByteSize(settings.ByteSize),
-		m_StopBit(settings.StopBit),
+		m_settings(settings),
 		m_MaxPortNum(32),
 		m_AvailComPorts()
-    {}
+    {
+		m_scanPorts();
+	}
 
     wxThread::ExitCode Entry();
 
@@ -79,9 +73,9 @@ public:
     void StopMonitoring(void)   { m_NextState = MONITOR_STATE_STOPPED;}
     bool IsMonitoring(void)     { return (m_CurrentState == MONITOR_STATE_RUNNING);}
 
-	std::list<int>* GetAvailableComPorts();
+	const std::list<wxString>& GetAvailableComPorts();
 
-    void GetPortSettings( ComPortSetting& settings);
+    ComPortSetting GetPortSettings(void);
     void SetPortSettings( const ComPortSetting& settings);
 
     DWORD GetErrorCode(void)

@@ -37,7 +37,8 @@ const wxString REG_WINDOW_WIDTH     = "Window Width";
 const wxString REG_WINDOW_HEIGHT    = "Window Height";
 const wxString REG_POS_X            = "Position X";
 const wxString REG_POS_Y            = "Position Y";
-const wxString REG_COM_NUM          = "COM Number";
+const wxString REG_COM_NUM          = "COM Number";		// obsolete
+const wxString REG_PORT_NAME        = "Port Name";
 const wxString REG_BAUD_RATE        = "BAUD Rate";
 const wxString REG_MANUAL_BAUD_RATE = "Manual Baud Rate";
 const wxString REG_PARITY           = "Parity";
@@ -110,7 +111,7 @@ DumpViewFrame::DumpViewFrame(const wxString& title)
 
     //------- Get port settings from registry
     ComPortSetting settings;
-    settings.PortNum = m_pAppConfig->Read( REG_COM_NUM, static_cast<int>(1));
+	settings.PortName = m_pAppConfig->Read(REG_PORT_NAME, "COM1");
     settings.BaudRate = m_pAppConfig->Read( REG_BAUD_RATE, static_cast<int>(CBR_115200));
 	settings.ManualBaudRate = m_pAppConfig->Read( REG_MANUAL_BAUD_RATE, static_cast<int>(CBR_115200));
     settings.Parity = m_pAppConfig->Read( REG_PARITY, static_cast<long>(NOPARITY));
@@ -476,7 +477,7 @@ wxString DumpViewFrame::m_FormatErrorMessage(DWORD error_no)
 
 void DumpViewFrame::m_ShowPortInfoOnStatusBar( ComPortSetting &settings)
 {
-    m_statusBar1->SetStatusText( wxString::Format( "COM%d", settings.PortNum), 0);
+    m_statusBar1->SetStatusText( settings.PortName, 0);
 
     wxString result;
     result.Printf( "%d %d-", (-1 == settings.BaudRate) ? settings.ManualBaudRate : settings.BaudRate, settings.ByteSize);
@@ -542,9 +543,8 @@ void DumpViewFrame::OnClose(wxCloseEvent& event)
 
         if ( m_PortMonitor)
         {
-            ComPortSetting settings = {0};
-            m_PortMonitor->GetPortSettings( settings);
-            m_pAppConfig->Write(REG_COM_NUM , static_cast<int>(settings.PortNum ));
+            ComPortSetting settings = m_PortMonitor->GetPortSettings();
+            m_pAppConfig->Write(REG_PORT_NAME , settings.PortName);
             m_pAppConfig->Write(REG_BAUD_RATE , static_cast<int>(settings.BaudRate ));
 			m_pAppConfig->Write(REG_MANUAL_BAUD_RATE, static_cast<int>(settings.ManualBaudRate));
             m_pAppConfig->Write(REG_PARITY , static_cast<int>(settings.Parity ));
@@ -888,22 +888,15 @@ void DumpViewFrame::OnCopySelection(wxCommandEvent& evt)
 void DumpViewFrame::OnComPortSetting(wxCommandEvent &evt)
 {
     ComSettingDialog* dlg = new ComSettingDialog(this);
-    ComPortSetting setting = {0};
-    ComPortSetting result = {0};
+    ComPortSetting setting = m_PortMonitor->GetPortSettings();
 
-    m_PortMonitor->GetPortSettings( setting);
 	dlg->SetAvailableComPorts( m_PortMonitor->GetAvailableComPorts());
     dlg->SetPortSettings( setting);
 
     if ( dlg->ShowModal() == wxID_OK)
     {
-        dlg->GetPortSettings(result);
-        if ( setting.PortNum != result.PortNum ||
-             setting.BaudRate != result.BaudRate ||
-			 setting.ManualBaudRate != result.ManualBaudRate ||
-             setting.ByteSize != result.ByteSize ||
-             setting.Parity != result.Parity ||
-             setting.StopBit != result.StopBit)
+		ComPortSetting result = dlg->GetPortSettings();
+        if ( setting != result)
         {
             m_PortMonitor->SetPortSettings( result);
             if ( m_PortMonitor->IsMonitoring())
@@ -912,7 +905,6 @@ void DumpViewFrame::OnComPortSetting(wxCommandEvent &evt)
                 m_SwitchSelect_body( SWITCH_OFF);
             }
             m_ShowPortInfoOnStatusBar( result);
-
         }
     }
 

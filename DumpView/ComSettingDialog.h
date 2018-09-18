@@ -19,13 +19,13 @@ class ComSettingDialog: public wxDialog
 		ComSettingDialog(wxWindow* parent,wxWindowID id=wxID_ANY,const wxPoint& pos=wxDefaultPosition,const wxSize& size=wxDefaultSize);
 		virtual ~ComSettingDialog();
 
-		wxStaticText* m_labelPortNumber;
+		wxStaticText* m_labelPortName;
 		wxStaticText* m_labelBaudRate;
 		wxStaticText* m_labelManualBaudRate;
 		wxStaticText* m_labelByteSize;
 		wxStaticText* m_labelParity;
 		wxStaticText* m_labelStopBit;
-		wxChoice* m_choicePortNumber;
+		wxChoice* m_choicePortName;
 		wxChoice* m_choiceBaudRate;
 		wxTextCtrl* m_textManualBaudRate;
 		wxChoice* m_choiceByteSize;
@@ -34,10 +34,10 @@ class ComSettingDialog: public wxDialog
 		wxButton* m_buttonOk;
 		wxButton* m_buttonCancel;
 
-        void SetPortSettings( ComPortSetting &settings);
-        void GetPortSettings( ComPortSetting &settings);
+        void SetPortSettings(const ComPortSetting &settings);
+		ComPortSetting GetPortSettings( );
 
-		void SetAvailableComPorts( std::list<int>* port_list);
+		void SetAvailableComPorts(const std::list<wxString>& port_list);
 
 	private:
 
